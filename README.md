@@ -5,7 +5,7 @@ The main two classes here are Csv and Row.
 A helper function `csv()` is provided for elegant syntax. The first parameter can be either a string or an array. If a string is given, it will automatically be read. If an array is given, the object will populate itself with the data, using the first value as the header.
 
 ## Examples
-### Example 1
+### Example
 ```php
 <?php
 // Create CSV
@@ -29,7 +29,25 @@ Tammy is 40!
 Evan is 22!
 ```
 
-### Example 2
+### Example: Line by line
+If you need to make changes, use Csv::iterate(). It will pass each $row to a function. All changes will be saved to a new file.
+```php
+use ColbyGatte\SmartCsv\Csv;
+
+quick_csv_ages($path = '/tmp/iterate.csv');
+
+Csv::iterate($path, $savePath = '/tmp/iterated.csv', function ($row) {
+    $row->name = 'NOBODY';
+});
+
+echo csv($savePath)->first()->name;
+```
+__Output__
+```
+NOBODY
+```
+
+### Example
 ```php
 <?php
 // Read CSV, make changes, save
@@ -49,7 +67,7 @@ COLBY is 25!
 TAMMY is 40!
 EVAN is 22!
 ```
-### Example 3
+### Example
 When you have multiple columns that you need to bring together, you can use groupColumns().
 ```php
 <?php
@@ -81,7 +99,7 @@ print_r($grouped);
 )
 ```
 
-### Example 4
+### Example
 __Index Aliases__
 ```php
 <?php
@@ -109,7 +127,7 @@ __Output__
 i love php
 ```
 
-### Example 5
+### Example
 __Coders__
 
 If you want to store serialized data in a column, you can use Coders/Serialize.
@@ -145,7 +163,7 @@ Array
 )
 ```
 
-### Example 6
+### Example
 __Filters__
 ```php
 <?php
