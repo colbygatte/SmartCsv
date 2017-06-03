@@ -3,6 +3,7 @@
 namespace Tests\UnitTests;
 
 use ColbyGatte\SmartCsv\Coders\Serialize;
+use ColbyGatte\SmartCsv\Filters\FilterInterface;
 use PHPUnit\Framework\TestCase;
 
 class CsvTest extends TestCase
@@ -13,7 +14,17 @@ class CsvTest extends TestCase
     public function can_do_key_values_grouping()
     {
         $csv = csv(array(
-            array('Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3', 'Value 3', 'UOM 3'),
+            array(
+                'Specification 1',
+                'Value 1',
+                'UOM 1',
+                'Specification 2',
+                'Value 2',
+                'UOM 2',
+                'Specification 3',
+                'Value 3',
+                'UOM 3'
+            ),
             array('Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb')
         ));
 
@@ -26,17 +37,14 @@ class CsvTest extends TestCase
     /** @test */
     public function index_aliases()
     {
-        $csv = csv(
-            array(
-                array('Category', 'Product #'),
-                array('flowers', '234234')
-            ),
-            // index aliases!
+        $csv = csv(array(
+            array('Category', 'Product #'),
+            array('flowers', '234234')
+        ), // index aliases!
             array(
                 'cat' => 'Category',
                 'sku' => 'Product #'
-            )
-        );
+            ));
 
         $this->assertEquals('234234', $csv->first()->sku);
     }
@@ -44,17 +52,15 @@ class CsvTest extends TestCase
     /** @test */
     public function can_write_using_aliases_as_header_title()
     {
-        csv(
-            array(
-                array('Category', 'Product #'),
-                array('flowers', '234234')
-            ),
-            // index aliases!
+        csv(array(
+            array('Category', 'Product #'),
+            array('flowers', '234234')
+        ), // index aliases!
             array(
                 'cat' => 'Category',
                 'sku' => 'Product #'
-            )
-        )->useAliases()
+            ))
+            ->useAliases()
             ->write($path = '/tmp/dummy-csv.csv');
 
         $this->assertEquals('234234', csv($path)->first()->sku);
@@ -108,4 +114,29 @@ class CsvTest extends TestCase
 
         $this->assertEquals($csv->first()->name, 'Sarah');
     }
+
+    /** @test */
+    public function can_change_value_using_alias()
+    {
+        $this->assertTrue(true);
+
+        $csv = csv([
+            ['A Really Long String Of Text'],
+            ['I LOVE PHP'],
+            ['WOOOOOOOOO']
+        ], // Define the alias
+            ['shortstring' => 'A Really Long String Of Text']);
+
+        $csv->each(function ($row) {
+            $row->shortstring = strtolower($row->shortstring);
+        });
+
+        // Index aliases can also be used in place of the original column name when writing
+        $csv->useAliases()
+            ->write('/tmp/using_aliases.csv');
+
+        $this->assertEquals('i love php', csv('/tmp/using_aliases.csv')->first()->shortstring);
+    }
+
+
 }

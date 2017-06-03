@@ -118,7 +118,7 @@ class Csv implements Iterator
             $this->filters[$column] = array();
         }
 
-        $this->filters[$column][$filter] = $filter;
+        $this->filters[$column][] = $filter;
 
         return $this;
     }

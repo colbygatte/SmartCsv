@@ -50,6 +50,10 @@ class Row implements Iterator
 
     public function setCell($indexString, $value)
     {
+        if (isset($this->csv->indexAliases[$indexString])) {
+            $indexString = $this->csv->indexAliases[$indexString];
+        }
+
         if (($index = $this->csv->getIndex($indexString)) !== false) {
             $this->data[$index] = $value;
 

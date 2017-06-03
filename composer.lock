@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "533b5daea9752fa642dc64baeb812d10",
+    "content-hash": "b1c95d9005bc09b3ad0713b7ab4ea12a",
     "packages": [],
     "packages-dev": [
         {
@@ -1586,9 +1586,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "symfony/var-dumper": 0
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
