@@ -34,7 +34,11 @@ If you need to make changes, use Csv::iterate(). It will pass each $row to a fun
 ```php
 use ColbyGatte\SmartCsv\Csv;
 
-quick_csv_ages($path = '/tmp/iterate.csv');
+$csv = csv();
+$csv->setHeader(['name', 'age']);
+$csv->appendRow(['Colby', '25']);
+$csv->appendRow(['Sarah', '22']);
+$csv->write('/tmp/iterate.csv');
 
 Csv::iterate($path, $savePath = '/tmp/iterated.csv', function ($row) {
     $row->name = 'NOBODY';
