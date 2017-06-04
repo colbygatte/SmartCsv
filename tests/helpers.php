@@ -9,10 +9,12 @@ define('SAMPLE_CSV', __DIR__ . '/sample.csv');
  */
 function quick_csv_ages($path = '/tmp/smart-csv-dummy.csv')
 {
-    $csv = csv();
-    $csv->setHeader(['name', 'age']);
-    $csv->appendRow(['Colby', '25']);
-    $csv->appendRow(['Sarah', '22']);
+    $csv = csv(array(
+        array('name', 'age'),
+        array('Colby', '25'),
+        array('Sarah', '22')
+    ));
+
     $csv->write($path);
 
     return $csv;
@@ -23,10 +25,11 @@ function quick_csv_ages($path = '/tmp/smart-csv-dummy.csv')
  */
 function make_csv_complex_data()
 {
-    $csv = csv();
-    $csv->setHeader(['name', 'age', 'favorite_foods']);
-    $csv->appendRow(['Colby', '25', ['pho', 'cheeseburgers']]);
-    $csv->appendRow(['Sarah', '22', ['chips & salsa', 'coffee']]);
+    $csv = csv(array(
+        array('name', 'age', 'favorite_foods'),
+        array('Colby', '25', array('pho', 'cheeseburgers')),
+        array('Sarah', '22', array('chips & salsa', 'coffee'))
+    ));
 
     return $csv;
 }

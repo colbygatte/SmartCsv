@@ -31,7 +31,14 @@ if (! function_exists('csv')) {
         }
 
         if (is_string($file) || is_array($file)) {
-            return $csv->read($file);
+            $csv->parseOptions($file);
+
+            // If $csv->csvFile was set, read it!
+            if (! empty($csv->getCsvFile())) {
+                $csv->read();
+            }
+
+            return $csv;
         }
 
         return $csv;
@@ -43,7 +50,7 @@ if (! function_exists('csv_search')) {
      * @param \ColbyGatte\SmartCsv\Csv $csv
      * @param callable[]               $filters
      *
-     * @return mixed
+     * @return Csv
      */
     function csv_search($csv, $filters)
     {

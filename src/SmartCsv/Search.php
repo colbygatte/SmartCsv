@@ -9,6 +9,11 @@ class Search
      */
     private $searchFilters = array();
 
+    /**
+     * @param callable $filter
+     *
+     * @return $this
+     */
     public function addFilter($filter)
     {
         $this->searchFilters[] = $filter;
@@ -16,6 +21,11 @@ class Search
         return $this;
     }
 
+    /**
+     * @param \ColbyGatte\SmartCsv\Row $row
+     *
+     * @return bool
+     */
     public function runFilters(Row $row)
     {
         foreach ($this->searchFilters as $searchFilter) {

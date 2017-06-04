@@ -75,10 +75,10 @@ trait CsvIterator
 
         // If we are in alter mode, write the previous line (only if it hasn't been unset)
         if (is_resource($this->alter) && $this->currentRow) {
-            fputcsv($this->alter, $this->currentRow->toArray());
+            $this->puts($this->currentRow, $this->alter);
         }
 
-        if (($data = fgetcsv($this->fileHandle)) === false) {
+        if (($data = $this->gets()) === false) {
             $this->currentRow = null;
 
             return;

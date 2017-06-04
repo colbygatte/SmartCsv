@@ -2,10 +2,10 @@
 
 namespace ColbyGatte\SmartCsv;
 
-use ColbyGatte\SmartCsv\Coders\CoderInterface;
-use ColbyGatte\SmartCsv\Traits\CsvIterator;
-use Exception;
 use Iterator;
+use Exception;
+use ColbyGatte\SmartCsv\Traits\CsvIterator;
+use ColbyGatte\SmartCsv\Coders\CoderInterface;
 
 class Csv implements Iterator
 {
@@ -43,7 +43,7 @@ class Csv implements Iterator
     /**
      * The CSV file being read.
      */
-    public $csvFile;
+    private $csvFile;
 
     /**
      * @var \ColbyGatte\SmartCsv\Row[]
@@ -52,6 +52,8 @@ class Csv implements Iterator
 
     /**
      * The CSV file handle.
+     * $this->gets() and $this->puts() read from here if
+     * no filehandle is given.
      *
      * @var resource|bool
      */
@@ -79,6 +81,10 @@ class Csv implements Iterator
      */
     private $coders = array();
 
+    private $optionsParsed = false;
+
+    private $delimiter = ',';
+
     /**
      * Ran before writing to a CSV file.
      */
@@ -88,13 +94,13 @@ class Csv implements Iterator
             throw new Exception("Could not open {$this->csvFile}.");
         }
 
-        $this->columnNamesAsValue = fgetcsv($this->fileHandle);
+        $this->columnNamesAsValue = $this->gets();
         $this->columnNamesAsKey = array_flip($this->columnNamesAsValue);
         $this->findIndexes();
 
         // If we are in alter mode, output the header
         if ($this->alter) {
-            fputcsv($this->alter, $this->getHeader());
+            $this->puts($this->getHeader(), $this->alter);
         }
 
         return $this;
@@ -149,7 +155,7 @@ class Csv implements Iterator
         $results = csv([$this->getHeader()]);
 
         foreach ($this as $row) {
-            if($search->runFilters($row)) {
+            if ($search->runFilters($row)) {
                 $results->appendRow($row);
             }
         }
@@ -185,30 +191,45 @@ class Csv implements Iterator
     }
 
     /**
+     * @return string|false
+     */
+    public function getCsvFile()
+    {
+        return $this->csvFile;
+    }
+
+    /**
      * @param string|null $csvFile
      *
      * @return $this
      */
-    public function read($options)
+    public function read($options = null)
     {
         if ($this->read) {
             throw new Exception('File already read!');
         }
 
-        $this->parseOptions($options)
-            ->setUp();
+        if ($options == null && ! $this->optionsParsed) {
+            throw new Exception('No options have been set!');
+        }
+
+        if ($options) {
+            $this->parseOptions($options);
+        }
+
+        $this->setUp();
 
         // If we aren't saving the rows, they can only be accessed through each() or a foreach loop.
         if (! $this->saveRows) {
             // Read the first line
-            if (($data = fgetcsv($this->fileHandle)) !== false) {
+            if (($data = $this->gets()) !== false) {
                 $this->currentRow = new Row($this, $data);
             }
 
             return $this;
         }
 
-        while (($data = fgetcsv($this->fileHandle)) !== false) {
+        while (($data = $this->gets()) !== false) {
             $row = new Row($this, $data);
 
             array_push($this->rows, $row);
@@ -219,6 +240,9 @@ class Csv implements Iterator
         return $this;
     }
 
+    /**
+     * @return string[]
+     */
     public function getHeader()
     {
         return $this->useAliases ? $this->convertAliases() : $this->columnNamesAsValue;
@@ -237,18 +261,47 @@ class Csv implements Iterator
 
         $fh = fopen($toFile, 'w');
 
-        fputcsv($fh, $this->getHeader());
+        $this->puts($this->getHeader(), $fh);
 
         foreach ($this->rows as $row) {
-            fputcsv($fh, $row->toArray());
+            $this->puts($row, $fh);
         }
 
         fclose($fh);
     }
 
+    private function puts($data, $fh = false)
+    {
+        if (! $fh) {
+            $fh = $this->fileHandle;
+        }
+
+        if ($data instanceof Row) {
+            $data = $data->toArray();
+        }
+
+        fputcsv($fh, $data, $this->delimiter);
+    }
+
+    /**
+     * @param resource $fh
+     *
+     * @return array
+     */
+    private function gets($fh = false)
+    {
+        if (! $fh) {
+            $fh = $this->fileHandle;
+        }
+
+        return fgetcsv($fh, 0, $this->delimiter);
+    }
+
     /**
      * Convert the header line of the CSV to use the defined
      * aliases instead of the original values.
+     *
+     * @return string[]
      */
     public function convertAliases()
     {
@@ -268,6 +321,9 @@ class Csv implements Iterator
     }
 
     /**
+     * If file option is not set, the file will not be read.
+     * If  file option IS set, the file will automatically be read.
+     *
      * @param $options
      *
      * @return $this
@@ -278,31 +334,38 @@ class Csv implements Iterator
         if (is_string($options)) {
             $this->csvFile = $options;
 
+            $this->optionsParsed = true;
+
             return $this;
         }
-
-        // check for mandatory data
 
         if (! is_array($options)) {
             throw new Exception('Csv needs a string or an array.');
         }
 
-        if (! isset($options['file'])) {
-            throw new Exception('No file set to read CSV data from.');
-        }
+        $this->optionsParsed = true;
 
-        $this->csvFile = $options['file'];
+        foreach ($options as $option => $value) {
+            switch ($option) {
+                case 'file':
+                    $this->csvFile = $value;
+                    break;
 
-        // now check for options
+                case 'alter':
+                    $this->alter = fopen($value, 'w');
+                    $this->saveRows = false;
+                    break;
 
-        if (isset($options['alter'])) {
-            $options['save'] = false; // The next if statement will take care of self::$saveRows
+                case 'save':
+                    if (is_bool($value)) {
+                        $this->saveRows = $value;
+                    }
+                    break;
 
-            $this->alter = fopen($options['alter'], 'w');
-        }
-
-        if (isset($options['save']) && is_bool($options['save'])) {
-            $this->saveRows = $options['save'];
+                case 'del':
+                    $this->delimiter = $value;
+                    break;
+            }
         }
 
         return $this;
@@ -347,11 +410,18 @@ class Csv implements Iterator
         });
     }
 
+    /**
+     * @param array $header
+     *
+     * @return $this
+     */
     public function setHeader(array $header)
     {
         $this->columnNamesAsKey = array_flip($header);
 
         $this->columnNamesAsValue = $header;
+
+        return $this;
     }
 
     /**
@@ -368,6 +438,10 @@ class Csv implements Iterator
 
     /**
      * Get the index based on the CSV header
+     *
+     * @param string $indexString
+     *
+     * @return bool|int
      */
     public function getIndex($indexString)
     {
@@ -376,6 +450,11 @@ class Csv implements Iterator
         return $index;
     }
 
+    /**
+     * @param $index
+     *
+     * @return string|bool
+     */
     public function getIndexString($index)
     {
         $indexString = isset($this->columnNamesAsValue[$index]) ? $this->columnNamesAsValue[$index] : false;
@@ -383,6 +462,11 @@ class Csv implements Iterator
         return $indexString;
     }
 
+    /**
+     * Resets the rows array and returns the first row.
+     *
+     * @return \ColbyGatte\SmartCsv\Row|null
+     */
     public function first()
     {
         return reset($this->rows);
@@ -416,6 +500,12 @@ class Csv implements Iterator
         return true;
     }
 
+    /**
+     * @param \ColbyGatte\SmartCsv\Row|int $row
+     * @param bool                         $reindex
+     *
+     * @return bool
+     */
     public function deleteRow($row, $reindex = true)
     {
         if ($row instanceof Row) {
@@ -453,7 +543,7 @@ class Csv implements Iterator
     /**
      * @return int
      */
-    public function count()
+    public function countRows()
     {
         return count($this->rows);
     }

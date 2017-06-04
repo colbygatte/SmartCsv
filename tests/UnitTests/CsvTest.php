@@ -16,15 +16,8 @@ class CsvTest extends TestCase
     {
         $csv = csv(array(
             array(
-                'Specification 1',
-                'Value 1',
-                'UOM 1',
-                'Specification 2',
-                'Value 2',
-                'UOM 2',
-                'Specification 3',
-                'Value 3',
-                'UOM 3'
+                'Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3',
+                'Value 3', 'UOM 3'
             ),
             array('Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb')
         ));
@@ -38,14 +31,14 @@ class CsvTest extends TestCase
     /** @test */
     public function index_aliases()
     {
-        $csv = csv(array(
-            array('Category', 'Product #'),
-            array('flowers', '234234')
-        ), // index aliases!
+        $csv = csv(
             array(
-                'cat' => 'Category',
-                'sku' => 'Product #'
-            ));
+                array('Category', 'Product #'), array('flowers', '234234')
+            ),
+            array(
+                'cat' => 'Category', 'sku' => 'Product #'
+            )
+        );
 
         $this->assertEquals('234234', $csv->first()->sku);
     }
@@ -53,15 +46,16 @@ class CsvTest extends TestCase
     /** @test */
     public function can_write_using_aliases_as_header_title()
     {
-        csv(array(
-            array('Category', 'Product #'),
-            array('flowers', '234234')
-        ), // index aliases!
+        csv(
             array(
-                'cat' => 'Category',
-                'sku' => 'Product #'
-            ))
-            ->useAliases()
+                array('Category', 'Product #'),
+                array('flowers', '234234')
+            ),
+            // index aliases!
+            array(
+                'cat' => 'Category', 'sku' => 'Product #'
+            )
+        )->useAliases()
             ->write($path = '/tmp/dummy-csv.csv');
 
         $this->assertEquals('234234', csv($path)->first()->sku);
@@ -82,9 +76,10 @@ class CsvTest extends TestCase
     {
         quick_csv_ages($path = '/tmp/dummy_csv.csv');
 
-        $csv = csv()->read($path);
+        $csv = csv($path);
 
-        $csv->first()->delete();
+        $csv->first()
+            ->delete();
 
         $csv->write($path);
 
@@ -96,9 +91,9 @@ class CsvTest extends TestCase
     {
         quick_csv_ages($path = '/tmp/dummy_csv.csv');
 
-        $csv = csv()->read($path);
+        $csv = csv($path);
 
-        $csv->getRow(0)->name = 'Paul';
+        $csv->first()->name = 'Paul';
 
         $csv->write($path);
 
@@ -122,9 +117,7 @@ class CsvTest extends TestCase
         $this->assertTrue(true);
 
         $csv = csv(array(
-            array('A Really Long String Of Text'),
-            array('I LOVE PHP'),
-            array('WOOOOOOOOO')
+            array('A Really Long String Of Text'), array('I LOVE PHP'), array('WOOOOOOOOO')
         ), // Define the alias
             array('shortstring' => 'A Really Long String Of Text'));
 
@@ -177,7 +170,7 @@ class CsvTest extends TestCase
     {
         $emails = array();
 
-        foreach(sample_csv() as $row) {
+        foreach (sample_csv() as $row) {
             $emails[] = $row->email;
         }
 
@@ -191,6 +184,22 @@ class CsvTest extends TestCase
 
         $this->assertEquals($emails, $emailsFromIterate);
 
-        $this->assertEquals(0, $csv->count());
+        $this->assertEquals(0, $csv->countRows());
+    }
+
+    /** @test */
+    public function can_change_delimiter()
+    {
+        $path = '/tmp/changing_delimiter.csv';
+
+        csv(['del' => '|'])->setHeader(['name', 'age'])
+            ->write($path);
+
+        $this->assertEquals("name|age\n", file_get_contents($path));
+
+        $this->assertEquals(
+            array('name', 'age'),
+            csv(['file' => $path, 'del' => '|'])->getHeader()
+        );
     }
 }

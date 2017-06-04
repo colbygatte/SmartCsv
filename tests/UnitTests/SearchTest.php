@@ -28,7 +28,7 @@ class SearchTest extends TestCase
 
         $resultCsv->write('/tmp/results.csv');
 
-        $this->assertEquals(1, $resultCsv->count());
+        $this->assertEquals(1, $resultCsv->countRows());
 
         $this->assertEquals(['Sarah', '22'], $resultCsv->first()
             ->toArray());

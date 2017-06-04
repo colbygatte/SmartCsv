@@ -2,7 +2,6 @@
 
 namespace ColbyGatte\SmartCsv;
 
-use Exception;
 use Iterator;
 
 class Row implements Iterator
@@ -14,9 +13,9 @@ class Row implements Iterator
 
     private $data = array();
 
-    public function __construct(Csv $csvFile, array $data)
+    public function __construct(Csv $csv, array $data)
     {
-        $this->csv = $csvFile;
+        $this->csv = $csv;
         $this->data = $data;
 
         $this->runDecoders();
@@ -24,6 +23,8 @@ class Row implements Iterator
 
     /**
      * Should ONLY be called from constructor.
+     *
+     * @return void
      */
     private function runDecoders()
     {
@@ -34,6 +35,11 @@ class Row implements Iterator
         }
     }
 
+    /**
+     * @param $indexString
+     *
+     * @return false|mixed
+     */
     public function getCell($indexString)
     {
         if (isset($this->csv->indexAliases[$indexString])) {
@@ -48,6 +54,12 @@ class Row implements Iterator
         return $this->data[$index];
     }
 
+    /**
+     * @param $indexString
+     * @param $value
+     *
+     * @return bool
+     */
     public function setCell($indexString, $value)
     {
         if (isset($this->csv->indexAliases[$indexString])) {
@@ -63,6 +75,9 @@ class Row implements Iterator
         return false;
     }
 
+    /**
+     * @return void
+     */
     public function delete()
     {
         $this->csv->deleteRow($this);
@@ -151,11 +166,22 @@ class Row implements Iterator
         return $copy;
     }
 
+    /**
+     * @param $name
+     *
+     * @return false|mixed
+     */
     function __get($name)
     {
         return $this->getCell($name);
     }
 
+    /**
+     * @param $name
+     * @param $value
+     *
+     * @return bool
+     */
     function __set($name, $value)
     {
         return $this->setCell($name, $value);

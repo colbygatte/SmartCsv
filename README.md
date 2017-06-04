@@ -5,7 +5,7 @@ The main two classes here are Csv and Row.
 A helper function `csv()` is provided for elegant syntax. The first parameter can be either a string or an array. If a string is given, it will automatically be read. If an array is given, the object will populate itself with the data, using the first value as the header.
 
 ## Examples
-### Example: Create a CSV, then read it
+### Create a CSV, then read it
 ```php
 <?php
 // Create CSV
@@ -30,7 +30,7 @@ Tammy is 40!
 Evan is 22!
 ```
 
-### Example: Line by line
+### Line by line
 The csv() helper function can take an array of options as the first parameter.
 If the save option is set to false, the rows are not saved. The CSV can only be iterated over once (in a single instance).
 ```
@@ -44,6 +44,7 @@ Rows can also be deleted.
 ```php
 $path = '/tmp/iterate.csv';
 
+// make dummy csv
 csv([
     ['name', 'age'],
     ['Colby', '26'],
@@ -51,7 +52,7 @@ csv([
     ['Ben', '50']
 ])->write($path);
 
-
+// now we are going to alter the dummy csv, but save the altered version to a new location
 $alterFile = '/tmp/altered.csv';
 
 $options = ['file' => $path, 'alter' => $alterFile];
@@ -183,22 +184,22 @@ print_r($grouped);
 <?php
 $csv = csv(
     [
-        ['A Really Long String Of Text'],
+        ['A Really Long Column Name'],
         ['I LOVE PHP'],
         ['WOOOOOOOOO']
     ],
     // Define the alias
-    ['shortstring' => 'A Really Long String Of Text']
+    ['shortname' => 'A Really Long Column Name']
 );
 
 $csv->each(function ($row) {
-   $row->shortstring = strtolower($row->shortstring); 
+   $row->shortname = strtolower($row->shortname); 
 });
 
 // Index aliases can also be used in place of the original column name when writing
 $csv->useAliases()->write('/tmp/using_aliases.csv');
 
-echo csv('/tmp/using_aliases.csv')->first()->shortstring;
+echo csv('/tmp/using_aliases.csv')->first()->shortname;
 ```
 __Output__
 ```
