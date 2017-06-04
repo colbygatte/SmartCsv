@@ -1,5 +1,7 @@
 <?php
 
+define('SAMPLE_CSV', __DIR__ . '/sample.csv');
+
 /**
  * @param string $path
  *
@@ -27,4 +29,12 @@ function make_csv_complex_data()
     $csv->appendRow(['Sarah', '22', ['chips & salsa', 'coffee']]);
 
     return $csv;
+}
+
+/**
+ * @return \ColbyGatte\SmartCsv\Csv
+ */
+function sample_csv()
+{
+    return csv(SAMPLE_CSV);
 }

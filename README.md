@@ -5,7 +5,7 @@ The main two classes here are Csv and Row.
 A helper function `csv()` is provided for elegant syntax. The first parameter can be either a string or an array. If a string is given, it will automatically be read. If an array is given, the object will populate itself with the data, using the first value as the header.
 
 ## Examples
-### Example
+### Example: Create a CSV, then read it
 ```php
 <?php
 // Create CSV
@@ -30,7 +30,15 @@ Evan is 22!
 ```
 
 ### Example: Line by line
-If you need to make changes, use Csv::iterate(). It will pass each $row to a function. All changes will be saved to a new file.
+The csv() helper function can take an array of options as the first parameter.
+If the save option is set to false, the rows are not saved. The CSV can only be iterated over once (in a single instance).
+```
+foreach(csv(['file' => '/tmp/some_csv.csv', 'save' => false]) as $row) {
+    
+}
+```
+
+If you need to make changes, use Csv::iterateSave(). It will pass each $row to a function. All changes will be saved to a new file.
 ```php
 use ColbyGatte\SmartCsv\Csv;
 
@@ -40,7 +48,7 @@ $csv->appendRow(['Colby', '25']);
 $csv->appendRow(['Sarah', '22']);
 $csv->write('/tmp/iterate.csv');
 
-Csv::iterate($path, $savePath = '/tmp/iterated.csv', function ($row) {
+Csv::iterateSave($path, $savePath = '/tmp/iterated.csv', function ($row) {
     $row->name = 'NOBODY';
 });
 

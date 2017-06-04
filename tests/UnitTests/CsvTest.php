@@ -3,6 +3,7 @@
 namespace Tests\UnitTests;
 
 use ColbyGatte\SmartCsv\Coders\Serialize;
+use ColbyGatte\SmartCsv\Csv;
 use ColbyGatte\SmartCsv\Filters\FilterInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -29,7 +30,7 @@ class CsvTest extends TestCase
         ));
 
         $data = $csv->first()
-            ->groupColumns('Specification', ['Value', 'UOM']);
+            ->groupColumns('Specification', array('Value', 'UOM'));
 
         $this->assertEquals(array('Specification' => 'Height', 'Value' => '30', 'UOM' => 'in'), $data[1]);
     }
@@ -83,7 +84,7 @@ class CsvTest extends TestCase
 
         $csv = csv()->read($path);
 
-        $csv->deleteRow(0);
+        $csv->first()->delete();
 
         $csv->write($path);
 
@@ -120,12 +121,12 @@ class CsvTest extends TestCase
     {
         $this->assertTrue(true);
 
-        $csv = csv([
-            ['A Really Long String Of Text'],
-            ['I LOVE PHP'],
-            ['WOOOOOOOOO']
-        ], // Define the alias
-            ['shortstring' => 'A Really Long String Of Text']);
+        $csv = csv(array(
+            array('A Really Long String Of Text'),
+            array('I LOVE PHP'),
+            array('WOOOOOOOOO')
+        ), // Define the alias
+            array('shortstring' => 'A Really Long String Of Text'));
 
         $csv->each(function ($row) {
             $row->shortstring = strtolower($row->shortstring);
@@ -138,5 +139,58 @@ class CsvTest extends TestCase
         $this->assertEquals('i love php', csv('/tmp/using_aliases.csv')->first()->shortstring);
     }
 
+    /** @test */
+    public function can_iterate_and_alter_each_row_and_save_to_new_file()
+    {
+        $options = array(
+            'file' => SAMPLE_CSV,
+            'alter' => $savePath = '/tmp/iterated.csv'
+        );
 
+        // Delete the row with name 'Kyra Stevens'
+        // Change all emails to 'nocontact'
+        foreach (csv($options) as $row) {
+            if ($row->name == 'Kyra Stevens') {
+                $row->delete();
+
+                continue;
+            }
+
+            $row->email = 'nocontact';
+        }
+
+        $csv = csv($savePath);
+
+        $this->assertCount(0, $csv->findRows('name', 'Kyra Stevens'));
+
+        $emails = array();
+
+        foreach ($csv as $row) {
+            $emails[] = $row->email;
+        }
+
+        $this->assertEquals(array('nocontact'), array_keys(array_flip($emails)));
+    }
+
+    /** @test */
+    public function can_iterate_line_by_line()
+    {
+        $emails = array();
+
+        foreach(sample_csv() as $row) {
+            $emails[] = $row->email;
+        }
+
+        $emailsFromIterate = array();
+
+        $csv = csv(array('file' => SAMPLE_CSV, 'save' => false));
+
+        foreach ($csv as $row) {
+            $emailsFromIterate[] = $row->email;
+        }
+
+        $this->assertEquals($emails, $emailsFromIterate);
+
+        $this->assertEquals(0, $csv->count());
+    }
 }

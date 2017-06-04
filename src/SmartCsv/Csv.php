@@ -4,11 +4,14 @@ namespace ColbyGatte\SmartCsv;
 
 use ColbyGatte\SmartCsv\Coders\CoderInterface;
 use ColbyGatte\SmartCsv\Filters\FilterInterface;
+use ColbyGatte\SmartCsv\Traits\CsvIterator;
 use Exception;
 use Iterator;
 
 class Csv implements Iterator
 {
+    use CsvIterator;
+
     /**
      * ['alias' => 'Original']
      * @var array
@@ -63,6 +66,16 @@ class Csv implements Iterator
     private $filters = array();
 
     /**
+     * Save rows when reading?
+     *
+     * An instance can only be set to save before reading is done.
+     * Each instance only allows iterating once.
+     *
+     * @var bool
+     */
+    private $saveRows = true;
+
+    /**
      * They key is the column to code.
      * The values are the coder to run it through.
      * Each column can only have one coder.
@@ -72,10 +85,8 @@ class Csv implements Iterator
     /**
      * Ran before writing to a CSV file.
      */
-    private function setUp($csvFile)
+    private function setUp()
     {
-        $this->csvFile = $csvFile;
-
         if (($this->fileHandle = fopen($this->csvFile, 'r')) === false) {
             throw new Exception("Could not open {$this->csvFile}.");
         }
@@ -83,6 +94,11 @@ class Csv implements Iterator
         $this->columnNamesAsValue = fgetcsv($this->fileHandle);
         $this->columnNamesAsKey = array_flip($this->columnNamesAsValue);
         $this->findIndexes();
+
+        // If we are in alter mode, output the header
+        if ($this->alter) {
+            $this->writeHeader($this->alter);
+        }
 
         return $this;
     }
@@ -174,13 +190,24 @@ class Csv implements Iterator
      *
      * @return $this
      */
-    public function read($csvFile)
+    public function read($options)
     {
         if ($this->read) {
             throw new Exception('File already read!');
         }
 
-        $this->setUp($csvFile);
+        $this->parseOptions($options)
+            ->setUp();
+
+        // If we aren't saving the rows, they can only be accessed through each() or a foreach loop.
+        if (! $this->saveRows) {
+            // Read the first line
+            if (($data = fgetcsv($this->fileHandle)) !== false) {
+                $this->currentRow = new Row($this, $data);
+            }
+
+            return $this;
+        }
 
         while (($data = fgetcsv($this->fileHandle)) !== false) {
             $row = new Row($this, $data);
@@ -191,6 +218,11 @@ class Csv implements Iterator
         $this->tearDown();
 
         return $this;
+    }
+
+    private function writeHeader($fh)
+    {
+        fputcsv($fh, $this->useAliases ? $this->convertAliases() : $this->columnNamesAsValue);
     }
 
     /**
@@ -206,7 +238,7 @@ class Csv implements Iterator
 
         $fh = fopen($toFile, 'w');
 
-        fputcsv($fh, $this->useAliases ? $this->convertAliases() : $this->columnNamesAsValue);
+        $this->writeHeader($fh);
 
         foreach ($this->rows as $row) {
             fputcsv($fh, $row->toArray());
@@ -237,36 +269,44 @@ class Csv implements Iterator
     }
 
     /**
-     * Allows manipulation of a CSV line-by-line, and saves it to a new location.
-     * Good for large CSV files.
-     * If the callback returns false, the line won't be saved to the new location.
+     * @param $options
      *
-     * @param string   $csvFile
-     * @param string   $saveLocation
-     * @param callable $callback
+     * @return $this
+     * @throws \Exception
      */
-    public static function iterate($csvFile, $saveLocation, callable $callback)
+    public function parseOptions($options)
     {
-        $csv = new static($csvFile);
-        $csv->setUp($csvFile);
+        if (is_string($options)) {
+            $this->csvFile = $options;
 
-        $fh = fopen($saveLocation, 'w');
-
-        fputcsv($fh, $csv->columnNamesAsValue);
-
-        while (($data = fgetcsv($csv->fileHandle)) !== false) {
-            if ($callback($row = new Row($csv, $data)) === false) {
-                continue;
-            }
-
-            fputcsv($fh, $row->toArray());
-
-            unset($row);
+            return $this;
         }
 
-        fclose($fh);
+        // check for mandatory data
 
-        $csv->tearDown();
+        if (! is_array($options)) {
+            throw new Exception('Csv needs a string or an array.');
+        }
+
+        if (! isset($options['file'])) {
+            throw new Exception('File must be set.');
+        }
+
+        $this->csvFile = $options['file'];
+
+        // now check for options
+
+        if (isset($options['alter'])) {
+            $options['save'] = false; // The next if statement will take care of self::$saveRows
+
+            $this->alter = fopen($options['alter'], 'w');
+        }
+
+        if (isset($options['save']) && is_bool($options['save'])) {
+            $this->saveRows = $options['save'];
+        }
+
+        return $this;
     }
 
     /**
@@ -294,6 +334,8 @@ class Csv implements Iterator
     }
 
     /**
+     * Find rows where $column is equal to $value.
+     *
      * @param $column
      * @param $value
      *
@@ -378,6 +420,15 @@ class Csv implements Iterator
     public function deleteRow($row, $reindex = true)
     {
         if ($row instanceof Row) {
+
+            // If we are in alter mode, deleting the row will mean not saving it to the new CSV file,
+            // so we just set the value of currentRow to false.
+            if ($this->alter) {
+                $this->currentRow = false;
+
+                return true;
+            }
+
             if (($index = array_search($row, $this->rows)) !== false) {
                 unset($this->rows[$index]);
 
@@ -401,16 +452,11 @@ class Csv implements Iterator
     }
 
     /**
-     * Iterate over each element.
-     * $callable is passed the Row instance..
-     *
-     * @param callable $callback
+     * @return int
      */
-    public function each(callable $callback)
+    public function count()
     {
-        foreach ($this as $row) {
-            $callback($row);
-        }
+        return count($this->rows);
     }
 
     /**
@@ -421,50 +467,5 @@ class Csv implements Iterator
         $this->useAliases = true;
 
         return $this;
-    }
-
-    /**
-     * Return the current element
-     * @return \ColbyGatte\SmartCsv\Row
-     */
-    public function current()
-    {
-        return current($this->rows);
-    }
-
-    /**
-     * Move forward to next element
-     * @return \ColbyGatte\SmartCsv\Row
-     */
-    public function next()
-    {
-        return next($this->rows);
-    }
-
-    /**
-     * Return the key of the current element
-     *
-     * @return int
-     */
-    public function key()
-    {
-        return key($this->rows);
-    }
-
-    /**
-     * Checks if current position is valid
-     * @return bool
-     */
-    public function valid()
-    {
-        return key($this->rows) !== null;
-    }
-
-    /**
-     * Rewind the Iterator to the first element
-     */
-    public function rewind()
-    {
-        reset($this->rows);
     }
 }

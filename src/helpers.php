@@ -18,16 +18,19 @@ if (! function_exists('csv')) {
 
         $csv->indexAliases = $indexAliases;
 
-        if (is_string($file)) {
-            return $csv->read($file);
-        }
-
-        if (is_array($file)) {
+        // Passing through multidimensional array?
+        if (is_array($file) && isset($file[0]) && is_array($file[0])) {
             $csv->setHeader(array_shift($file));
 
             foreach ($file as $row) {
                 $csv->appendRow($row);
             }
+
+            return $csv;
+        }
+
+        if (is_string($file) || is_array($file)) {
+            return $csv->read($file);
         }
 
         return $csv;
