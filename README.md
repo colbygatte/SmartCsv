@@ -88,15 +88,14 @@ $csv = csv([
     ['Ben', '50']
 ]);
 
-$search = new Search;
-$search->addFilter(function ($row) {
+$resultCsv = csv_search($csv, [
+    function ($row) {
         return $row->age < 30;
-    })
-    ->addFilter(function ($row) {
+    },
+    function ($row) {
         return strlen($row->name) < 6;
-    });
-
-$resultCsv = $csv->runSearch($search);
+    }
+]);
 
 $resultCsv->write('/tmp/results.csv');
 
