@@ -1,6 +1,7 @@
 <?php
 
 use ColbyGatte\SmartCsv\Csv;
+use ColbyGatte\SmartCsv\Search;
 
 if (! function_exists('csv')) {
     /**
@@ -36,3 +37,23 @@ if (! function_exists('csv')) {
         return $csv;
     }
 }
+
+if (! function_exists('csv_search')) {
+    /**
+     * @param \ColbyGatte\SmartCsv\Csv $csv
+     * @param callable[]               $filters
+     *
+     * @return mixed
+     */
+    function csv_search($csv, $filters)
+    {
+        $search = new Search;
+
+        foreach ($filters as $filter) {
+            $search->addFilter($filter);
+        }
+
+        return $csv->runSearch($search);
+    }
+}
+

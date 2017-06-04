@@ -15,6 +15,7 @@ $csv = csv([
     ['Tammy', '40'],
     ['Evan', '22']
 ]);
+
 $csv->write('/tmp/names.csv');
 
 // Read CSV
@@ -38,48 +39,115 @@ foreach(csv(['file' => '/tmp/some_csv.csv', 'save' => false]) as $row) {
 }
 ```
 
-If you need to make changes, use Csv::iterateSave(). It will pass each $row to a function. All changes will be saved to a new file.
+If you need to make changes, pass 'alter' option with the location of the file. It will pass each $row to a function. All changes will be saved to a new file.
+Rows can also be deleted.
 ```php
-use ColbyGatte\SmartCsv\Csv;
+$path = '/tmp/iterate.csv';
 
-$csv = csv();
-$csv->setHeader(['name', 'age']);
-$csv->appendRow(['Colby', '25']);
-$csv->appendRow(['Sarah', '22']);
-$csv->write('/tmp/iterate.csv');
+csv([
+    ['name', 'age'],
+    ['Colby', '26'],
+    ['Sarah', '22'],
+    ['Ben', '50']
+])->write($path);
 
-Csv::iterateSave($path, $savePath = '/tmp/iterated.csv', function ($row) {
-    $row->name = 'NOBODY';
-});
 
-echo csv($savePath)->first()->name;
+$alterFile = '/tmp/altered.csv';
+
+$options = ['file' => $path, 'alter' => $alterFile];
+
+foreach (csv($options) as $row) {
+    if ($row->name == 'Colby') {
+        $row->name = strtoupper($row->name);
+    }
+
+    if ($row->name == 'Sarah') {
+        $row->age = 102510;
+    }
+
+    if ($row->name == 'Ben') {
+        $row->delete();
+    }
+}
+
+print_r(file_get_contents($alterFile));
 ```
 __Output__
 ```
-NOBODY
+name,age
+COLBY,26
+Sarah,102510
 ```
 
-### Example
+### Searching
 ```php
-<?php
-// Read CSV, make changes, save
-foreach ($csv = csv('/tmp/names.csv') as $row) {
-    $row->name = strtoupper($row->name);
-}
+$csv = csv([
+    ['name', 'age'],
+    ['Frankenstein', '26'],
+    ['Sarah', '22'],
+    ['Ben', '50']
+]);
 
-$csv->write('/tmp/uppercase_names.csv');
+$search = new Search;
+$search->addFilter(function ($row) {
+        return $row->age < 30;
+    })
+    ->addFilter(function ($row) {
+        return strlen($row->name) < 6;
+    });
 
-foreach (csv('/tmp/uppercase_names.csv') as $row) {
-    echo "{$row->name} is {$row->age}! \n";
-}
+$resultCsv = $csv->runSearch($search);
+
+$resultCsv->write('/tmp/results.csv');
+
+print_r(file_get_contents('/tmp/results.csv'));
 ```
 __Output__
 ```        
-COLBY is 25!
-TAMMY is 40!
-EVAN is 22!
+name,age
+Sarah,22
 ```
-### Example
+
+### Filtering
+```
+$path = '/tmp/dummy.csv';
+
+$csv = csv([
+    ['name', 'age'],
+    ['Colby', '26'],
+    ['Sarah', '22'],
+    ['Ben', '50']
+]);
+
+$csv->addFilter(function ($row) {
+        if ($row->name == 'Colby') {
+            $row->name = strtoupper($row->name);
+        }
+    })
+    ->addFilter(function ($row) {
+        if ($row->name == 'Sarah') {
+            $row->age = 102510;
+        }
+    })
+    ->addFilter(function ($row) {
+        if ($row->name == 'Ben') {
+            $row->delete();
+        }
+    });
+
+$csv->runFilters()
+    ->write($path);
+
+print_r(file_get_contents($path));
+```
+__Output__
+```
+name,age
+COLBY,26
+Sarah,102510
+```
+
+### Grouping
 When you have multiple columns that you need to bring together, you can use groupColumns().
 ```php
 <?php
@@ -111,8 +179,7 @@ print_r($grouped);
 )
 ```
 
-### Example
-__Index Aliases__
+### Index Aliases
 ```php
 <?php
 $csv = csv(
@@ -139,9 +206,7 @@ __Output__
 i love php
 ```
 
-### Example
-__Coders__
-
+### Coders
 If you want to store serialized data in a column, you can use Coders/Serialize.
 Custom coders can be defined, and must implement the Coders/CoderInterface.
 __IMPORTANT:__ Coders are ran when reading a CSV and when writing it, NOT when accessing individual values. You must add a coder to an instance of CSV before reading!
@@ -175,25 +240,3 @@ Array
 )
 ```
 
-### Example
-__Filters__
-```php
-<?php
-$csv = csv([
-    ['text'],
-    ['hello'],
-    ['sup']
-]);
-
-$csv->addFilter('text', new class implements FilterInterface {
-    public static function filter($data)
-    {
-        return strtoupper($data);
-    }
-});
-
-$csv->first()->text; // HELLO
-```
-
-### For more...
-Check out the tests in the tests/ directory to see more examples.

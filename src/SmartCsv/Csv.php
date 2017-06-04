@@ -3,7 +3,6 @@
 namespace ColbyGatte\SmartCsv;
 
 use ColbyGatte\SmartCsv\Coders\CoderInterface;
-use ColbyGatte\SmartCsv\Filters\FilterInterface;
 use ColbyGatte\SmartCsv\Traits\CsvIterator;
 use Exception;
 use Iterator;
@@ -59,9 +58,7 @@ class Csv implements Iterator
     private $fileHandle = false;
 
     /**
-     * They key is the column to filter
-     * The values are the filters to run it through
-     * Currently, there is no order.
+     * Filters for modifying data
      */
     private $filters = array();
 
@@ -97,7 +94,7 @@ class Csv implements Iterator
 
         // If we are in alter mode, output the header
         if ($this->alter) {
-            $this->writeHeader($this->alter);
+            fputcsv($this->alter, $this->getHeader());
         }
 
         return $this;
@@ -121,41 +118,43 @@ class Csv implements Iterator
      *
      * @return $this
      */
-    public function addFilter($column, $filter)
+    public function addFilter($callback)
     {
-        if (! is_subclass_of($filter, FilterInterface::class)) {
-            throw new Exception("$filter does not implement FilterInterface.");
-
-            // TODO: Check if this is necessary after throwing an error:
-            return $this;
-        }
-
-        if (! isset($this->filters[$column])) {
-            $this->filters[$column] = array();
-        }
-
-        $this->filters[$column][] = $filter;
+        $this->filters[] = $callback;
 
         return $this;
     }
 
     /**
-     * Called from Row::getCell
-     *
-     * @param string $column
-     * @param array  $value
-     *
-     * @return mixed
+     * If $returnNewSet is true, the current instance will not be modified.
      */
-    public function runFilters($column, $value)
+    public function runFilters($returnNewSet = false)
     {
-        if (isset($this->filters[$column]) && $filters = $this->filters[$column]) {
-            foreach ($filters as $filter) {
-                $value = call_user_func(array($filter, 'filter'), $value);
+        foreach ($this as $row) {
+            foreach ($this->filters as $filter) {
+                $filter($row);
             }
         }
 
-        return $value;
+        return $this;
+    }
+
+    /**
+     * @param \ColbyGatte\SmartCsv\Search $search
+     *
+     * @return \ColbyGatte\SmartCsv\Csv
+     */
+    public function runSearch(Search $search)
+    {
+        $results = csv([$this->getHeader()]);
+
+        foreach ($this as $row) {
+            if($search->runFilters($row)) {
+                $results->appendRow($row);
+            }
+        }
+
+        return $results;
     }
 
     /**
@@ -220,9 +219,9 @@ class Csv implements Iterator
         return $this;
     }
 
-    private function writeHeader($fh)
+    public function getHeader()
     {
-        fputcsv($fh, $this->useAliases ? $this->convertAliases() : $this->columnNamesAsValue);
+        return $this->useAliases ? $this->convertAliases() : $this->columnNamesAsValue;
     }
 
     /**
@@ -238,7 +237,7 @@ class Csv implements Iterator
 
         $fh = fopen($toFile, 'w');
 
-        $this->writeHeader($fh);
+        fputcsv($fh, $this->getHeader());
 
         foreach ($this->rows as $row) {
             fputcsv($fh, $row->toArray());
@@ -289,7 +288,7 @@ class Csv implements Iterator
         }
 
         if (! isset($options['file'])) {
-            throw new Exception('File must be set.');
+            throw new Exception('No file set to read CSV data from.');
         }
 
         $this->csvFile = $options['file'];

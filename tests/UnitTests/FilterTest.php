@@ -2,43 +2,43 @@
 
 namespace Tests\UnitTests;
 
-use ColbyGatte\SmartCsv\Filters\FilterInterface;
 use PHPUnit\Framework\TestCase;
 
-class TestFilter implements FilterInterface
-{
-    public static function filter($data)
-    {
-        return strtoupper($data);
-    }
-}
-
-class InvalidFilter
-{
-}
 
 class FilterTest extends TestCase
 {
     /** @test */
-    public function can_use_filters()
+    public function filter_test()
     {
-        $csv = quick_csv_ages($path = '/tmp/dummy_csv.csv')->addFilter('name', TestFilter::class);
+        $path = '/tmp/dummy.csv';
 
-        $this->assertEquals('COLBY', $csv->first()->name);
-    }
+        $csv = csv([
+            ['name', 'age'],
+            ['Colby', '26'],
+            ['Sarah', '22'],
+            ['Ben', '50']
+        ]);
 
-    /** @test */
-    public function cannot_use_invalid_filter()
-    {
-        $assert = false;
+        $csv->addFilter(function ($row) {
+            if ($row->name == 'Colby') {
+                $row->name = strtoupper($row->name);
+            }
+        })
+            ->addFilter(function ($row) {
+                if ($row->name == 'Sarah') {
+                    $row->age = 102510;
+                }
+            })
+            ->addFilter(function ($row) {
+                if ($row->name == 'Ben') {
+                    $row->delete();
+                }
+            });
 
-        try {
-            quick_csv_ages($path = '/tmp/dummy_csv.csv')->addFilter('name', InvalidFilter::class);
-        } catch (\Exception $e) {
-            $assert = true;
-        }
+        $csv->runFilters()
+            ->write($path);
 
-        $this->assertTrue($assert);
+        $this->assertEquals("name,age\nCOLBY,26\nSarah,102510\n", file_get_contents($path));
     }
 }
 

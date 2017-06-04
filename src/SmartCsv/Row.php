@@ -45,7 +45,7 @@ class Row implements Iterator
         }
 
 
-        return $this->csv->runFilters($indexString, $this->data[$index]);
+        return $this->data[$index];
     }
 
     public function setCell($indexString, $value)
