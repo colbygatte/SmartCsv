@@ -31,6 +31,10 @@ class Row implements Iterator
         foreach ($this->csv->getCoders() as $column => $coder) {
             $index = $this->csv->getIndex($column);
 
+            if ($index === false) {
+                continue;
+            }
+
             $this->data[$index] = call_user_func(array($coder, 'decode'), $this->data[$index]);
         }
     }
@@ -49,7 +53,6 @@ class Row implements Iterator
         if (($index = $this->csv->getIndex($indexString)) === false) {
             return false;
         }
-
 
         return $this->data[$index];
     }
@@ -160,7 +163,11 @@ class Row implements Iterator
         foreach ($this->csv->getCoders() as $column => $coder) {
             $index = $this->csv->getIndex($column);
 
-            $copy[$index] = call_user_func(array($coder, 'encode'), $this->$column);
+            if ($index === false) {
+                continue;
+            }
+
+            $copy[$index] = call_user_func(array($coder, 'encode'), $this->data[$index]);
         }
 
         return $copy;

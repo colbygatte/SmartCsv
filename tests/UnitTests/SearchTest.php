@@ -2,7 +2,6 @@
 
 namespace Tests\UnitTests;
 
-use ColbyGatte\SmartCsv\Search;
 use PHPUnit\Framework\TestCase;
 
 class SearchTest extends TestCase

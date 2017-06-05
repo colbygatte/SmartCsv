@@ -59,5 +59,30 @@ class CoderTest extends TestCase
 
         $this->assertTrue($assert);
     }
+
+    /** @test */
+    public function can_user_coder_through_csv_helper_function()
+    {
+        $path = '/tmp/csv_helper_coder.csv';
+        $data = ['name' => 'Colby'];
+        $serialized = serialize($data);
+
+        $csv = csv([
+            'coders' => [
+                ['data', TestCoder::class]
+            ]
+        ]);
+
+        $csv->setHeader(['data'])
+            ->appendRows([
+                [$serialized]
+            ])
+            ->write('/tmp/csv_helper_coder.csv');
+
+        $this->assertEquals(
+            $serialized,
+            csv($path)->first()->data
+        );
+    }
 }
 

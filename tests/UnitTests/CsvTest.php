@@ -4,7 +4,6 @@ namespace Tests\UnitTests;
 
 use ColbyGatte\SmartCsv\Coders\Serialize;
 use ColbyGatte\SmartCsv\Csv;
-use ColbyGatte\SmartCsv\Filters\FilterInterface;
 use PHPUnit\Framework\TestCase;
 
 class CsvTest extends TestCase
@@ -31,13 +30,23 @@ class CsvTest extends TestCase
     /** @test */
     public function index_aliases()
     {
+        //$csv = csv(
+        //    array(
+        //        array('Category', 'Product #'), array('flowers', '234234')
+        //    ),
+        //    array(
+        //        'cat' => 'Category', 'sku' => 'Product #'
+        //    )
+        //);
+
         $csv = csv(
-            array(
-                array('Category', 'Product #'), array('flowers', '234234')
-            ),
-            array(
-                'cat' => 'Category', 'sku' => 'Product #'
-            )
+            [
+                'aliases' => ['cat' => 'Category', 'sku' => 'Product #']
+            ],
+            [
+                ['Category', 'Product #'],
+                ['flowers', '234234']
+            ]
         );
 
         $this->assertEquals('234234', $csv->first()->sku);
@@ -48,12 +57,11 @@ class CsvTest extends TestCase
     {
         csv(
             array(
+                'aliases' => array('cat' => 'Category', 'sku' => 'Product #')
+            ),
+            array(
                 array('Category', 'Product #'),
                 array('flowers', '234234')
-            ),
-            // index aliases!
-            array(
-                'cat' => 'Category', 'sku' => 'Product #'
             )
         )->useAliases()
             ->write($path = '/tmp/dummy-csv.csv');
@@ -116,10 +124,14 @@ class CsvTest extends TestCase
     {
         $this->assertTrue(true);
 
-        $csv = csv(array(
-            array('A Really Long String Of Text'), array('I LOVE PHP'), array('WOOOOOOOOO')
-        ), // Define the alias
-            array('shortstring' => 'A Really Long String Of Text'));
+        $csv = csv(
+            array(
+                'aliases' => array('shortstring' => 'A Really Long String Of Text')
+            ),
+            array(
+                array('A Really Long String Of Text'), array('I LOVE PHP'), array('WOOOOOOOOO')
+            )
+        );
 
         $csv->each(function ($row) {
             $row->shortstring = strtolower($row->shortstring);

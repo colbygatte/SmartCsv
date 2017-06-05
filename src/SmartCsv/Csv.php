@@ -365,6 +365,24 @@ class Csv implements Iterator
                 case 'del':
                     $this->delimiter = $value;
                     break;
+
+                case 'aliases':
+                    $this->indexAliases = $value;
+                    break;
+
+                case 'coders':
+                    foreach ($value as $coderInfo) {
+                        call_user_func_array(array($this, 'addCoder'), $coderInfo);
+
+                        // $this->addCoder(...$coderInfo); <-- not using this way because old php :(
+                    }
+                    break;
+
+                case 'filters':
+                    foreach ($value as $filter) {
+                        $this->addFilter($filter);
+                    }
+                    break;
             }
         }
 
@@ -485,19 +503,31 @@ class Csv implements Iterator
     /**
      * @param Row|array $data
      *
-     * @return bool
+     * @return $this
      */
     public function appendRow($data = array())
     {
         if ($data instanceof Row) {
             $this->rows[] = $data;
-
-            return true;
+        } else {
+            $this->rows[] = new Row($this, $data);
         }
 
-        $this->rows[] = new Row($this, $data);
+        return $this;
+    }
 
-        return true;
+    /**
+     * @param $data
+     *
+     * @return $this
+     */
+    public function appendRows($data)
+    {
+        foreach ($data as $rowData) {
+            $this->appendRow($rowData);
+        }
+
+        return $this;
     }
 
     /**

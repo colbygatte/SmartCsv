@@ -6,39 +6,45 @@ use ColbyGatte\SmartCsv\Search;
 if (! function_exists('csv')) {
     /**
      * If $file is string, the file will automatically be read.
-     * If $file is an array, the header and rows will be automatically populated.
+     * If $file is an array of options, the options will be parsed.
+     * If 'file' option is passed, the file will automatically be read and $rows will be ignored.
      *
      * @param string|array $file
-     * @param array $indexAliases
+     * @param array        $rows
      *
      * @return Csv
      */
-    function csv($file = false, $indexAliases = array())
+    function csv($file = false, $rows = array())
     {
         $csv = new Csv();
 
-        $csv->indexAliases = $indexAliases;
+        if (false === $file) {
+            return $csv;
+        }
 
-        // Passing through multidimensional array?
+        // Passing through multidimensional array will create Csv instance using array for rows
         if (is_array($file) && isset($file[0]) && is_array($file[0])) {
             $csv->setHeader(array_shift($file));
-
-            foreach ($file as $row) {
-                $csv->appendRow($row);
-            }
+            $csv->appendRows($file);
 
             return $csv;
         }
 
-        if (is_string($file) || is_array($file)) {
-            $csv->parseOptions($file);
+        // If we are here, assume $file can be parsed by $csv->parseOptions()
+        $csv->parseOptions($file);
 
-            // If $csv->csvFile was set, read it!
-            if (! empty($csv->getCsvFile())) {
-                $csv->read();
-            }
+        // If $csv->csvFile was set, read it!
+        if (! empty($csv->getCsvFile())) {
+            $csv->read();
 
+            // Return now to ensure ignoring $rows. If $rows is accidentally set,
+            // it would override the header row from the original read above.
             return $csv;
+        }
+
+        if ($headerRow = array_shift($rows)) {
+            $csv->setHeader($headerRow);
+            $csv->appendRows($rows);
         }
 
         return $csv;
