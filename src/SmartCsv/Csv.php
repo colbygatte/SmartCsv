@@ -152,7 +152,7 @@ class Csv implements Iterator
      */
     public function runSearch(Search $search)
     {
-        $results = csv([$this->getHeader()]);
+        $results = csv(array($this->getHeader()));
 
         foreach ($this as $row) {
             if ($search->runFilters($row)) {
