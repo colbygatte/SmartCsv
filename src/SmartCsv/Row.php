@@ -89,6 +89,10 @@ class Row implements Iterator
     /**
      * Match up values from multiple columns.
      * Must have exact naming.
+     * If ony $mandatoryColumn is given, the results are all returned in an array.
+     * If $additionalColumns is given, an array of key-value paired arrays is returned.
+     *
+     * TODO: cache indexes for searches in the Csv instance
      *
      * @param string $mandatoryColumn
      * @param array  $additionalColumns
@@ -97,7 +101,7 @@ class Row implements Iterator
      */
     public function groupColumns(
         $mandatoryColumn,
-        array $additionalColumns,
+        $additionalColumns = array(),
         $discardEmptyKeys = true,
         $trimEnding = true
     ) {
@@ -108,12 +112,20 @@ class Row implements Iterator
         foreach ($this as $columnName => $value) {
             if (substr($columnName, 0, $searchKeyLength) != $mandatoryColumn // Does this column match our search term?
                 || ($discardEmptyKeys && empty($value))
-            ) { // Do we want to skip if empty? Is this value empty?
+            ) {
                 continue;
             }
 
             // We need the ending to find other matching search values with the same ending
             $ending = substr($columnName, $searchKeyLength);
+
+            // If we aren't grabbing additionalColumns, $results will be an array of the results from
+            // the mandatory column.
+            if (empty($additionalColumns)) {
+                $results[] = $value;
+
+                continue;
+            }
 
             $result = array($trimEnding ? $mandatoryColumn : $columnName => $value);
 

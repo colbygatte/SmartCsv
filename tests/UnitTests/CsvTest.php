@@ -28,6 +28,23 @@ class CsvTest extends TestCase
     }
 
     /** @test */
+    public function can_group_a_single_column()
+    {
+        $csv = csv(array(
+            array(
+                'Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3',
+                'Value 3', 'UOM 3'
+            ),
+            array('Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb')
+        ));
+
+        $data = $csv->first()
+            ->groupColumns('Specification');
+
+        $this->assertEquals(array('Length', 'Height', 'Weight'), $data);
+    }
+
+    /** @test */
     public function index_aliases()
     {
         //$csv = csv(
