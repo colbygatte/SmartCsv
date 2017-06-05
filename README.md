@@ -1,5 +1,12 @@
 # SmartCsv
 
+## Install
+
+Install with composer:
+```
+compose require colbygatte/smart-csv
+```
+
 ## Usage
 The main two classes here are Csv and Row.
 A helper function `csv()` is provided for elegant syntax. The first parameter can be either a string or an array. If a string is given, it will automatically be read. If an array is given, the object will populate itself with the data, using the first value as the header.
