@@ -69,7 +69,7 @@ class CoderTest extends TestCase
 
         $csv = csv([
             'coders' => [
-                ['data', TestCoder::class]
+                'data' => TestCoder::class
             ]
         ]);
 

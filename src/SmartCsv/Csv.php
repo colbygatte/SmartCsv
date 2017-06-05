@@ -371,8 +371,8 @@ class Csv implements Iterator
                     break;
 
                 case 'coders':
-                    foreach ($value as $coderInfo) {
-                        call_user_func_array(array($this, 'addCoder'), $coderInfo);
+                    foreach ($value as $column => $coder) {
+                        call_user_func(array($this, 'addCoder'), $column, $coder);
 
                         // $this->addCoder(...$coderInfo); <-- not using this way because old php :(
                     }
