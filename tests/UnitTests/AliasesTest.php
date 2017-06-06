@@ -17,7 +17,11 @@ class AliasesTest extends TestCase
             ['Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb']
         ]);
 
-        $csv->columnGroup('specs', 'Specification', ['Value', 'UOM']);
+        $csv->presets([
+            'column-groups' => ['specs', 'Specification', ['Value', 'UOM']]
+        ]);
+
+        //$csv->columnGroup('specs', 'Specification', ['Value', 'UOM']);
 
         $data = $csv->first()->groups()->specs;
 
@@ -41,15 +45,4 @@ class AliasesTest extends TestCase
 
         $this->assertEquals(['Length', 'Height', 'Weight'], $data);
     }
-
-    /** @test */
-    public function grouping_works_with_index_aliases()
-    {
-        $csv = csv(['aliases' => ['a' => 'age']])->columnGroup('about', 'attribute', ['value', 'notes']);
-
-        foreach ($csv->read(SAMPLE_CSV) as $row) {
-            dump($row->groups()->baout);
-        }
-    }
-
 }

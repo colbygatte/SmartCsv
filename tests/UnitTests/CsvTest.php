@@ -169,8 +169,9 @@ class CsvTest extends TestCase
     {
         $path = '/tmp/changing_delimiter.csv';
 
-        csv(['del' => '|'])
+        csv()
             ->setHeader(['name', 'age'])
+            ->presets(['del' => '|'])
             ->write($path);
 
         $this->assertEquals("name|age\n", file_get_contents($path));

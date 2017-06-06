@@ -377,13 +377,25 @@ class Csv implements Iterator
                         $this->saveRows = $value;
                     }
                     break;
+            }
+        }
 
+        $this->presets($options);
+
+        return $this;
+    }
+
+    public function presets($options)
+    {
+        foreach ($options as $option => $value) {
+            switch($option) {
                 case 'del':
                     $this->delimiter = $value;
                     break;
 
                 case 'aliases':
                     $this->indexAliases = $value;
+                    $this->findIndexes();
                     break;
 
                 case 'coders':
@@ -396,6 +408,10 @@ class Csv implements Iterator
                     foreach ($value as $filter) {
                         $this->addFilter($filter);
                     }
+                    break;
+
+                case 'column-groups':
+                    call_user_func_array([$this, 'columnGroup'], $value);
                     break;
             }
         }
