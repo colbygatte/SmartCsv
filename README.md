@@ -93,7 +93,7 @@ $csv = csv([
 
 $csv->write('/tmp/names.csv');
 
-// Read CSV
+// Read CSV. csv() defaults to slurp mode, so here the whole file will be loaded before the loop starts.
 foreach (csv('/tmp/names.csv') as $row) {
     echo "{$row->name} is {$row->age}! \n";
 }
@@ -105,16 +105,8 @@ Tammy is 40!
 Evan is 22!
 ```
 
-### Line by line
-The csv() helper function can take an array of options as the first parameter.
-If the save option is set to false, the rows are not saved. The CSV can only be iterated over once (in a single instance).
-```
-foreach(csv(['file' => '/tmp/some_csv.csv', 'save' => false]) as $row) {
-    
-}
-```
-
-If you need to make changes, pass 'alter' option with the location of the file. It will pass each $row to a function. All changes will be saved to a new file.
+### Weird alter example
+Here is an example of alter mode without using the `csv_alter()` helper function (and using the `csv()` helper function only).
 Rows can also be deleted.
 ```php
 $path = '/tmp/iterate.csv';
@@ -183,7 +175,7 @@ name,age
 Sarah,22
 ```
 
-### Filtering
+### Weird filtering example
 ```
 $path = '/tmp/dummy.csv';
 
@@ -206,6 +198,7 @@ $csv->addFilter(function ($row) {
     })
     ->addFilter(function ($row) {
         if ($row->name == 'Ben') {
+            // Rows can be deleted inside a loop
             $row->delete();
         }
     });
@@ -232,7 +225,9 @@ $csv = csv([
     ['Height', '21', 'in', 'Weight', '30', 'lb']
 ]);
 
-$grouped = $csv->first()->groupColumns('Spec', ['Val', 'UOM']);
+$csv->columnGroup('spec', 'Spec', ['Val, 'UOM']);
+
+$grouped = $csv->first()->groups()->spec;
 
 print_r($grouped);
 ```
@@ -258,13 +253,12 @@ print_r($grouped);
 ```php
 <?php
 $csv = csv(
+    ['aliases' => ['shortname' => ''A Really Long Column Name'],
     [
         ['A Really Long Column Name'],
         ['I LOVE PHP'],
         ['WOOOOOOOOO']
     ],
-    // Define the alias
-    ['shortname' => 'A Really Long Column Name']
 );
 
 $csv->each(function ($row) {
