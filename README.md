@@ -225,7 +225,7 @@ $csv = csv([
     ['Height', '21', 'in', 'Weight', '30', 'lb']
 ]);
 
-$csv->columnGroup('spec', 'Spec', ['Val, 'UOM']);
+$csv->columnGroup('spec', 'Spec', ['Val', 'UOM']);
 
 $grouped = $csv->first()->groups()->spec;
 
@@ -253,12 +253,12 @@ print_r($grouped);
 ```php
 <?php
 $csv = csv(
-    ['aliases' => ['shortname' => ''A Really Long Column Name'],
+    ['aliases' => ['shortname' => 'A Really Long Column Name']],
     [
         ['A Really Long Column Name'],
         ['I LOVE PHP'],
         ['WOOOOOOOOO']
-    ],
+    ]
 );
 
 $csv->each(function ($row) {
