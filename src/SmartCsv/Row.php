@@ -57,6 +57,11 @@ class Row implements Iterator
         return $this->data[$index];
     }
 
+    public function getCellByIndex($index)
+    {
+        return $this->data[$index];
+    }
+
     /**
      * @param $indexString
      * @param $value
@@ -87,31 +92,97 @@ class Row implements Iterator
     }
 
     /**
+     * @param $cached
+     * @param $discardEmptyValues
+     * @param $trimEnding
+     */
+    private function groupSingleColumnsFromCache($cached, $discardEmptyValues)
+    {
+        $results = array();
+
+        foreach ($cached as $index) {
+            $value = $this->data[$index];
+
+            if (empty($value) && $discardEmptyValues) {
+                continue;
+            }
+
+            $results[] = $value;
+        }
+
+        return $results;
+    }
+
+    private function groupMultipleColumnsFromCache($cached, $discardEmptyValues, $trimEnding)
+    {
+        $results = array();
+
+        $searches = $cached['search'];
+
+        foreach ($cached['groups'] as $group) {
+            $ending = $group['ending'];
+
+            $result = array();
+
+            foreach ($searches as $key => $search) {
+                $index = $group['indexes'][$key];
+
+                $value = $this->data[$index];
+
+                if (empty($value) && $discardEmptyValues) {
+                    continue;
+                }
+
+                $result[$trimEnding ? $search : $search . $ending] = $value;
+            }
+
+            $results[] = $result;
+        }
+        
+        return $results;
+    }
+
+    /**
      * Match up values from multiple columns.
      * Must have exact naming.
      * If ony $mandatoryColumn is given, the results are all returned in an array.
      * If $additionalColumns is given, an array of key-value paired arrays is returned.
      *
-     * TODO: cache indexes for searches in the Csv instance
-     *
      * @param string $mandatoryColumn
      * @param array  $additionalColumns
+     *
+     * @param bool   $discardEmptyValues
+     * @param bool   $trimEnding
      *
      * @return array
      */
     public function groupColumns(
         $mandatoryColumn,
         $additionalColumns = array(),
-        $discardEmptyKeys = true,
+        $discardEmptyValues = true,
         $trimEnding = true
     ) {
+        // Check if we have the indexes cached
+        $cached = $this->csv->getCachedGroupColumnsSearch($mandatoryColumn, $additionalColumns);
+
+        if ($cached) {
+            if (empty($additionalColumns)) {
+                return $this->groupSingleColumnsFromCache($cached, $discardEmptyValues);
+            }
+
+            return $this->groupMultipleColumnsFromCache($cached, $discardEmptyValues, $trimEnding);
+        }
+
         $searchKeyLength = strlen($mandatoryColumn);
 
         $results = array();
 
+        $cache = array();
+
+        // Here, we iterate over all the cells.
         foreach ($this as $columnName => $value) {
             if (substr($columnName, 0, $searchKeyLength) != $mandatoryColumn // Does this column match our search term?
-                || ($discardEmptyKeys && empty($value))
+                || ($discardEmptyValues && empty($value))
             ) {
                 continue;
             }
@@ -124,8 +195,12 @@ class Row implements Iterator
             if (empty($additionalColumns)) {
                 $results[] = $value;
 
+                $cache[] = $this->csv->getIndex($columnName);
+
                 continue;
             }
+
+            $cacheIndexes = array($this->csv->getIndex($columnName));
 
             $result = array($trimEnding ? $mandatoryColumn : $columnName => $value);
 
@@ -134,17 +209,27 @@ class Row implements Iterator
 
                 if (($value = $this->getCell($fullSearchValue)) !== false) {
                     $result[$trimEnding ? $searchValue : $fullSearchValue] = $value;
+
+                    $cacheIndexes[] = $this->csv->getIndex($fullSearchValue);
                 }
             }
 
+            $cache[] = array(
+                'ending' => $ending, 'indexes' => $cacheIndexes
+            );
+
             $results[] = $result;
         }
+
+        $this->csv->cacheGroupColumnsSearch($mandatoryColumn, $additionalColumns, $cache);
 
         return $results;
     }
 
     /**
      * Extracts all data from cells ($indexes) unless they are empty.
+     *
+     * @deprecated use groupColumns() instead.
      *
      * @param int []
      *

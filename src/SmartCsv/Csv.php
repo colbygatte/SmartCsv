@@ -85,6 +85,11 @@ class Csv implements Iterator
 
     private $delimiter = ',';
 
+    private $cachedIndexGroups = array(
+        'single' => array(),
+        'multiple' => array()
+    );
+
     /**
      * Ran before writing to a CSV file.
      */
@@ -443,7 +448,59 @@ class Csv implements Iterator
     }
 
     /**
+     * @param $mandatoryColumn
+     * @param $additionalColumns
+     *
+     * @return false|array
+     */
+    public function getCachedGroupColumnsSearch($mandatoryColumn, $additionalColumns)
+    {
+        if (empty($additionalColumns)) {
+            if (isset($this->cachedIndexGroups['single'][$mandatoryColumn])) {
+                return $this->cachedIndexGroups['single'][$mandatoryColumn];
+            }
+
+            return false;
+        }
+
+        $id = $this->cacheId($mandatoryColumn, $additionalColumns);
+
+        if (isset($this->cachedIndexGroups['multiple'][$id])) {
+            return $this->cachedIndexGroups['multiple'][$id];
+        }
+
+        return false;
+    }
+
+
+    public function cacheGroupColumnsSearch($mandatoryColumn, $additionalColumns, $cache)
+    {
+        if (empty($additionalColumns)) {
+            $this->cachedIndexGroups['single'][$mandatoryColumn] = $cache;
+        }
+
+        $id = $this->cacheId($mandatoryColumn, $additionalColumns);
+
+        array_unshift($additionalColumns, $mandatoryColumn);
+
+        $this->cachedIndexGroups['multiple'][$id] = array(
+            'search' => $additionalColumns,
+            'groups' => $cache
+        );
+    }
+
+    public function cacheId($mandatoryColumn, $additionalColumns)
+    {
+        sort($additionalColumns);
+        $additionalColumns[] = $mandatoryColumn;
+
+        return serialize($additionalColumns);
+    }
+
+    /**
      * Perform a regex search for keys matching $regex.
+     *
+     * @deprecated groupColumns can be used on rows. Searches are cached.
      *
      * @return array Array of the index numbers that match
      */

@@ -231,4 +231,18 @@ class CsvTest extends TestCase
             csv(['file' => $path, 'del' => '|'])->getHeader()
         );
     }
+
+    /** @test */
+    public function caching_doesnt_change_values()
+    {
+        $csv = csv([
+            ['Spec 1', 'Value 1', 'Spec 2', 'Value 2', 'Spec 3', 'Value 3'],
+            ['food', 'hamburger', 'drink', 'coke', 'dessert', 'chocolate']
+        ]);
+
+        $this->assertEquals(
+            $csv->first()->groupColumns('Spec', ['Value']),
+            $csv->first()->groupColumns('Spec', ['Value'])
+        );
+    }
 }
