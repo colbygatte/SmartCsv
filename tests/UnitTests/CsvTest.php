@@ -16,6 +16,8 @@ class CsvTest extends TestCase
                 ['flowers', '234234']
             ]);
 
+        dump($csv->first()->toArray(true));
+
         $this->assertEquals('234234', $csv->first()->sku);
     }
 

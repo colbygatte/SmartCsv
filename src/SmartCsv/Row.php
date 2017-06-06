@@ -163,18 +163,21 @@ class Row implements Iterator
      *
      * @return mixed
      */
-    public function toArray()
+    public function toArray($associative = false)
     {
         $copy = $this->data;
-
+        
         foreach ($this->csv->getCoders() as $column => $coder) {
             $index = $this->csv->getIndex($column);
 
             if ($index === false) {
                 continue;
             }
-
             $copy[$index] = call_user_func([$coder, 'encode'], $this->data[$index]);
+        }
+
+        if ($associative) {
+            $copy = array_combine($this->csv->getHeader(), $copy);
         }
 
         return $copy;
