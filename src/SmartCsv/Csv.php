@@ -92,6 +92,8 @@ class Csv implements Iterator
      */
     public $columnGroupingHelper;
 
+    private $columnGroups = [];
+
     public function __construct()
     {
         $this->columnGroupingHelper = new ColumnGroupingHelper($this);
@@ -106,9 +108,7 @@ class Csv implements Iterator
             throw new Exception("Could not open {$this->csvFile}.");
         }
 
-        $this->columnNamesAsValue = $this->gets();
-        $this->columnNamesAsKey = array_flip($this->columnNamesAsValue);
-        $this->findIndexes();
+        $this->setHeader($this->gets());
 
         // If we are in alter mode, output the header
         if ($this->alter) {
@@ -412,6 +412,13 @@ class Csv implements Iterator
      */
     public function columnGroup($name, $mandatoryColumn, $additionalColumns = [])
     {
+        // If the header hasn't been set, groups can't be made. Save them until then.
+        if (empty($this->columnNamesAsValue)) {
+            $this->columnGroups[] = [$name, $mandatoryColumn, $additionalColumns];
+
+            return $this;
+        }
+
         $this->columnGroupingHelper->columnGroup($name, $mandatoryColumn, $additionalColumns);
 
         return $this;
@@ -468,6 +475,12 @@ class Csv implements Iterator
         $this->columnNamesAsValue = $header;
 
         $this->columnGroupingHelper->setColumnNames($header);
+
+        $this->findIndexes();
+
+        foreach ($this->columnGroups as $data) {
+            call_user_func_array([$this->columnGroupingHelper, 'columnGroup'], $data);
+        }
 
         return $this;
     }

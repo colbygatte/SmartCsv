@@ -6,56 +6,15 @@ use PHPUnit\Framework\TestCase;
 
 class CsvTest extends TestCase
 {
-    // TODO: Write a test for index mappers
-
-    /** @test */
-    public function can_do_key_values_grouping()
-    {
-        $csv = csv([
-            [
-                'Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3',
-                'Value 3', 'UOM 3'
-            ],
-            ['Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb']
-        ]);
-
-        $csv->columnGroup('specs', 'Specification', ['Value', 'UOM']);
-
-        $data = $csv->first()->groups()->specs;
-
-        $this->assertEquals(['Specification' => 'Height', 'Value' => '30', 'UOM' => 'in'], $data[1]);
-    }
-
-    /** @test */
-    public function can_group_a_single_column()
-    {
-        $csv = csv([
-            [
-                'Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3',
-                'Value 3', 'UOM 3'
-            ],
-            ['Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb']
-        ]);
-
-        $csv->columnGroup('specs', 'Specification');
-
-        $data = $csv->first()->groups()->specs;
-
-        $this->assertEquals(['Length', 'Height', 'Weight'], $data);
-    }
-
     /** @test */
     public function index_aliases()
     {
-        $csv = csv(
-            [
-                'aliases' => ['cat' => 'Category', 'sku' => 'Product #']
-            ],
-            [
+        $csv = csv([
+            'aliases' => ['cat' => 'Category', 'sku' => 'Product #']
+        ], [
                 ['Category', 'Product #'],
                 ['flowers', '234234']
-            ]
-        );
+            ]);
 
         $this->assertEquals('234234', $csv->first()->sku);
     }
@@ -63,15 +22,13 @@ class CsvTest extends TestCase
     /** @test */
     public function can_write_using_aliases_as_header_title()
     {
-        csv(
-            [
-                'aliases' => ['cat' => 'Category', 'sku' => 'Product #']
-            ],
-            [
+        csv([
+            'aliases' => ['cat' => 'Category', 'sku' => 'Product #']
+        ], [
                 ['Category', 'Product #'],
                 ['flowers', '234234']
-            ]
-        )->useAliases()
+            ])
+            ->useAliases()
             ->write($path = '/tmp/dummy-csv.csv');
 
         $this->assertEquals('234234', csv($path)->first()->sku);
@@ -132,14 +89,13 @@ class CsvTest extends TestCase
     {
         $this->assertTrue(true);
 
-        $csv = csv(
-            [
-                'aliases' => ['shortstring' => 'A Really Long String Of Text']
-            ],
-            [
-                ['A Really Long String Of Text'], ['I LOVE PHP'], ['WOOOOOOOOO']
-            ]
-        );
+        $csv = csv([
+            'aliases' => ['shortstring' => 'A Really Long String Of Text']
+        ], [
+                ['A Really Long String Of Text'],
+                ['I LOVE PHP'],
+                ['WOOOOOOOOO']
+            ]);
 
         $csv->each(function ($row) {
             $row->shortstring = strtolower($row->shortstring);
@@ -213,14 +169,12 @@ class CsvTest extends TestCase
     {
         $path = '/tmp/changing_delimiter.csv';
 
-        csv(['del' => '|'])->setHeader(['name', 'age'])
+        csv(['del' => '|'])
+            ->setHeader(['name', 'age'])
             ->write($path);
 
         $this->assertEquals("name|age\n", file_get_contents($path));
 
-        $this->assertEquals(
-            ['name', 'age'],
-            csv(['file' => $path, 'del' => '|'])->getHeader()
-        );
+        $this->assertEquals(['name', 'age'], csv(['file' => $path, 'del' => '|'])->getHeader());
     }
 }

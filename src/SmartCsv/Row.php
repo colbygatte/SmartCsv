@@ -141,11 +141,15 @@ class Row implements Iterator
     /**
      * @param $name
      *
-     * @return array
+     * @return array|false
      */
     public function group($name, $trimEndings = true)
     {
         $data = $this->csv->columnGroupingHelper->getColumnGroup($name);
+
+        if (! $data) {
+            return false;
+        }
 
         if ($data['type'] == 'single') {
             return $this->groupSingleColumnsFromCache($data['cache']);
