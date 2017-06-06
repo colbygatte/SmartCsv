@@ -96,14 +96,14 @@ class Row implements Iterator
      * @param $discardEmptyValues
      * @param $trimEnding
      */
-    private function groupSingleColumnsFromCache($cached, $discardEmptyValues)
+    private function groupSingleColumnsFromCache($cached)
     {
         $results = array();
 
         foreach ($cached as $index) {
             $value = $this->data[$index];
 
-            if (empty($value) && $discardEmptyValues) {
+            if (empty($value)) {
                 continue;
             }
 
@@ -113,7 +113,7 @@ class Row implements Iterator
         return $results;
     }
 
-    private function groupMultipleColumnsFromCache($cached, $discardEmptyValues, $trimEnding)
+    private function groupMultipleColumnsFromCache($cached, $trimEnding)
     {
         $results = array();
 
@@ -129,16 +129,12 @@ class Row implements Iterator
 
                 $value = $this->data[$index];
 
-                if (empty($value) && $discardEmptyValues) {
-                    continue;
-                }
-
                 $result[$trimEnding ? $search : $search . $ending] = $value;
             }
 
             $results[] = $result;
         }
-        
+
         return $results;
     }
 
@@ -159,7 +155,6 @@ class Row implements Iterator
     public function groupColumns(
         $mandatoryColumn,
         $additionalColumns = array(),
-        $discardEmptyValues = true,
         $trimEnding = true
     ) {
         // Check if we have the indexes cached
@@ -167,10 +162,10 @@ class Row implements Iterator
 
         if ($cached) {
             if (empty($additionalColumns)) {
-                return $this->groupSingleColumnsFromCache($cached, $discardEmptyValues);
+                return $this->groupSingleColumnsFromCache($cached);
             }
 
-            return $this->groupMultipleColumnsFromCache($cached, $discardEmptyValues, $trimEnding);
+            return $this->groupMultipleColumnsFromCache($cached, $trimEnding);
         }
 
         $searchKeyLength = strlen($mandatoryColumn);
@@ -181,24 +176,28 @@ class Row implements Iterator
 
         // Here, we iterate over all the cells.
         foreach ($this as $columnName => $value) {
-            if (substr($columnName, 0, $searchKeyLength) != $mandatoryColumn // Does this column match our search term?
-                || ($discardEmptyValues && empty($value))
-            ) {
+            if (substr($columnName, 0, $searchKeyLength) != $mandatoryColumn) {
                 continue;
             }
 
-            // We need the ending to find other matching search values with the same ending
-            $ending = substr($columnName, $searchKeyLength);
-
-            // If we aren't grabbing additionalColumns, $results will be an array of the results from
-            // the mandatory column.
             if (empty($additionalColumns)) {
+                if (empty($value)) {
+                    $cache[] = $this->csv->getIndex($columnName);
+
+                    continue;
+                }
+
+                // If we aren't grabbing additionalColumns, $results will be an array of the results from
+                // the mandatory column.
                 $results[] = $value;
 
                 $cache[] = $this->csv->getIndex($columnName);
 
                 continue;
             }
+
+            // We need the ending to find other matching search values with the same ending
+            $ending = substr($columnName, $searchKeyLength);
 
             $cacheIndexes = array($this->csv->getIndex($columnName));
 
