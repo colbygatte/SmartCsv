@@ -32,7 +32,7 @@ if (! function_exists('csv')) {
         $csv->parseOptions($file);
 
         // If $csv->csvFile was set, read it!
-        if (! empty($csv->getCsvFile())) {
+        if ($csv->getCsvFile() !== false ) {
             // Return now to ensure ignoring $rows. If $rows is accidentally set,
             // it would override the header row from the original read above.
             return $csv->read();
