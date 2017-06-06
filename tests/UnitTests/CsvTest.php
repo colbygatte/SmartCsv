@@ -11,48 +11,48 @@ class CsvTest extends TestCase
     /** @test */
     public function can_do_key_values_grouping()
     {
-        $csv = csv(array(
-            array(
+        $csv = csv([
+            [
                 'Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3',
                 'Value 3', 'UOM 3'
-            ),
-            array('Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb')
-        ));
+            ],
+            ['Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb']
+        ]);
 
         $data = $csv->first()
-            ->groupColumns('Specification', array('Value', 'UOM'));
+            ->groupColumns('Specification', ['Value', 'UOM']);
 
-        $this->assertEquals(array('Specification' => 'Height', 'Value' => '30', 'UOM' => 'in'), $data[1]);
+        $this->assertEquals(['Specification' => 'Height', 'Value' => '30', 'UOM' => 'in'], $data[1]);
     }
 
     /** @test */
     public function can_group_a_single_column()
     {
-        $csv = csv(array(
-            array(
+        $csv = csv([
+            [
                 'Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3',
                 'Value 3', 'UOM 3'
-            ),
-            array('Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb')
-        ));
+            ],
+            ['Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb']
+        ]);
 
         $data = $csv->first()
             ->groupColumns('Specification');
 
-        $this->assertEquals(array('Length', 'Height', 'Weight'), $data);
+        $this->assertEquals(['Length', 'Height', 'Weight'], $data);
     }
 
     /** @test */
     public function index_aliases()
     {
         $csv = csv(
-            array(
-                'aliases' => array('cat' => 'Category', 'sku' => 'Product #')
-            ),
-            array(
-                array('Category', 'Product #'),
-                array('flowers', '234234')
-            )
+            [
+                'aliases' => ['cat' => 'Category', 'sku' => 'Product #']
+            ],
+            [
+                ['Category', 'Product #'],
+                ['flowers', '234234']
+            ]
         );
 
         $this->assertEquals('234234', $csv->first()->sku);
@@ -62,13 +62,13 @@ class CsvTest extends TestCase
     public function can_write_using_aliases_as_header_title()
     {
         csv(
-            array(
-                'aliases' => array('cat' => 'Category', 'sku' => 'Product #')
-            ),
-            array(
-                array('Category', 'Product #'),
-                array('flowers', '234234')
-            )
+            [
+                'aliases' => ['cat' => 'Category', 'sku' => 'Product #']
+            ],
+            [
+                ['Category', 'Product #'],
+                ['flowers', '234234']
+            ]
         )->useAliases()
             ->write($path = '/tmp/dummy-csv.csv');
 
@@ -131,12 +131,12 @@ class CsvTest extends TestCase
         $this->assertTrue(true);
 
         $csv = csv(
-            array(
-                'aliases' => array('shortstring' => 'A Really Long String Of Text')
-            ),
-            array(
-                array('A Really Long String Of Text'), array('I LOVE PHP'), array('WOOOOOOOOO')
-            )
+            [
+                'aliases' => ['shortstring' => 'A Really Long String Of Text']
+            ],
+            [
+                ['A Really Long String Of Text'], ['I LOVE PHP'], ['WOOOOOOOOO']
+            ]
         );
 
         $csv->each(function ($row) {
@@ -153,10 +153,10 @@ class CsvTest extends TestCase
     /** @test */
     public function can_iterate_and_alter_each_row_and_save_to_new_file()
     {
-        $options = array(
+        $options = [
             'file' => SAMPLE_CSV,
             'alter' => $savePath = '/tmp/iterated.csv'
-        );
+        ];
 
         // Delete the row with name 'Kyra Stevens'
         // Change all emails to 'nocontact'
@@ -174,28 +174,28 @@ class CsvTest extends TestCase
 
         $this->assertCount(0, $csv->findRows('name', 'Mrs. Emilie Pacocha Jr.'));
 
-        $ages = array();
+        $ages = [];
 
         foreach ($csv as $row) {
             $ages[] = $row->age;
         }
 
 
-        $this->assertEquals(array('noage'), array_keys(array_flip($ages)));
+        $this->assertEquals(['noage'], array_keys(array_flip($ages)));
     }
 
     /** @test */
     public function can_iterate_line_by_line()
     {
-        $ages = array();
+        $ages = [];
 
         foreach (sample_csv() as $row) {
             $ages[] = $row->age;
         }
 
-        $agesFromIterate = array();
+        $agesFromIterate = [];
 
-        $csv = csv(array('file' => SAMPLE_CSV, 'save' => false));
+        $csv = csv(['file' => SAMPLE_CSV, 'save' => false]);
 
         foreach ($csv as $row) {
             $agesFromIterate[] = $row->age;
@@ -217,7 +217,7 @@ class CsvTest extends TestCase
         $this->assertEquals("name|age\n", file_get_contents($path));
 
         $this->assertEquals(
-            array('name', 'age'),
+            ['name', 'age'],
             csv(['file' => $path, 'del' => '|'])->getHeader()
         );
     }

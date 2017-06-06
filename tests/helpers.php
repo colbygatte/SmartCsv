@@ -31,17 +31,37 @@ function csv_faker($writeTo, $rows = 20)
         return faker()->boolean() ? faker()->$val : '';
     };
 
-    $foods = array('pizza', 'sushi', 'pho', 'cheeseburgers', 'chicken', 'peanut butter', 'turkey', 'spaghetti', 'grilled chicken caesar salad');
+    $foods = [
+        'pizza',
+        'sushi',
+        'pho',
+        'cheeseburgers',
+        'chicken',
+        'peanut butter',
+        'turkey',
+        'spaghetti',
+        'grilled chicken caesar salad'
+    ];
 
-    $attributePossibilities = array(
-        array('hair color', function () { return faker()->colorName; }),
-        array('favorite food', function () use ($foods) { return $foods[array_rand($foods)]; }),
-        array('favorite vacation spot', function () { return faker()->city; }),
-        array('height', function () { return faker()->numberBetween(4, 7) . 'ft ' . faker()->numberBetween(0, 11) . 'in'; }),
-        array('weight', function () { return faker()->numberBetween(100, 250) . 'ln'; })
-    );
+    $attributePossibilities = [
+        'hair color' => function () {
+            return faker()->colorName;
+        },
+        'favorite food' => function () use ($foods) {
+            return $foods[array_rand($foods)];
+        },
+        'favorite vacation spot' => function () {
+            return faker()->city;
+        },
+        'height' => function () {
+            return faker()->numberBetween(4, 7) . 'ft ' . faker()->numberBetween(0, 11) . 'in';
+        },
+        'weight' => function () {
+            return faker()->numberBetween(100, 250) . 'lb';
+        }
+    ];
 
-    $header = array(
+    $header = [
         'name',
         'age',
         'contact 1',
@@ -57,12 +77,12 @@ function csv_faker($writeTo, $rows = 20)
         'value 3',
         'notes 3',
         'other_info'
-    );
+    ];
 
     $csv = csv()->setHeader($header);
 
     for ($i = 0; $i < $rows; $i++) {
-        $rowData = array(
+        $rowData = [
             faker()->name,
 
             // age
@@ -72,7 +92,7 @@ function csv_faker($writeTo, $rows = 20)
             $valOrEmpty('email'),
             $valOrEmpty('email'),
             $valOrEmpty('email'),
-        );
+        ];
 
         $copy = $attributePossibilities;
         shuffle($copy);
@@ -83,13 +103,14 @@ function csv_faker($writeTo, $rows = 20)
                 array_push($rowData, '', '', '');
             }
 
-            $randAttributeMaker = array_pop($copy);
+            $randomAttribute = array_rand($attributePossibilities);
 
-            array_push($rowData, $randAttributeMaker[0], $randAttributeMaker[1](), $valOrEmpty('sentence'));
+            array_push($rowData, $randomAttribute, $attributePossibilities[$randomAttribute](),
+                $valOrEmpty('sentence'));
         }
 
         // random info
-        array_push($rowData, serialize(array('random-string' => faker()->randomAscii)));
+        array_push($rowData, serialize(['random-string' => faker()->randomAscii]));
 
         $csv->appendRow($rowData);
     }
@@ -106,9 +127,11 @@ function csv_faker($writeTo, $rows = 20)
  */
 function quick_csv_ages($path = '/tmp/smart-csv-dummy.csv')
 {
-    $csv = csv(array(
-        array('name', 'age'), array('Colby', '25'), array('Sarah', '22')
-    ));
+    $csv = csv([
+        ['name', 'age'],
+        ['Colby', '25'],
+        ['Sarah', '22']
+    ]);
 
     $csv->write($path);
 

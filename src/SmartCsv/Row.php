@@ -11,7 +11,7 @@ class Row implements Iterator
      */
     private $csv;
 
-    private $data = array();
+    private $data = [];
 
     public function __construct(Csv $csv, array $data)
     {
@@ -35,7 +35,7 @@ class Row implements Iterator
                 continue;
             }
 
-            $this->data[$index] = call_user_func(array($coder, 'decode'), $this->data[$index]);
+            $this->data[$index] = call_user_func([$coder, 'decode'], $this->data[$index]);
         }
     }
 
@@ -98,7 +98,7 @@ class Row implements Iterator
      */
     private function groupSingleColumnsFromCache($cached)
     {
-        $results = array();
+        $results = [];
 
         foreach ($cached as $index) {
             $value = $this->data[$index];
@@ -115,14 +115,14 @@ class Row implements Iterator
 
     private function groupMultipleColumnsFromCache($cached, $trimEnding)
     {
-        $results = array();
+        $results = [];
 
         $searches = $cached['search'];
 
         foreach ($cached['groups'] as $group) {
             $ending = $group['ending'];
 
-            $result = array();
+            $result = [];
 
             foreach ($searches as $key => $search) {
                 $index = $group['indexes'][$key];
@@ -154,7 +154,7 @@ class Row implements Iterator
      */
     public function groupColumns(
         $mandatoryColumn,
-        $additionalColumns = array(),
+        $additionalColumns = [],
         $trimEnding = true
     ) {
         // Check if we have the indexes cached
@@ -170,9 +170,9 @@ class Row implements Iterator
 
         $searchKeyLength = strlen($mandatoryColumn);
 
-        $results = array();
+        $results = [];
 
-        $cacheData = array();
+        $cacheData = [];
 
         // Here, we iterate over all the cells.
         foreach ($this as $columnName => $value) {
@@ -199,11 +199,11 @@ class Row implements Iterator
             // We need the ending to find other matching search values with the same ending
             $ending = substr($columnName, $searchKeyLength);
 
-            $cacheIndexes = array($this->csv->getIndex($columnName));
+            $cacheIndexes = [$this->csv->getIndex($columnName)];
 
-            $result = array(
+            $result = [
                 $trimEnding ? $mandatoryColumn : $columnName => $value
-            );
+            ];
 
             foreach ($additionalColumns as $searchValue) {
                 $fullSearchValue = $searchValue . $ending;
@@ -215,9 +215,9 @@ class Row implements Iterator
                 }
             }
 
-            $cacheData[] = array(
+            $cacheData[] = [
                 'ending' => $ending, 'indexes' => $cacheIndexes
-            );
+            ];
 
             $results[] = $result;
         }
@@ -243,7 +243,7 @@ class Row implements Iterator
                 continue;
             }
 
-            $copy[$index] = call_user_func(array($coder, 'encode'), $this->data[$index]);
+            $copy[$index] = call_user_func([$coder, 'encode'], $this->data[$index]);
         }
 
         return $copy;

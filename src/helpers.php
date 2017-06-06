@@ -14,7 +14,7 @@ if (! function_exists('csv')) {
      *
      * @return Csv
      */
-    function csv($file = false, $rows = array())
+    function csv($file = false, $rows = [])
     {
         $csv = new Csv();
 

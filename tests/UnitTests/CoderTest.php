@@ -69,16 +69,16 @@ class CoderTest extends TestCase
         $data = ['name' => 'Colby'];
         $serialized = serialize($data);
 
-        $csv = csv(array(
-            'coders' => array(
+        $csv = csv([
+            'coders' => [
                 'data' => TestCoder::class
-            )
-        ));
+            ]
+        ]);
 
         $csv->setHeader(['data'])
-            ->appendRows(array(
-                array($serialized)
-            ))
+            ->appendRows([
+                [$serialized]
+            ])
             ->write('/tmp/csv_helper_coder.csv');
 
         $this->assertEquals(

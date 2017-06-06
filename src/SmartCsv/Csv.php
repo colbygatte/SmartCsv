@@ -2,16 +2,19 @@
 
 namespace ColbyGatte\SmartCsv;
 
+use ColbyGatte\SmartCsv\Traits\CsvIterator;
 use Iterator;
 use Exception;
 
 class Csv implements Iterator
 {
+    use CsvIterator;
     /**
+     * compatibility
      * ['alias' => 'Original']
      * @var array
      */
-    public $indexAliases = array();
+    public $indexAliases = [];
 
     /**
      * Whether or not to use aliases when writing to a CSV (instead of using original values)
@@ -25,8 +28,8 @@ class Csv implements Iterator
      *
      * @var array
      */
-    private $columnNamesAsKey = array();
-    private $columnNamesAsValue = array();
+    private $columnNamesAsKey = [];
+    private $columnNamesAsValue = [];
 
     /**
      * Whether or not the csv file has been read or written.
@@ -44,7 +47,7 @@ class Csv implements Iterator
     /**
      * @var \ColbyGatte\SmartCsv\Row[]
      */
-    private $rows = array();
+    private $rows = [];
 
     /**
      * The CSV file handle.
@@ -58,7 +61,7 @@ class Csv implements Iterator
     /**
      * Filters for modifying data
      */
-    private $filters = array();
+    private $filters = [];
 
     /**
      * Save rows when reading?
@@ -75,15 +78,15 @@ class Csv implements Iterator
      * The values are the coder to run it through.
      * Each column can only have one coder.
      */
-    private $coders = array();
+    private $coders = [];
 
     private $optionsParsed = false;
 
     private $delimiter = ',';
 
-    private $cachedIndexGroups = array(
-        'single' => array(), 'multiple' => array()
-    );
+    private $cachedIndexGroups = [
+        'single' => [], 'multiple' => []
+    ];
 
     /**
      * Ran before writing to a CSV file.
@@ -132,9 +135,9 @@ class Csv implements Iterator
     }
 
     /**
-     * If $returnNewSet is true, the current instance will not be modified.
+     * @return $this
      */
-    public function runFilters($returnNewSet = false)
+    public function runFilters()
     {
         foreach ($this as $row) {
             foreach ($this->filters as $filter) {
@@ -152,7 +155,7 @@ class Csv implements Iterator
      */
     public function runSearch(Search $search)
     {
-        $results = csv(array($this->getHeader()));
+        $results = csv([$this->getHeader()]);
 
         foreach ($this as $row) {
             if ($search->runFilters($row)) {
@@ -307,7 +310,7 @@ class Csv implements Iterator
     {
         $aliasesFlipped = array_flip($this->indexAliases);
 
-        $headerUsingAliases = array();
+        $headerUsingAliases = [];
 
         foreach ($this->columnNamesAsValue as $column) {
             if (isset($aliasesFlipped[$column])) {
@@ -372,7 +375,7 @@ class Csv implements Iterator
 
                 case 'coders':
                     foreach ($value as $column => $coder) {
-                        call_user_func(array($this, 'addCoder'), $column, $coder);
+                        call_user_func([$this, 'addCoder'], $column, $coder);
 
                         // $this->addCoder(...$coderInfo); <-- not using this way because old php :(
                     }
@@ -478,9 +481,9 @@ class Csv implements Iterator
 
         array_unshift($additionalColumns, $mandatoryColumn);
 
-        $this->cachedIndexGroups['multiple'][$id] = array(
+        $this->cachedIndexGroups['multiple'][$id] = [
             'search' => $additionalColumns, 'groups' => $cache
-        );
+        ];
     }
 
     public function cacheId($mandatoryColumn, $additionalColumns)
@@ -558,7 +561,7 @@ class Csv implements Iterator
      *
      * @return $this
      */
-    public function appendRow($data = array())
+    public function appendRow($data = [])
     {
         if ($data instanceof Row) {
             $this->rows[] = $data;
@@ -642,116 +645,4 @@ class Csv implements Iterator
 
         return $this;
     }
-
-    // TODO: Extract these methods to a trait
-    // region Iterable
-    /**
-     * Return the current element
-     * @return \ColbyGatte\SmartCsv\Row
-     */
-    public function current()
-    {
-        if ($this->saveRows) {
-            return current($this->rows);
-        }
-
-        $row = $this->currentRow;
-
-        return $row;
-    }
-
-    /**
-     * Move forward to next element
-     */
-    public function next()
-    {
-        if ($this->saveRows) {
-            next($this->rows);
-
-            return;
-        }
-
-        // If we are in alter mode, write the previous line (only if it hasn't been unset)
-        if (is_resource($this->alter) && $this->currentRow) {
-            $this->puts($this->currentRow, $this->alter);
-        }
-
-        if (($data = $this->gets()) === false) {
-            $this->currentRow = null;
-
-            return;
-        }
-
-        $this->currentRow = new Row($this, $data);
-    }
-
-    /**
-     * Return the key of the current element
-     *
-     * @return int
-     */
-    public function key()
-    {
-        if ($this->saveRows) {
-            return key($this->rows);
-        }
-
-        return 0;
-    }
-
-    /**
-     * Checks if current position is valid
-     * @return bool
-     */
-    public function valid()
-    {
-        if ($this->saveRows) {
-            return key($this->rows) !== null;
-        }
-
-        return $this->currentRow !== null;
-    }
-
-    /**
-     * Rewind the Iterator to the first element
-     */
-    public function rewind()
-    {
-        $this->rows;
-    }
-
-    /**
-     * Used for iteration.
-     *
-     * A starting value of false is used before reading, null is used after reading.
-     *
-     * @var null|false|\ColbyGatte\SmartCsv\Row
-     */
-    private $currentRow = false;
-
-    /**
-     * Do we want to save each previous row from the loop?
-     * This only happens in no-save mode ($save is false).
-     *
-     * @var null|resource
-     */
-    private $alter;
-
-    /**
-     * Iterate over each element.
-     * $callable is passed the Row instance..
-     *
-     * @param callable $callback
-     *
-     * @return $this
-     */
-    public function each(callable $callback)
-    {
-        foreach ($this as $row) {
-            $callback($row);
-        }
-
-        return $this;
-    }
-    // endregion
 }

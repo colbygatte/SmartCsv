@@ -9,21 +9,21 @@ class SearchTest extends TestCase
     /** @test */
     public function search_test()
     {
-        $csv = csv(array(
-            array('name', 'age'),
-            array('Frankenstein', '26'),
-            array('Sarah', '22'),
-            array('Ben', '50')
-        ));
+        $csv = csv([
+            ['name', 'age'],
+            ['Frankenstein', '26'],
+            ['Sarah', '22'],
+            ['Ben', '50']
+        ]);
 
-        $resultCsv = csv_search($csv, array(
+        $resultCsv = csv_search($csv, [
             function ($row) {
                 return $row->age < 30;
             },
             function ($row) {
                 return strlen($row->name) < 6;
             }
-        ));
+        ]);
 
         $resultCsv->write('/tmp/results.csv');
 
