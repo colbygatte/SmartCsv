@@ -141,7 +141,7 @@ class Row implements Iterator
     /**
      * Match up values from multiple columns.
      * Must have exact naming.
-     * If ony $mandatoryColumn is given, the results are all returned in an array.
+     * If only $mandatoryColumn is given, the results are all returned in an array and empty values are not included.
      * If $additionalColumns is given, an array of key-value paired arrays is returned.
      *
      * @param string $mandatoryColumn
@@ -172,7 +172,7 @@ class Row implements Iterator
 
         $results = array();
 
-        $cache = array();
+        $cacheData = array();
 
         // Here, we iterate over all the cells.
         foreach ($this as $columnName => $value) {
@@ -182,7 +182,7 @@ class Row implements Iterator
 
             if (empty($additionalColumns)) {
                 if (empty($value)) {
-                    $cache[] = $this->csv->getIndex($columnName);
+                    $cacheData[] = $this->csv->getIndex($columnName);
 
                     continue;
                 }
@@ -191,7 +191,7 @@ class Row implements Iterator
                 // the mandatory column.
                 $results[] = $value;
 
-                $cache[] = $this->csv->getIndex($columnName);
+                $cacheData[] = $this->csv->getIndex($columnName);
 
                 continue;
             }
@@ -201,7 +201,9 @@ class Row implements Iterator
 
             $cacheIndexes = array($this->csv->getIndex($columnName));
 
-            $result = array($trimEnding ? $mandatoryColumn : $columnName => $value);
+            $result = array(
+                $trimEnding ? $mandatoryColumn : $columnName => $value
+            );
 
             foreach ($additionalColumns as $searchValue) {
                 $fullSearchValue = $searchValue . $ending;
@@ -213,38 +215,16 @@ class Row implements Iterator
                 }
             }
 
-            $cache[] = array(
+            $cacheData[] = array(
                 'ending' => $ending, 'indexes' => $cacheIndexes
             );
 
             $results[] = $result;
         }
 
-        $this->csv->cacheGroupColumnsSearch($mandatoryColumn, $additionalColumns, $cache);
+        $this->csv->cacheGroupColumnsSearch($mandatoryColumn, $additionalColumns, $cacheData);
 
         return $results;
-    }
-
-    /**
-     * Extracts all data from cells ($indexes) unless they are empty.
-     *
-     * @deprecated use groupColumns() instead.
-     *
-     * @param int []
-     *
-     * @return array
-     */
-    public function getNonEmptyCells($indexes)
-    {
-        $data = array();
-
-        foreach ($indexes as $index) {
-            if (! empty($this->data[$index])) {
-                $data[] = $this->data[$index];
-            }
-        }
-
-        return $data;
     }
 
     /**

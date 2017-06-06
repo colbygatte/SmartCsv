@@ -86,8 +86,7 @@ class Csv implements Iterator
     private $delimiter = ',';
 
     private $cachedIndexGroups = array(
-        'single' => array(),
-        'multiple' => array()
+        'single' => array(), 'multiple' => array()
     );
 
     /**
@@ -484,8 +483,7 @@ class Csv implements Iterator
         array_unshift($additionalColumns, $mandatoryColumn);
 
         $this->cachedIndexGroups['multiple'][$id] = array(
-            'search' => $additionalColumns,
-            'groups' => $cache
+            'search' => $additionalColumns, 'groups' => $cache
         );
     }
 

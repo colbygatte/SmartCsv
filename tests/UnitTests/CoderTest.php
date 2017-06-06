@@ -27,10 +27,10 @@ class CoderTest extends TestCase
     /** @test */
     public function can_use_encoder()
     {
-        quick_csv_ages($path = '/tmp/dummy_csv.csv')->addCoder('name', TestCoder::class)->write($path);
+        sample_csv()->addCoder('name', TestCoder::class)->write($path = '/tmp/dummy_csv.csv');
 
         $this->assertEquals(
-            serialize('Colby'),
+            serialize('Mrs. Emilie Pacocha Jr.'),
             csv($path)->first()->name
         );
     }
@@ -38,10 +38,12 @@ class CoderTest extends TestCase
     /** @test */
     public function can_use_decoder()
     {
-        quick_csv_ages($path = '/tmp/dummy_csv.csv')->addCoder('name', TestCoder::class)->write($path);
+        $path = '/tmp/dummy_csv.csv';
+
+        sample_csv()->addCoder('name', TestCoder::class)->write($path);
 
         $this->assertEquals(
-            'Colby',
+            'Mrs. Emilie Pacocha Jr.',
             csv()->addCoder('name', TestCoder::class)->read($path)->first()->name
         );
     }
@@ -52,7 +54,7 @@ class CoderTest extends TestCase
         $assert = false;
 
         try {
-            quick_csv_ages($path = '/tmp/dummy_csv.csv')->addCoder('name', InvalidCoder::class);
+            sample_csv()->addCoder('name', InvalidCoder::class);
         } catch (\Exception $e) {
             $assert = true;
         }

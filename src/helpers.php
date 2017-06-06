@@ -25,9 +25,7 @@ if (! function_exists('csv')) {
         // Passing through multidimensional array will create Csv instance using array for rows
         if (is_array($file) && isset($file[0]) && is_array($file[0])) {
             $csv->setHeader(array_shift($file));
-            $csv->appendRows($file);
-
-            return $csv;
+            return $csv->appendRows($file);
         }
 
         // If we are here, assume $file can be parsed by $csv->parseOptions()
@@ -35,11 +33,9 @@ if (! function_exists('csv')) {
 
         // If $csv->csvFile was set, read it!
         if (! empty($csv->getCsvFile())) {
-            $csv->read();
-
             // Return now to ensure ignoring $rows. If $rows is accidentally set,
             // it would override the header row from the original read above.
-            return $csv;
+            return $csv->read();
         }
 
         if ($headerRow = array_shift($rows)) {

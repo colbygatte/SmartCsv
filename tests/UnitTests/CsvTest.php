@@ -2,8 +2,6 @@
 
 namespace Tests\UnitTests;
 
-use ColbyGatte\SmartCsv\Coders\Serialize;
-use ColbyGatte\SmartCsv\Csv;
 use PHPUnit\Framework\TestCase;
 
 class CsvTest extends TestCase
@@ -47,23 +45,14 @@ class CsvTest extends TestCase
     /** @test */
     public function index_aliases()
     {
-        //$csv = csv(
-        //    array(
-        //        array('Category', 'Product #'), array('flowers', '234234')
-        //    ),
-        //    array(
-        //        'cat' => 'Category', 'sku' => 'Product #'
-        //    )
-        //);
-
         $csv = csv(
-            [
-                'aliases' => ['cat' => 'Category', 'sku' => 'Product #']
-            ],
-            [
-                ['Category', 'Product #'],
-                ['flowers', '234234']
-            ]
+            array(
+                'aliases' => array('cat' => 'Category', 'sku' => 'Product #')
+            ),
+            array(
+                array('Category', 'Product #'),
+                array('flowers', '234234')
+            )
         );
 
         $this->assertEquals('234234', $csv->first()->sku);
@@ -172,46 +161,47 @@ class CsvTest extends TestCase
         // Delete the row with name 'Kyra Stevens'
         // Change all emails to 'nocontact'
         foreach (csv($options) as $row) {
-            if ($row->name == 'Kyra Stevens') {
+            if ($row->name == 'Mrs. Emilie Pacocha Jr.') {
                 $row->delete();
 
                 continue;
             }
 
-            $row->email = 'nocontact';
+            $row->age = 'noage';
         }
 
         $csv = csv($savePath);
 
-        $this->assertCount(0, $csv->findRows('name', 'Kyra Stevens'));
+        $this->assertCount(0, $csv->findRows('name', 'Mrs. Emilie Pacocha Jr.'));
 
-        $emails = array();
+        $ages = array();
 
         foreach ($csv as $row) {
-            $emails[] = $row->email;
+            $ages[] = $row->age;
         }
 
-        $this->assertEquals(array('nocontact'), array_keys(array_flip($emails)));
+
+        $this->assertEquals(array('noage'), array_keys(array_flip($ages)));
     }
 
     /** @test */
     public function can_iterate_line_by_line()
     {
-        $emails = array();
+        $ages = array();
 
         foreach (sample_csv() as $row) {
-            $emails[] = $row->email;
+            $ages[] = $row->age;
         }
 
-        $emailsFromIterate = array();
+        $agesFromIterate = array();
 
         $csv = csv(array('file' => SAMPLE_CSV, 'save' => false));
 
         foreach ($csv as $row) {
-            $emailsFromIterate[] = $row->email;
+            $agesFromIterate[] = $row->age;
         }
 
-        $this->assertEquals($emails, $emailsFromIterate);
+        $this->assertEquals($ages, $agesFromIterate);
 
         $this->assertEquals(0, $csv->countRows());
     }
@@ -233,7 +223,7 @@ class CsvTest extends TestCase
     }
 
     /** @test */
-    public function caching_doesnt_change_values()
+    public function caching_does_not_change_values()
     {
         $csv = csv([
             ['Spec 1', 'Value 1', 'Spec 2', 'Value 2', 'Spec 3', 'Value 3'],
