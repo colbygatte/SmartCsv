@@ -47,6 +47,27 @@ if (! function_exists('csv')) {
     }
 }
 
+if (! function_exists('csv_slurp')) {
+    function csv_slurp($file, $options = [])
+    {
+        return csv(array_merge(['file' => $file], $options));
+    }
+}
+
+if (! function_exists('csv_alter')) {
+    function csv_alter($file, $writeTo, $options = [])
+    {
+        return csv(array_merge(['file' => $file, 'alter' => $writeTo], $options));
+    }
+}
+
+if (! function_exists('csv_sip')) {
+    function csv_sip($file, $options = [])
+    {
+        return csv(array_merge(['file' => $file, 'save' => false], $options));
+    }
+}
+
 if (! function_exists('csv_search')) {
     /**
      * @param \ColbyGatte\SmartCsv\Csv $csv

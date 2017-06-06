@@ -1,13 +1,81 @@
 # SmartCsv
 
-## Install
+I wrote SmartCsv while working on a project that required handling multiple CSVs in several different formats.
+
+This tool has been a huge time saver for me, and has made my code much more readable.
+
+The Csv functions in 3 main modes: slurp and sip. Once a mode is set, it cannot be changed.
+
+* __Slurp__: read the entire CSV into memory.
+* __Sip__: intended for line-by-line manipulation.
+* __Alter__: uses sip mode, but after iterating over reach row, the changes are saved to a new file.
+
+Other feature highlights:
+* __Magic properties__: Access values through magic properties (corresponding to column name, or index aliases)
+* __Index aliases__: Say you have column 'Total Amount Of Lions', instead of using `$row->{'Total Amount Of Lions'}`, you can use an index alias and use `$row->total_lions` instead! 
+* __Column grouping__: Say you have `Attribute 1`, `Value 1`, `Attribute 2`, `Value 2`, etc... Use column grouping for easy parsing (see below)
+## For the impatient
+
+SmartCsv provides 4 helper functions:
+ * `csv()`
+ * `csv_slurp()`
+ * `csv_sip()`
+ * `csv_alter()`
+ * `csv_search()`
+
+`csv_slurp()`, `csv_sip()`, and `csv_alter()` all use `csv()`.
 
 Install with composer:
 ```
 compose require colbygatte/smart-csv
 ```
 
-## Usage
+__File: prices.csv__
+```$xslt
+amount,currency
+10,dollars
+50,euros
+```
+
+__Slurp__
+```php
+<?php
+foreach (csv_slurp('prices.csv') as $row) {
+    echo $row->currency;
+}
+```
+
+__Sip__
+```php
+<?php
+foreach (csv_sip('prices.csv') as $row) {
+    echo $row->currency;
+}
+```
+
+__Alter__
+```php
+<?php
+foreach (csv_alter('prices.csv', 'altered_prices.csv') as $row) {
+    $row->amount = $row->amount * 10;
+}
+```
+
+## Search
+Searching can be done in sip or slurp mode.
+```php
+<?php
+// Returns new Csv instance
+$results = csv_search(csv_sip('prices.csv'), [
+    function ($row) {
+        return $row->amount > 50;
+    }
+]);
+
+$results->write('results.csv');
+```
+
+## Advanced usage
 The main two classes here are Csv and Row.
 A helper function `csv()` is provided for elegant syntax. The first parameter can be either a string or an array. If a string is given, it will automatically be read. If an array is given, the object will populate itself with the data, using the first value as the header.
 

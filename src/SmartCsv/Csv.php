@@ -3,12 +3,14 @@
 namespace ColbyGatte\SmartCsv;
 
 use ColbyGatte\SmartCsv\Traits\CsvIterator;
+use ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper;
 use Iterator;
 use Exception;
 
 class Csv implements Iterator
 {
     use CsvIterator;
+
     /**
      * compatibility
      * ['alias' => 'Original']
@@ -18,6 +20,7 @@ class Csv implements Iterator
 
     /**
      * Whether or not to use aliases when writing to a CSV (instead of using original values)
+     *
      * @var bool
      */
     public $useAliases = false;
@@ -84,9 +87,15 @@ class Csv implements Iterator
 
     private $delimiter = ',';
 
-    private $cachedIndexGroups = [
-        'single' => [], 'multiple' => []
-    ];
+    /**
+     * @var \ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper
+     */
+    public $columnGroupingHelper;
+
+    public function __construct()
+    {
+        $this->columnGroupingHelper = new ColumnGroupingHelper($this);
+    }
 
     /**
      * Ran before writing to a CSV file.
@@ -157,6 +166,10 @@ class Csv implements Iterator
     {
         $results = csv([$this->getHeader()]);
 
+        if ($this->alter) {
+            throw new Exception('Cannot search in alter mode.');
+        }
+
         foreach ($this as $row) {
             if ($search->runFilters($row)) {
                 $results->appendRow($row);
@@ -222,9 +235,8 @@ class Csv implements Iterator
 
         $this->setUp();
 
-        // If we aren't saving the rows, they can only be accessed through each() or a foreach loop.
+        // If we aren't saving the rows, read the first line only.
         if (! $this->saveRows) {
-            // Read the first line
             if (($data = $this->gets()) !== false) {
                 $this->currentRow = new Row($this, $data);
             }
@@ -232,6 +244,7 @@ class Csv implements Iterator
             return $this;
         }
 
+        // Read EVERYTHING!
         while (($data = $this->gets()) !== false) {
             $row = new Row($this, $data);
 
@@ -376,8 +389,6 @@ class Csv implements Iterator
                 case 'coders':
                     foreach ($value as $column => $coder) {
                         call_user_func([$this, 'addCoder'], $column, $coder);
-
-                        // $this->addCoder(...$coderInfo); <-- not using this way because old php :(
                     }
                     break;
 
@@ -388,6 +399,20 @@ class Csv implements Iterator
                     break;
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @param string   $name
+     * @param string   $mandatoryColumn
+     * @param string[] $additionalColumns
+     *
+     * @return $this
+     */
+    public function columnGroup($name, $mandatoryColumn, $additionalColumns = [])
+    {
+        $this->columnGroupingHelper->columnGroup($name, $mandatoryColumn, $additionalColumns);
 
         return $this;
     }
@@ -442,56 +467,9 @@ class Csv implements Iterator
 
         $this->columnNamesAsValue = $header;
 
+        $this->columnGroupingHelper->setColumnNames($header);
+
         return $this;
-    }
-
-    /**
-     * @param $mandatoryColumn
-     * @param $additionalColumns
-     *
-     * @return false|array
-     */
-    public function getCachedGroupColumnsSearch($mandatoryColumn, $additionalColumns)
-    {
-        if (empty($additionalColumns)) {
-            if (isset($this->cachedIndexGroups['single'][$mandatoryColumn])) {
-                return $this->cachedIndexGroups['single'][$mandatoryColumn];
-            }
-
-            return false;
-        }
-
-        $id = $this->cacheId($mandatoryColumn, $additionalColumns);
-
-        if (isset($this->cachedIndexGroups['multiple'][$id])) {
-            return $this->cachedIndexGroups['multiple'][$id];
-        }
-
-        return false;
-    }
-
-
-    public function cacheGroupColumnsSearch($mandatoryColumn, $additionalColumns, $cache)
-    {
-        if (empty($additionalColumns)) {
-            $this->cachedIndexGroups['single'][$mandatoryColumn] = $cache;
-        }
-
-        $id = $this->cacheId($mandatoryColumn, $additionalColumns);
-
-        array_unshift($additionalColumns, $mandatoryColumn);
-
-        $this->cachedIndexGroups['multiple'][$id] = [
-            'search' => $additionalColumns, 'groups' => $cache
-        ];
-    }
-
-    public function cacheId($mandatoryColumn, $additionalColumns)
-    {
-        sort($additionalColumns);
-        $additionalColumns[] = $mandatoryColumn;
-
-        return serialize($additionalColumns);
     }
 
     /**

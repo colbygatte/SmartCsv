@@ -25,23 +25,41 @@ trait CsvIterator
             return current($this->rows);
         }
 
-        $row = $this->currentRow;
-
-        return $row;
+        return $this->currentRow;
     }
 
     /**
+     * Used for iteration.
+     *
+     * A starting value of false is used before reading, null is used after reading.
+     *
+     * @var null|false|\ColbyGatte\SmartCsv\Row
+     */
+    private $currentRow = false;
+
+    /**
+     * Do we want to save each previous row from the loop?
+     * This only happens in no-save mode ($save is false).
+     *
+     * @var null|resource
+     */
+    private $alter;
+
+    /**
      * Move forward to next element
+     *
+     * @return void
      */
     public function next()
     {
+        // If $this->saveRows is set, all rows have been loaded already.
         if ($this->saveRows) {
             next($this->rows);
 
             return;
         }
 
-        // If we are in alter mode, write the previous line (only if it hasn't been unset)
+        // If we are in alter mode, write the previous line (only if it hasn't been unset, which means the row was deleted)
         if (is_resource($this->alter) && $this->currentRow) {
             $this->puts($this->currentRow, $this->alter);
         }
@@ -87,25 +105,8 @@ trait CsvIterator
      */
     public function rewind()
     {
-        $this->rows;
+        reset($this->rows);
     }
-
-    /**
-     * Used for iteration.
-     *
-     * A starting value of false is used before reading, null is used after reading.
-     *
-     * @var null|false|\ColbyGatte\SmartCsv\Row
-     */
-    private $currentRow = false;
-
-    /**
-     * Do we want to save each previous row from the loop?
-     * This only happens in no-save mode ($save is false).
-     *
-     * @var null|resource
-     */
-    private $alter;
 
     /**
      * Iterate over each element.

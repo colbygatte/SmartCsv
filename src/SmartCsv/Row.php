@@ -139,92 +139,19 @@ class Row implements Iterator
     }
 
     /**
-     * Match up values from multiple columns.
-     * Must have exact naming.
-     * If only $mandatoryColumn is given, the results are all returned in an array and empty values are not included.
-     * If $additionalColumns is given, an array of key-value paired arrays is returned.
-     *
-     * @param string $mandatoryColumn
-     * @param array  $additionalColumns
-     *
-     * @param bool   $discardEmptyValues
-     * @param bool   $trimEnding
+     * @param $name
      *
      * @return array
      */
-    public function groupColumns(
-        $mandatoryColumn,
-        $additionalColumns = [],
-        $trimEnding = true
-    ) {
-        // Check if we have the indexes cached
-        $cached = $this->csv->getCachedGroupColumnsSearch($mandatoryColumn, $additionalColumns);
+    public function group($name, $trimEndings = true)
+    {
+        $data = $this->csv->columnGroupingHelper->getColumnGroup($name);
 
-        if ($cached) {
-            if (empty($additionalColumns)) {
-                return $this->groupSingleColumnsFromCache($cached);
-            }
-
-            return $this->groupMultipleColumnsFromCache($cached, $trimEnding);
+        if ($data['type'] == 'single') {
+            return $this->groupSingleColumnsFromCache($data['cache']);
         }
 
-        $searchKeyLength = strlen($mandatoryColumn);
-
-        $results = [];
-
-        $cacheData = [];
-
-        // Here, we iterate over all the cells.
-        foreach ($this as $columnName => $value) {
-            if (substr($columnName, 0, $searchKeyLength) != $mandatoryColumn) {
-                continue;
-            }
-
-            if (empty($additionalColumns)) {
-                if (empty($value)) {
-                    $cacheData[] = $this->csv->getIndex($columnName);
-
-                    continue;
-                }
-
-                // If we aren't grabbing additionalColumns, $results will be an array of the results from
-                // the mandatory column.
-                $results[] = $value;
-
-                $cacheData[] = $this->csv->getIndex($columnName);
-
-                continue;
-            }
-
-            // We need the ending to find other matching search values with the same ending
-            $ending = substr($columnName, $searchKeyLength);
-
-            $cacheIndexes = [$this->csv->getIndex($columnName)];
-
-            $result = [
-                $trimEnding ? $mandatoryColumn : $columnName => $value
-            ];
-
-            foreach ($additionalColumns as $searchValue) {
-                $fullSearchValue = $searchValue . $ending;
-
-                if (($value = $this->getCell($fullSearchValue)) !== false) {
-                    $result[$trimEnding ? $searchValue : $fullSearchValue] = $value;
-
-                    $cacheIndexes[] = $this->csv->getIndex($fullSearchValue);
-                }
-            }
-
-            $cacheData[] = [
-                'ending' => $ending, 'indexes' => $cacheIndexes
-            ];
-
-            $results[] = $result;
-        }
-
-        $this->csv->cacheGroupColumnsSearch($mandatoryColumn, $additionalColumns, $cacheData);
-
-        return $results;
+        return $this->groupMultipleColumnsFromCache($data['cache'], $trimEndings);
     }
 
     /**
@@ -247,6 +174,11 @@ class Row implements Iterator
         }
 
         return $copy;
+    }
+
+    public function groups()
+    {
+        return $this->csv->columnGroupingHelper->setCurrentRow($this);
     }
 
     /**
