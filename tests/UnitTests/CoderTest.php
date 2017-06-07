@@ -30,7 +30,7 @@ class CoderTest extends TestCase
         sample_csv()->addCoder('name', TestCoder::class)->write($path = '/tmp/dummy_csv.csv');
 
         $this->assertEquals(
-            serialize('Mrs. Emilie Pacocha Jr.'),
+            serialize('Prof. Adrian Schmeler IV'),
             csv($path)->first()->name
         );
     }
@@ -43,7 +43,7 @@ class CoderTest extends TestCase
         sample_csv()->addCoder('name', TestCoder::class)->write($path);
 
         $this->assertEquals(
-            'Mrs. Emilie Pacocha Jr.',
+            'Prof. Adrian Schmeler IV',
             csv()->addCoder('name', TestCoder::class)->read($path)->first()->name
         );
     }
@@ -75,10 +75,8 @@ class CoderTest extends TestCase
             ]
         ]);
 
-        $csv->setHeader(['data'])
-            ->appendRows([
-                [$serialized]
-            ])
+        $csv->header(['data'])
+            ->append([$serialized])
             ->write('/tmp/csv_helper_coder.csv');
 
         $this->assertEquals(

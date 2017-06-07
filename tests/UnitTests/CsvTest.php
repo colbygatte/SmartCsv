@@ -9,14 +9,12 @@ class CsvTest extends TestCase
     /** @test */
     public function index_aliases()
     {
-        $csv = csv([
-            'aliases' => ['cat' => 'Category', 'sku' => 'Product #']
-        ], [
-                ['Category', 'Product #'],
-                ['flowers', '234234']
-            ]);
+        $csv = csv(['aliases' => ['cat' => 'Category', 'sku' => 'Product #']])
+            ->header(['Category', 'Product #'])
+            ->append(['flowers', '234234']);
 
-        dump($csv->first()->toArray(true));
+        $csv->first()
+            ->toArray(true);
 
         $this->assertEquals('234234', $csv->first()->sku);
     }
@@ -26,10 +24,9 @@ class CsvTest extends TestCase
     {
         csv([
             'aliases' => ['cat' => 'Category', 'sku' => 'Product #']
-        ], [
-                ['Category', 'Product #'],
-                ['flowers', '234234']
-            ])
+        ])
+            ->header(['Category', 'Product #'])
+            ->append(['flowers', '234234'])
             ->useAliases()
             ->write($path = '/tmp/dummy-csv.csv');
 
@@ -93,11 +90,9 @@ class CsvTest extends TestCase
 
         $csv = csv([
             'aliases' => ['shortstring' => 'A Really Long String Of Text']
-        ], [
-                ['A Really Long String Of Text'],
-                ['I LOVE PHP'],
-                ['WOOOOOOOOO']
-            ]);
+        ])
+            ->header(['A Really Long String Of Text'])
+            ->append(['I LOVE PHP'], ['WOOOOOOOOO']);
 
         $csv->each(function ($row) {
             $row->shortstring = strtolower($row->shortstring);
@@ -132,7 +127,13 @@ class CsvTest extends TestCase
 
         $csv = csv($savePath);
 
-        $this->assertCount(0, $csv->findRows('name', 'Mrs. Emilie Pacocha Jr.'));
+        $count = csv_search($csv, [
+            function ($row) {
+                return $row->name == 'Mrs. Emilie Pacocha Jr.';
+            }
+        ])->count();
+
+        $this->assertEquals(0, $count);
 
         $ages = [];
 
@@ -163,7 +164,7 @@ class CsvTest extends TestCase
 
         $this->assertEquals($ages, $agesFromIterate);
 
-        $this->assertEquals(0, $csv->countRows());
+        $this->assertEquals(0, $csv->count());
     }
 
     /** @test */
@@ -172,12 +173,56 @@ class CsvTest extends TestCase
         $path = '/tmp/changing_delimiter.csv';
 
         csv()
-            ->setHeader(['name', 'age'])
+            ->header(['name', 'age'])
             ->presets(['del' => '|'])
             ->write($path);
 
         $this->assertEquals("name|age\n", file_get_contents($path));
 
-        $this->assertEquals(['name', 'age'], csv(['file' => $path, 'del' => '|'])->getHeader());
+        $this->assertEquals(['name', 'age'], csv(['file' => $path, 'del' => '|'])->header());
+    }
+
+    /** @test */
+    public function cannot_set_header_twice()
+    {
+        $error = get_thrown_message(function () {
+            csv()
+                ->header(['hi'])
+                ->header(['hi']);
+        });
+
+        $this->assertEquals('Header can only be set once!', $error);
+    }
+
+    /** @test */
+    public function header_must_be_set_before_adding_rows()
+    {
+        $error = get_thrown_message(function () {
+            csv()->append(['hi']);
+        });
+
+        $this->assertEquals('Header must be set before adding rows!', $error);
+    }
+
+    /** @test */
+    public function adding_row_with_incorrect_amount_of_columns_appends_extra_columns()
+    {
+        $csv = csv()
+            ->header(['one', 'two', 'three'])
+            ->append(['one']);
+
+        $this->assertCount(3, $csv->first());
+    }
+
+    /** @test */
+    public function cannot_add_more_entries_than_columns()
+    {
+        $error = get_thrown_message(function () {
+            csv()
+                ->header(['just one'])
+                ->append(['one', 'two']);
+        });
+
+        $this->assertEquals('Expected 1 data entry(s), recieved 2.', $error);
     }
 }

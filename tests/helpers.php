@@ -1,6 +1,6 @@
 <?php
 
-define('SAMPLE_CSV', __DIR__ . '/sample2.csv');
+define('SAMPLE_CSV', __DIR__ . '/sample.csv');
 
 /**
  * @return \Faker\Generator
@@ -79,7 +79,7 @@ function csv_faker($writeTo, $rows = 20)
         'other_info'
     ];
 
-    $csv = csv()->setHeader($header);
+    $csv = csv()->header($header);
 
     for ($i = 0; $i < $rows; $i++) {
         $rowData = [
@@ -101,6 +101,8 @@ function csv_faker($writeTo, $rows = 20)
         for ($j = 0; $j < 3; $j++) {
             if (! faker()->boolean()) {
                 array_push($rowData, '', '', '');
+
+                continue;
             }
 
             $randomAttribute = array_rand($attributePossibilities);
@@ -112,7 +114,7 @@ function csv_faker($writeTo, $rows = 20)
         // random info
         array_push($rowData, serialize(['random-string' => faker()->randomAscii]));
 
-        $csv->appendRow($rowData);
+        $csv->append($rowData);
     }
 
     $csv->write($writeTo);
@@ -127,11 +129,9 @@ function csv_faker($writeTo, $rows = 20)
  */
 function quick_csv_ages($path = '/tmp/smart-csv-dummy.csv')
 {
-    $csv = csv([
-        ['name', 'age'],
-        ['Colby', '25'],
-        ['Sarah', '22']
-    ]);
+    $csv = csv()
+        ->header(['name', 'age'])
+        ->append(['Colby', '25'], ['Sarah', '22']);
 
     $csv->write($path);
 
@@ -145,4 +145,22 @@ function quick_csv_ages($path = '/tmp/smart-csv-dummy.csv')
 function sample_csv()
 {
     return csv(SAMPLE_CSV);
+}
+
+/**
+ * @param $callable
+ *
+ * @return null|string
+ */
+function get_thrown_message($callable)
+{
+    $error = null;
+
+    try {
+        $callable();
+    } catch (\Exception $e) {
+        $error = $e->getMessage();
+    }
+
+    return $error;
 }

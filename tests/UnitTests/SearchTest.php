@@ -9,12 +9,9 @@ class SearchTest extends TestCase
     /** @test */
     public function search_test_slurp()
     {
-        $csv = csv([
-            ['name', 'age'],
-            ['Frankenstein', '26'],
-            ['Sarah', '22'],
-            ['Ben', '50']
-        ]);
+        $csv = csv()
+            ->header(['name', 'age'])
+            ->append(['Frankenstein', '26'], ['Sarah', '22'], ['Ben', '50']);
 
         $resultCsv = csv_search($csv, [
             function ($row) {
@@ -27,7 +24,7 @@ class SearchTest extends TestCase
 
         $resultCsv->write('/tmp/results.csv');
 
-        $this->assertEquals(1, $resultCsv->countRows());
+        $this->assertEquals(1, $resultCsv->count());
 
         $this->assertEquals(['Sarah', '22'], $resultCsv->first()
             ->toArray());
@@ -44,15 +41,15 @@ class SearchTest extends TestCase
 
         $resultCsv->write('/tmp/results.csv');
 
-        $this->assertEquals(9, $resultCsv->countRows());
+        $this->assertEquals(4, $resultCsv->count());
 
-        $this->assertEquals('Mrs. Emilie Pacocha Jr.', $resultCsv->first()->name);
+        $this->assertEquals('Bernardo Turcotte', $resultCsv->first()->name);
     }
 
     /** @test */
     public function search_in_alter_mode_throws()
     {
-        $csv = csv(['alter' => '__what.csv'], [
+        $csv = csv(['alter' => '/tmp/__what.csv'], [
             ['name', 'age'],
             ['Frankenstein', '26'],
             ['Sarah', '22'],

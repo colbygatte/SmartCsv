@@ -15,6 +15,17 @@ class Row implements Iterator
 
     public function __construct(Csv $csv, array $data)
     {
+        $dataCount = count($data);
+        $columnCount =  $csv->columnCount();
+
+        if ($dataCount != $columnCount) {
+            $data = array_pad($data, $csv->columnCount(), '');
+        }
+
+        if ($dataCount > $columnCount) {
+            throw new \Exception("Expected $columnCount data entry(s), recieved $dataCount.");
+        }
+
         $this->csv = $csv;
         $this->data = $data;
 
@@ -40,12 +51,18 @@ class Row implements Iterator
     }
 
     /**
+     * Use a string to get by header, integer to get by column ID.
+     *
      * @param $indexString
      *
      * @return false|mixed
      */
-    public function getCell($indexString)
+    public function get($indexString)
     {
+        if (is_int($indexString)) {
+            return $this->getByIndex($indexString);
+        }
+
         if (isset($this->csv->indexAliases[$indexString])) {
             $indexString = $this->csv->indexAliases[$indexString];
         }
@@ -57,7 +74,12 @@ class Row implements Iterator
         return $this->data[$index];
     }
 
-    public function getCellByIndex($index)
+    /**
+     * @param $index
+     *
+     * @return mixed
+     */
+    public function getByIndex($index)
     {
         return $this->data[$index];
     }
@@ -66,10 +88,14 @@ class Row implements Iterator
      * @param $indexString
      * @param $value
      *
-     * @return bool
+     * @return $this
      */
-    public function setCell($indexString, $value)
+    public function set($indexString, $value)
     {
+        if (is_int($indexString)) {
+            return $this->setByIndex($indexString, $value);
+        }
+
         if (isset($this->csv->indexAliases[$indexString])) {
             $indexString = $this->csv->indexAliases[$indexString];
         }
@@ -77,10 +103,24 @@ class Row implements Iterator
         if (($index = $this->csv->getIndex($indexString)) !== false) {
             $this->data[$index] = $value;
 
-            return true;
+            return $this;
         }
 
-        return false;
+        throw new \Exception("Column $indexString not found.");
+    }
+
+    /**
+     * @param $index
+     *
+     * @return $this
+     */
+    public function setByIndex($index, $value)
+    {
+        if (! isset($this->data[$index])) {
+            throw new \Exception("Column $index is out of range.");
+        }
+
+        $this->data[$index] = $value;
     }
 
     /**
@@ -88,7 +128,7 @@ class Row implements Iterator
      */
     public function delete()
     {
-        $this->csv->deleteRow($this);
+        $this->csv->delete($this);
     }
 
     /**
@@ -111,6 +151,26 @@ class Row implements Iterator
         }
 
         return $results;
+    }
+
+    /**
+     * @param $name
+     *
+     * @return array|false
+     */
+    public function group($name, $trimEndings = true)
+    {
+        $data = $this->csv->columnGroupingHelper->getColumnGroup($name);
+
+        if (! $data) {
+            return false;
+        }
+
+        if ($data['type'] == 'single') {
+            return $this->groupSingleColumnsFromCache($data['cache']);
+        }
+
+        return $this->groupMultipleColumnsFromCache($data['cache'], $trimEndings);
     }
 
     private function groupMultipleColumnsFromCache($cached, $trimEnding)
@@ -139,26 +199,6 @@ class Row implements Iterator
     }
 
     /**
-     * @param $name
-     *
-     * @return array|false
-     */
-    public function group($name, $trimEndings = true)
-    {
-        $data = $this->csv->columnGroupingHelper->getColumnGroup($name);
-
-        if (! $data) {
-            return false;
-        }
-
-        if ($data['type'] == 'single') {
-            return $this->groupSingleColumnsFromCache($data['cache']);
-        }
-
-        return $this->groupMultipleColumnsFromCache($data['cache'], $trimEndings);
-    }
-
-    /**
      * For coders, we use a new instance of Row.
      *
      * @return mixed
@@ -166,7 +206,7 @@ class Row implements Iterator
     public function toArray($associative = false)
     {
         $copy = $this->data;
-        
+
         foreach ($this->csv->getCoders() as $column => $coder) {
             $index = $this->csv->getIndex($column);
 
@@ -177,7 +217,7 @@ class Row implements Iterator
         }
 
         if ($associative) {
-            $copy = array_combine($this->csv->getHeader(), $copy);
+            $copy = array_combine($this->csv->header(), $copy);
         }
 
         return $copy;
@@ -195,7 +235,7 @@ class Row implements Iterator
      */
     function __get($name)
     {
-        return $this->getCell($name);
+        return $this->get($name);
     }
 
     /**
@@ -206,7 +246,7 @@ class Row implements Iterator
      */
     function __set($name, $value)
     {
-        return $this->setCell($name, $value);
+        return $this->set($name, $value);
     }
 
     /**

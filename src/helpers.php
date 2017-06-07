@@ -9,38 +9,27 @@ if (! function_exists('csv')) {
      * If $file is an array of options, the options will be parsed.
      * If 'file' option is passed, the file will automatically be read and $rows will be ignored.
      *
-     * @param string|array $file
+     * @param string|array $options
      * @param array        $rows
      *
      * @return Csv
      */
-    function csv($file = false, $rows = [])
+    function csv($options = false)
     {
-        $csv = new Csv();
+        $csv = new Csv;
 
-        if (false === $file) {
+        if (false === $options) {
             return $csv;
         }
 
-        // Passing through multidimensional array will create Csv instance using array for rows
-        if (is_array($file) && isset($file[0]) && is_array($file[0])) {
-            $csv->setHeader(array_shift($file));
-            return $csv->appendRows($file);
-        }
-
         // If we are here, assume $file can be parsed by $csv->parseOptions()
-        $csv->parseOptions($file);
+        $csv->parseOptions($options);
 
         // If $csv->csvFile was set, read it!
-        if ($csv->getCsvFile() !== false ) {
+        if ($csv->getFile() !== false ) {
             // Return now to ensure ignoring $rows. If $rows is accidentally set,
             // it would override the header row from the original read above.
             return $csv->read();
-        }
-
-        if ($headerRow = array_shift($rows)) {
-            $csv->setHeader($headerRow);
-            $csv->appendRows($rows);
         }
 
         return $csv;

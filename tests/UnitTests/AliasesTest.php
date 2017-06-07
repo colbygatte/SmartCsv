@@ -9,19 +9,14 @@ class AliasesTest extends TestCase
     /** @test */
     public function can_do_key_values_grouping()
     {
-        $csv = csv([
-            [
-                'Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3',
-                'Value 3', 'UOM 3'
-            ],
-            ['Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb']
-        ]);
+        $csv = csv()->header([
+            'Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3',
+            'Value 3', 'UOM 3'])
+            ->append(['Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb']);
 
         $csv->presets([
             'column-groups' => ['specs', 'Specification', ['Value', 'UOM']]
         ]);
-
-        //$csv->columnGroup('specs', 'Specification', ['Value', 'UOM']);
 
         $data = $csv->first()->groups()->specs;
 
@@ -31,15 +26,12 @@ class AliasesTest extends TestCase
     /** @test */
     public function can_group_a_single_column()
     {
-        $csv = csv([
-            [
-                'Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3',
-                'Value 3', 'UOM 3'
-            ],
-            ['Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb']
-        ]);
+        $csv = csv()->header([
+            'Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3',
+            'Value 3', 'UOM 3'])
+            ->append(['Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb']);
 
-        $csv->columnGroup('specs', 'Specification');
+        $csv->makeGroup('specs', 'Specification');
 
         $data = $csv->first()->groups()->specs;
 
