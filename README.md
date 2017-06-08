@@ -183,10 +183,10 @@ When you have multiple columns that you need to bring together, you can use grou
 ```php
 <?php
 // Grouping data
-$csv = csv([
-    ['Spec 1', 'Val 1', 'UOM 1', 'Spec 2', 'Val 2', 'UOM 2'],
-    ['Height', '21', 'in', 'Weight', '30', 'lb']
-]);
+$csv = csv()->header(['Spec 1', 'Val 1', 'UOM 1', 'Spec 2', 'Val 2', 'UOM 2'])
+    ->append(
+        ['Height', '21', 'in', 'Weight', '30', 'lb']
+    ]);
 
 $csv->columnGroup('spec', 'Spec', ['Val', 'UOM']);
 
@@ -249,7 +249,7 @@ use ColbyGatte\SmartCsv\Coders\Serialize;
 $csv = csv()->header(['some-column-title'])
     ->append(
         [['oh', 'my', 'goodness']]
-);
+    );
 
 // First parameter is the column to use the coder on
 $csv->addCoder('array', Serialize::class);
