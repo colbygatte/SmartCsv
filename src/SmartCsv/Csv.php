@@ -150,7 +150,7 @@ class Csv implements Iterator
     public function append()
     {
         if (empty($this->columnNamesAsValue)) {
-            throw new \Exception('Header must be set before adding rows!');
+            throw new Exception('Header must be set before adding rows!');
         }
 
         foreach (func_get_args() as $data) {
@@ -206,6 +206,8 @@ class Csv implements Iterator
 
     /**
      * Ran before writing to a CSV file.
+     *
+     * @return $this
      */
     private function setUp()
     {
@@ -225,6 +227,8 @@ class Csv implements Iterator
 
     /**
      * Ran after writing to a CSV file.
+     *
+     * @return $this
      */
     private function tearDown()
     {
@@ -470,7 +474,24 @@ class Csv implements Iterator
         return $this;
     }
 
-    // region Row manipulation
+    public function findMatches(Csv $csvToSearch, array $parameters)
+    {
+        $resultCsv = csv()->header($csvToSearch->header());
+
+        foreach ($csvToSearch as $rowToSearch) {
+            foreach ($this as $row) {
+                foreach ($parameters as $column => $columnToMatch) {
+                    if ($row->$column == $rowToSearch->$columnToMatch) {
+                        $resultCsv->append($rowToSearch);
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $resultCsv;
+    }
 
     /**
      * Resets the rows array and returns the first row.

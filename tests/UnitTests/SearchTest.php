@@ -73,4 +73,20 @@ class SearchTest extends TestCase
 
         $this->assertTrue($threw);
     }
+
+    /** @test */
+    public function matchup()
+    {
+        $csv = csv()->header(['awesome_human', 'awesome_email'])->append(
+            ['Bernardo Turcotte', 'sloot@sllootsrus.com'],
+            ['Prof. Gregorio Schowalter Sr.', 'lrunte@hotmail.com']
+        );
+
+        $resultCsv = sample_csv()->findMatches($csv, [
+            'name' => 'awesome_human',
+            'contact 1' => 'awesome_email'
+        ]);
+
+        $this->assertEquals(2, $resultCsv->count());
+    }
 }

@@ -3,6 +3,7 @@
 namespace ColbyGatte\SmartCsv;
 
 use Iterator;
+use Exception;
 
 class Row implements Iterator
 {
@@ -23,7 +24,7 @@ class Row implements Iterator
         }
 
         if ($dataCount > $columnCount) {
-            throw new \Exception("Expected $columnCount data entry(s), recieved $dataCount.");
+            throw new Exception("Expected $columnCount data entry(s), recieved $dataCount.");
         }
 
         $this->csv = $csv;
@@ -106,7 +107,7 @@ class Row implements Iterator
             return $this;
         }
 
-        throw new \Exception("Column $indexString not found.");
+        throw new Exception("Column $indexString not found.");
     }
 
     /**
@@ -117,7 +118,7 @@ class Row implements Iterator
     public function setByIndex($index, $value)
     {
         if (! isset($this->data[$index])) {
-            throw new \Exception("Column $index is out of range.");
+            throw new Exception("Column $index is out of range.");
         }
 
         $this->data[$index] = $value;
