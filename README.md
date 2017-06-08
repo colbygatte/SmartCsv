@@ -6,7 +6,7 @@ This tool has been a huge time saver for me, and has made my code much more read
 
 The Csv functions in 3 main modes: slurp and sip. Once a mode is set, it cannot be changed.
 
-* __Slurp__: read the entire CSV into memory.
+* __Slurp__: read the entire CSV into memory. This mode is default.
 * __Sip__: intended for line-by-line manipulation.
 * __Alter__: uses sip mode, but after iterating over reach row, the changes are saved to a new file.
 
@@ -14,6 +14,7 @@ Other feature highlights:
 * __Magic properties__: Access values through magic properties (corresponding to column name, or index aliases)
 * __Index aliases__: Say you have column 'Total Amount Of Lions', instead of using `$row->{'Total Amount Of Lions'}`, you can use an index alias and use `$row->total_lions` instead! 
 * __Column grouping__: Say you have `Attribute 1`, `Value 1`, `Attribute 2`, `Value 2`, etc... Use column grouping for easy parsing (see below)
+* __Multi-CSV search__: Find rows in a CSV based on values in an instance of Csv.
 ## For the impatient
 
 SmartCsv provides 4 helper functions:
@@ -84,14 +85,14 @@ A helper function `csv()` is provided for elegant syntax. The first parameter ca
 ```php
 <?php
 // Create CSV
-$csv = csv([
-    ['name', 'age'],
-    ['Colby', '25'],
-    ['Tammy', '40'],
-    ['Evan', '22']
-]);
-
-$csv->write('/tmp/names.csv');
+csv()->header(['name', 'age'])
+    // Each parameter passed to append must be an array, representing a row in the CSV.
+    ->append(
+        ['Colby', '25'],
+        ['Tammy', '40'],
+        ['Evan', '22']
+    )
+    ->write('/tmp/names.csv');
 
 // Read CSV. csv() defaults to slurp mode, so here the whole file will be loaded before the loop starts.
 foreach (csv('/tmp/names.csv') as $row) {
@@ -109,22 +110,23 @@ Evan is 22!
 Here is an example of alter mode without using the `csv_alter()` helper function (and using the `csv()` helper function only).
 Rows can also be deleted.
 ```php
+<?php
 $path = '/tmp/iterate.csv';
 
 // make dummy csv
-csv([
-    ['name', 'age'],
-    ['Colby', '26'],
-    ['Sarah', '22'],
-    ['Ben', '50']
-])->write($path);
+csv()->header(['name', 'age'])
+    ->append(
+        ['name', 'age'],
+        ['Colby', '26'],
+        ['Sarah', '22'],
+        ['Ben', '50']
+    )
+    ->write($path);
 
 // now we are going to alter the dummy csv, but save the altered version to a new location
 $alterFile = '/tmp/altered.csv';
 
-$options = ['file' => $path, 'alter' => $alterFile];
-
-foreach (csv($options) as $row) {
+foreach (csv_alter($path, $alterFile) as $row) {
     if ($row->name == 'Colby') {
         $row->name = strtoupper($row->name);
     }
@@ -149,12 +151,13 @@ Sarah,102510
 
 ### Searching
 ```php
-$csv = csv([
-    ['name', 'age'],
-    ['Frankenstein', '26'],
-    ['Sarah', '22'],
-    ['Ben', '50']
-]);
+$csv = csv()->header(['name', 'age'])
+    ->append(
+        ['name', 'age'],
+        ['Frankenstein', '26'],
+        ['Sarah', '22'],
+        ['Ben', '50']
+);
 
 $resultCsv = csv_search($csv, [
     function ($row) {
@@ -173,46 +176,6 @@ __Output__
 ```        
 name,age
 Sarah,22
-```
-
-### Weird filtering example
-```
-$path = '/tmp/dummy.csv';
-
-$csv = csv([
-    ['name', 'age'],
-    ['Colby', '26'],
-    ['Sarah', '22'],
-    ['Ben', '50']
-]);
-
-$csv->addFilter(function ($row) {
-        if ($row->name == 'Colby') {
-            $row->name = strtoupper($row->name);
-        }
-    })
-    ->addFilter(function ($row) {
-        if ($row->name == 'Sarah') {
-            $row->age = 102510;
-        }
-    })
-    ->addFilter(function ($row) {
-        if ($row->name == 'Ben') {
-            // Rows can be deleted inside a loop
-            $row->delete();
-        }
-    });
-
-$csv->runFilters()
-    ->write($path);
-
-print_r(file_get_contents($path));
-```
-__Output__
-```
-name,age
-COLBY,26
-Sarah,102510
 ```
 
 ### Grouping
@@ -252,14 +215,12 @@ print_r($grouped);
 ### Index Aliases
 ```php
 <?php
-$csv = csv(
-    ['aliases' => ['shortname' => 'A Really Long Column Name']],
-    [
-        ['A Really Long Column Name'],
+$csv = csv(['aliases' => ['shortname' => 'A Really Long Column Name']])
+    ->header(['A Really Long Column Name'])
+    ->append(
         ['I LOVE PHP'],
         ['WOOOOOOOOO']
-    ]
-);
+    );
 
 $csv->each(function ($row) {
    $row->shortname = strtolower($row->shortname); 
@@ -267,12 +228,14 @@ $csv->each(function ($row) {
 
 // Index aliases can also be used in place of the original column name when writing
 $csv->useAliases()->write('/tmp/using_aliases.csv');
+echo file_get_contents('/tmp/using_aliases.csv');
 
-echo csv('/tmp/using_aliases.csv')->first()->shortname;
 ```
 __Output__
 ```
+shortname
 i love php
+wooooooooo
 ```
 
 ### Coders
@@ -283,10 +246,10 @@ __IMPORTANT:__ Coders are ran when reading a CSV and when writing it, NOT when a
 <?php
 use ColbyGatte\SmartCsv\Coders\Serialize;
 
-$csv = csv([
-    ['array'],
-    [['oh', 'my', 'goodness']]
-]);
+$csv = csv()->header(['some-column-title'])
+    ->append(
+        [['oh', 'my', 'goodness']]
+);
 
 // First parameter is the column to use the coder on
 $csv->addCoder('array', Serialize::class);

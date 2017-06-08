@@ -353,6 +353,7 @@ class Csv implements Iterator
 
         fclose($fh);
     }
+
     /**
      * If file option is not set, the file will not be read.
      * If  file option IS set, the file will automatically be read.
@@ -405,7 +406,7 @@ class Csv implements Iterator
     public function presets($options)
     {
         foreach ($options as $option => $value) {
-            switch($option) {
+            switch ($option) {
                 case 'del':
                     $this->delimiter = $value;
                     break;
@@ -453,6 +454,7 @@ class Csv implements Iterator
 
         return $headerUsingAliases;
     }
+
     /**
      * @param string   $name
      * @param string   $mandatoryColumn
@@ -478,8 +480,8 @@ class Csv implements Iterator
     {
         $resultCsv = csv()->header($csvToSearch->header());
 
-        foreach ($csvToSearch as $rowToSearch) {
-            foreach ($this as $row) {
+        foreach ($this as $row) {
+            foreach ($csvToSearch as $rowToSearch) {
                 foreach ($parameters as $column => $columnToMatch) {
                     if ($row->$column == $rowToSearch->$columnToMatch) {
                         $resultCsv->append($rowToSearch);
@@ -513,6 +515,7 @@ class Csv implements Iterator
         return $this->rows[$rowIndex];
     }
     // endregion
+
     /**
      * @return int
      */
