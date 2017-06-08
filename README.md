@@ -246,19 +246,19 @@ __IMPORTANT:__ Coders are ran when reading a CSV and when writing it, NOT when a
 <?php
 use ColbyGatte\SmartCsv\Coders\Serialize;
 
-$csv = csv()->header(['some-column-title'])
+$csv = csv()->header(['some_column_title'])
     ->append(
         [['oh', 'my', 'goodness']]
     );
 
 // First parameter is the column to use the coder on
-$csv->addCoder('array', Serialize::class);
+$csv->addCoder('some_column_title', Serialize::class);
 $csv->write('/tmp/serialized_row.csv');
 
 // Remember: Add coders before reading
-print_r(csv('/tmp/serialized_row.csv')->first()->array);
+print_r(csv('/tmp/serialized_row.csv')->first()->some_column_title);
 
-print_r(csv()->addCoder('array', Serialize::class)->read('/tmp/serialized_row.csv')->first()->array);
+print_r(csv()->addCoder('some_column_title', Serialize::class)->read('/tmp/serialized_row.csv')->first()->some_column_title);
 ```
 __Output__
 ```
