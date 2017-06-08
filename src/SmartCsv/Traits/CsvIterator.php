@@ -64,13 +64,13 @@ trait CsvIterator
             $this->puts($this->currentRow, $this->alter);
         }
 
-        if (($data = $this->gets()) === false) {
+        if (! ($row = $this->gets())) {
             $this->currentRow = null;
 
             return;
         }
 
-        $this->currentRow = new Row($this, $data);
+        $this->currentRow = $row;
     }
 
     /**

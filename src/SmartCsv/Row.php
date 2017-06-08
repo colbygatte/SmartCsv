@@ -24,7 +24,7 @@ class Row implements Iterator
         }
 
         if ($dataCount > $columnCount) {
-            throw new Exception("Expected $columnCount data entry(s), recieved $dataCount.");
+            throw new Exception("Expected $columnCount data entry(s), received $dataCount.");
         }
 
         $this->csv = $csv;
@@ -133,6 +133,26 @@ class Row implements Iterator
     }
 
     /**
+     * @param $name
+     *
+     * @return array|false
+     */
+    public function group($name, $trimEndings = true)
+    {
+        $data = $this->csv->columnGroupingHelper->getColumnGroup($name);
+
+        if (! $data) {
+            return false;
+        }
+
+        if ($data['type'] == 'single') {
+            return $this->groupSingleColumnsFromCache($data['cache']);
+        }
+
+        return $this->groupMultipleColumnsFromCache($data['cache'], $trimEndings);
+    }
+
+    /**
      * @param $cached
      * @param $discardEmptyValues
      * @param $trimEnding
@@ -155,37 +175,21 @@ class Row implements Iterator
     }
 
     /**
-     * @param $name
+     * @param $cached
+     * @param $trimEnding
      *
-     * @return array|false
+     * @return array
      */
-    public function group($name, $trimEndings = true)
-    {
-        $data = $this->csv->columnGroupingHelper->getColumnGroup($name);
-
-        if (! $data) {
-            return false;
-        }
-
-        if ($data['type'] == 'single') {
-            return $this->groupSingleColumnsFromCache($data['cache']);
-        }
-
-        return $this->groupMultipleColumnsFromCache($data['cache'], $trimEndings);
-    }
-
     private function groupMultipleColumnsFromCache($cached, $trimEnding)
     {
         $results = [];
-
-        $searches = $cached['search'];
 
         foreach ($cached['groups'] as $group) {
             $ending = $group['ending'];
 
             $result = [];
 
-            foreach ($searches as $key => $search) {
+            foreach ($cached['search'] as $key => $search) {
                 $index = $group['indexes'][$key];
 
                 $value = $this->data[$index];
@@ -268,7 +272,7 @@ class Row implements Iterator
     }
 
     /**
-     * Return the key of the current element
+     * Return the column title of the current element
      * @return string
      */
     public function key()

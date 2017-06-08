@@ -26,12 +26,19 @@ class Csv implements Iterator
     public $useAliases = false;
 
     /**
-     * Key: the key from index mappers
+     * Key: index alias strings
      * Value: corresponding index of each row
      *
      * @var array
      */
     private $columnNamesAsKey = [];
+
+    /**
+     * Key: index of rows
+     * Value: index alias strings
+     *
+     * @var array
+     */
     private $columnNamesAsValue = [];
 
     /**
@@ -55,7 +62,7 @@ class Csv implements Iterator
     /**
      * The CSV file handle.
      * $this->gets() and $this->puts() read from here if
-     * no filehandle is given.
+     * no file handle is given.
      *
      * @var resource|bool
      */
@@ -122,17 +129,13 @@ class Csv implements Iterator
 
         // If we aren't saving the rows, read the first line only.
         if (! $this->saveRows) {
-            if (($data = $this->gets()) !== false) {
-                $this->currentRow = new Row($this, $data);
-            }
+            $this->currentRow = $this->gets();
 
             return $this;
         }
 
         // Read EVERYTHING!
-        while (($data = $this->gets()) !== false) {
-            $row = new Row($this, $data);
-
+        while ($row = $this->gets()) {
             array_push($this->rows, $row);
         }
 
@@ -159,6 +162,18 @@ class Csv implements Iterator
             } else {
                 $this->rows[] = new Row($this, $data);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param \ColbyGatte\SmartCsv\Row $row
+     */
+    public function appendIfUnique(Row $row)
+    {
+        if (! in_array($row, $this->rows)) {
+            $this->rows[] = $row;
         }
 
         return $this;
@@ -215,7 +230,7 @@ class Csv implements Iterator
             throw new Exception("Could not open {$this->csvFile}.");
         }
 
-        $this->header($this->gets());
+        $this->header($this->gets(false));
 
         // If we are in alter mode, output the header
         if ($this->alter) {
@@ -478,13 +493,14 @@ class Csv implements Iterator
 
     public function findMatches(Csv $csvToSearch, array $parameters)
     {
-        $resultCsv = csv()->header($csvToSearch->header());
+        /** @var \ColbyGatte\SmartCsv\Csv $resultCsv */
+        $resultCsv = (new static)->header($csvToSearch->header());
 
         foreach ($this as $row) {
             foreach ($csvToSearch as $rowToSearch) {
                 foreach ($parameters as $column => $columnToMatch) {
                     if ($row->$column == $rowToSearch->$columnToMatch) {
-                        $resultCsv->append($rowToSearch);
+                        $resultCsv->appendIfUnique($rowToSearch);
 
                         break;
                     }
@@ -605,14 +621,16 @@ class Csv implements Iterator
     /**
      * @param resource $fh
      *
-     * @return array
+     * @return \ColbyGatte\SmartCsv\Row|array
      */
-    private function gets($fh = false)
+    private function gets($makeRow = true)
     {
-        if (! $fh) {
-            $fh = $this->fileHandle;
+        $data = fgetcsv($this->fileHandle, 0, $this->delimiter);
+
+        if ($makeRow && $data !== false) {
+            return new Row($this, $data);
         }
 
-        return fgetcsv($fh, 0, $this->delimiter);
+        return $data;
     }
 }
