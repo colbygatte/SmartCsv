@@ -76,6 +76,16 @@ class Row implements Iterator
     }
 
     /**
+     * @param array $columns
+     *
+     * @return bool
+     */
+    public function hasColumns($columns)
+    {
+        $this->csv->hasColumns($columns);
+    }
+
+    /**
      * @param $index
      *
      * @return mixed

@@ -215,6 +215,16 @@ class CsvTest extends TestCase
     }
 
     /** @test */
+    public function can_check_if_csv_has_columns()
+    {
+        $csv = csv(SAMPLE_CSV);
+
+        $this->assertTrue($csv->hasColumns(['name', 'age']));
+
+        $this->assertFalse($csv->hasColumns(['phone number', 'social security number']));
+    }
+
+    /** @test */
     public function cannot_add_more_entries_than_columns()
     {
         $error = get_thrown_message(function () {
@@ -223,6 +233,14 @@ class CsvTest extends TestCase
                 ->append(['one', 'two']);
         });
 
-        $this->assertEquals('Expected 1 data entry(s), recieved 2.', $error);
+        $this->assertEquals('Expected 1 data entry(s), received 2.', $error);
+    }
+
+    /** @test */
+    public function can_use_load_only_column_feature()
+    {
+        $csv = csv()->only(['name', 'age'])->read(SAMPLE_CSV);
+
+        $this->assertEquals(['name' => 'Prof. Adrian Schmeler IV', 'age' => '31'], $csv->first()->toArray(true));
     }
 }

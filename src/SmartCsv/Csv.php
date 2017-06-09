@@ -69,11 +69,6 @@ class Csv implements Iterator
     private $fileHandle = false;
 
     /**
-     * Filters for modifying data
-     */
-    private $filters = [];
-
-    /**
      * Save rows when reading?
      *
      * An instance can only be set to save before reading is done.
@@ -100,6 +95,16 @@ class Csv implements Iterator
     public $columnGroupingHelper;
 
     private $columnGroups = [];
+
+    /**
+     * @var array|false
+     */
+    private $only = false;
+
+    /**
+     * @var array|false
+     */
+    private $exclude = false;
 
     public function __construct()
     {
@@ -367,6 +372,48 @@ class Csv implements Iterator
         }
 
         fclose($fh);
+    }
+
+    /**
+     * @param $columns
+     *
+     * @return bool
+     */
+    public function hasColumns($columns)
+    {
+        foreach ($columns as $column) {
+            if (! isset($this->columnNamesAsKey[$column])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param array $columns
+     */
+    public function only($columns)
+    {
+        // TODO: Make sure this is done before reading starts.
+
+        $this->only = $columns;
+
+        return $this;
+    }
+
+    /**
+     * @param array $columns
+     *
+     * @return $this
+     */
+    public function exclude($columns)
+    {
+        // TODO: Make sure this is done before reading starts.
+
+        $this->exclude = $columns;
+
+        return $this;
     }
 
     /**

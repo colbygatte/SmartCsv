@@ -51,15 +51,11 @@ class CoderTest extends TestCase
     /** @test */
     public function cannot_use_invalid_coder()
     {
-        $assert = false;
-
-        try {
+        $message = get_thrown_message(function() {
             sample_csv()->addCoder('name', InvalidCoder::class);
-        } catch (\Exception $e) {
-            $assert = true;
-        }
+        });
 
-        $this->assertTrue($assert);
+        $this->assertEquals('Tests\UnitTests\InvalidCoder does not implement CoderInterface.', $message);
     }
 
     /** @test */
