@@ -89,6 +89,28 @@ class Row implements Iterator
     }
 
     /**
+     * Check if columns are empty
+     *
+     * @param array $columns
+     *
+     * @return bool
+     */
+    public function checkIfEmpty($columns = [])
+    {
+        if (empty($columns)) {
+            $columns = $this->csv->getHeader();
+        }
+
+        foreach ($columns as $column) {
+            if (! $this->$column) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @param $index
      *
      * @return mixed
