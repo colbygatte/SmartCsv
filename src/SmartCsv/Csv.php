@@ -560,6 +560,7 @@ class Csv implements Iterator
 
     /**
      * Resets the rows array and returns the first row.
+     * Only works in slurp mode.
      *
      * @return \ColbyGatte\SmartCsv\Row|null
      */

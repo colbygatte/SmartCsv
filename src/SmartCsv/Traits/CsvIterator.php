@@ -48,7 +48,7 @@ trait CsvIterator
     /**
      * Move forward to next element
      *
-     * @return void
+     * @return Row
      */
     public function next()
     {
@@ -71,6 +71,8 @@ trait CsvIterator
         }
 
         $this->currentRow = $row;
+
+        return $row;
     }
 
     /**

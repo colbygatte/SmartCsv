@@ -82,7 +82,7 @@ class Row implements Iterator
      */
     public function hasColumns($columns)
     {
-        $this->csv->hasColumns($columns);
+        return $this->csv->hasColumns($columns);
     }
 
     /**
