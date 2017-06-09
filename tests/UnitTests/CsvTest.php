@@ -10,7 +10,7 @@ class CsvTest extends TestCase
     public function index_aliases()
     {
         $csv = csv(['aliases' => ['cat' => 'Category', 'sku' => 'Product #']])
-            ->header(['Category', 'Product #'])
+            ->setHeader(['Category', 'Product #'])
             ->append(['flowers', '234234']);
 
         $csv->first()
@@ -25,7 +25,7 @@ class CsvTest extends TestCase
         csv([
             'aliases' => ['cat' => 'Category', 'sku' => 'Product #']
         ])
-            ->header(['Category', 'Product #'])
+            ->setHeader(['Category', 'Product #'])
             ->append(['flowers', '234234'])
             ->useAliases()
             ->write($path = '/tmp/dummy-csv.csv');
@@ -91,7 +91,7 @@ class CsvTest extends TestCase
         $csv = csv([
             'aliases' => ['shortstring' => 'A Really Long String Of Text']
         ])
-            ->header(['A Really Long String Of Text'])
+            ->setHeader(['A Really Long String Of Text'])
             ->append(['I LOVE PHP'], ['WOOOOOOOOO']);
 
         $csv->each(function ($row) {
@@ -173,13 +173,13 @@ class CsvTest extends TestCase
         $path = '/tmp/changing_delimiter.csv';
 
         csv()
-            ->header(['name', 'age'])
+            ->setHeader(['name', 'age'])
             ->presets(['del' => '|'])
             ->write($path);
 
         $this->assertEquals("name|age\n", file_get_contents($path));
 
-        $this->assertEquals(['name', 'age'], csv(['file' => $path, 'del' => '|'])->header());
+        $this->assertEquals(['name', 'age'], csv(['file' => $path, 'del' => '|'])->getHeader());
     }
 
     /** @test */
@@ -187,8 +187,8 @@ class CsvTest extends TestCase
     {
         $error = get_thrown_message(function () {
             csv()
-                ->header(['hi'])
-                ->header(['hi']);
+                ->setHeader(['hi'])
+                ->setHeader(['hi']);
         });
 
         $this->assertEquals('Header can only be set once!', $error);
@@ -208,7 +208,7 @@ class CsvTest extends TestCase
     public function adding_row_with_incorrect_amount_of_columns_appends_extra_columns()
     {
         $csv = csv()
-            ->header(['one', 'two', 'three'])
+            ->setHeader(['one', 'two', 'three'])
             ->append(['one']);
 
         $this->assertCount(3, $csv->first());
@@ -229,18 +229,12 @@ class CsvTest extends TestCase
     {
         $error = get_thrown_message(function () {
             csv()
-                ->header(['just one'])
+                ->setHeader(['just one'])
                 ->append(['one', 'two']);
         });
 
         $this->assertEquals('Expected 1 data entry(s), received 2.', $error);
     }
 
-    /** @test */
-    public function can_use_load_only_column_feature()
-    {
-        $csv = csv()->only(['name', 'age'])->read(SAMPLE_CSV);
 
-        $this->assertEquals(['name' => 'Prof. Adrian Schmeler IV', 'age' => '31'], $csv->first()->toArray(true));
-    }
 }

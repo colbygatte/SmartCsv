@@ -10,7 +10,7 @@ class SearchTest extends TestCase
     public function search_test_slurp()
     {
         $csv = csv()
-            ->header(['name', 'age'])
+            ->setHeader(['name', 'age'])
             ->append(['Frankenstein', '26'], ['Sarah', '22'], ['Ben', '50']);
 
         $resultCsv = csv_search($csv, [
@@ -77,7 +77,7 @@ class SearchTest extends TestCase
     /** @test */
     public function matchup()
     {
-        $csv = csv()->header(['awesome_human', 'awesome_email', 'value 2'])->append(
+        $csv = csv()->setHeader(['awesome_human', 'awesome_email', 'value 2'])->append(
             ['Bernardo Turcotte', 'sloot@sllootsrus.com'],
             ['Prof. Gregorio Schowalter Sr.', 'lrunte@hotmail.com', 'sushi']
         );

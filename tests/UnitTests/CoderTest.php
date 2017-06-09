@@ -71,7 +71,7 @@ class CoderTest extends TestCase
             ]
         ]);
 
-        $csv->header(['data'])
+        $csv->setHeader(['data'])
             ->append([$serialized])
             ->write('/tmp/csv_helper_coder.csv');
 

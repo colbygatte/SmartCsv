@@ -19,16 +19,19 @@ class Row implements Iterator
         $dataCount = count($data);
         $columnCount =  $csv->columnCount();
 
-        if ($dataCount != $columnCount) {
+        if ($dataCount != $columnCount && $csv->isStrictMode()) {
             $data = array_pad($data, $csv->columnCount(), '');
         }
 
-        if ($dataCount > $columnCount) {
+        if ($dataCount > $columnCount && $csv->isStrictMode()) {
             throw new Exception("Expected $columnCount data entry(s), received $dataCount.");
         }
 
         $this->csv = $csv;
-        $this->data = $data;
+
+        foreach (array_keys($csv->getHeader()) as $index) {
+            $this->data[$index] = $data[$index];
+        }
 
         $this->runDecoders();
     }
@@ -232,7 +235,7 @@ class Row implements Iterator
         }
 
         if ($associative) {
-            $copy = array_combine($this->csv->header(), $copy);
+            $copy = array_combine($this->csv->getHeader(), $copy);
         }
 
         return $copy;

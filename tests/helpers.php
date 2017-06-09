@@ -79,7 +79,7 @@ function csv_faker($writeTo, $rows = 20)
         'other_info'
     ];
 
-    $csv = csv()->header($header);
+    $csv = csv()->setHeader($header);
 
     for ($i = 0; $i < $rows; $i++) {
         $rowData = [
@@ -130,7 +130,7 @@ function csv_faker($writeTo, $rows = 20)
 function quick_csv_ages($path = '/tmp/smart-csv-dummy.csv')
 {
     $csv = csv()
-        ->header(['name', 'age'])
+        ->setHeader(['name', 'age'])
         ->append(['Colby', '25'], ['Sarah', '22']);
 
     $csv->write($path);

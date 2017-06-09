@@ -2,6 +2,7 @@
 
 namespace ColbyGatte\SmartCsv;
 
+use ColbyGatte\SmartCsv\Traits\CsvGetsAndPuts;
 use ColbyGatte\SmartCsv\Traits\CsvIterator;
 use ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper;
 use Iterator;
@@ -9,7 +10,12 @@ use Exception;
 
 class Csv implements Iterator
 {
-    use CsvIterator;
+    use CsvIterator, CsvGetsAndPuts;
+
+    /**
+     * @var bool
+     */
+    private $strictMode = true;
 
     /**
      * compatibility
@@ -97,7 +103,7 @@ class Csv implements Iterator
     private $columnGroups = [];
 
     /**
-     * @var array|false
+     * @var Csv|false
      */
     private $only = false;
 
@@ -105,6 +111,12 @@ class Csv implements Iterator
      * @var array|false
      */
     private $exclude = false;
+
+    /**
+     * Holds the options originally passed to this instance.
+     * @var bool
+     */
+    private $parsedOptions = false;
 
     public function __construct()
     {
@@ -185,6 +197,21 @@ class Csv implements Iterator
     }
 
     /**
+     * Used for only & except modes, where column header count won't be the same as the data count recieved.
+     */
+    public function isStrictMode()
+    {
+        return $this->strictMode;
+    }
+
+    public function setStrictMode($mode)
+    {
+        $this->strictMode = $mode;
+
+        return $this;
+    }
+
+    /**
      * @param \ColbyGatte\SmartCsv\Row|int $row
      * @param bool                         $reindex
      *
@@ -211,6 +238,10 @@ class Csv implements Iterator
             return false;
         }
 
+        if (! is_int($row)) {
+            throw new \Exception("Invalid row index $row.");
+        }
+
         if (isset($this->rows[$row])) {
             unset($this->rows[$row]);
 
@@ -235,11 +266,23 @@ class Csv implements Iterator
             throw new Exception("Could not open {$this->csvFile}.");
         }
 
-        $this->header($this->gets(false));
+        // If strict mode is turned off (which it is for $this->only() & $this->exclude()
+        // and the header is already set, throw it away
+        if ($this->columnNamesAsKey != null) {
+            if ($this->isStrictMode()) {
+                throw new \Exception("Headers were already set before reading started!");
+            } else {
+                $this->gets(false);
+
+                return $this;
+            }
+        }
+
+        $this->setHeader($this->gets(false));
 
         // If we are in alter mode, output the header
         if ($this->alter) {
-            $this->puts($this->header(), $this->alter);
+            $this->puts($this->getHeader(), $this->alter);
         }
 
         return $this;
@@ -266,7 +309,7 @@ class Csv implements Iterator
      */
     public function runSearch(Search $search)
     {
-        $results = csv()->header($this->header());
+        $results = csv()->setHeader($this->getHeader());
 
         if ($this->alter) {
             throw new Exception('Cannot search in alter mode.');
@@ -318,16 +361,20 @@ class Csv implements Iterator
     }
 
     /**
+     * @return \string[]
+     */
+    public function getHeader()
+    {
+        return $this->useAliases ? $this->convertAliases() : $this->columnNamesAsValue;
+    }
+
+    /**
      * @param array $header
      *
      * @return $this
      */
-    public function header($header = null)
+    public function setHeader($header)
     {
-        if ($header == null) {
-            return $this->useAliases ? $this->convertAliases() : $this->columnNamesAsValue;
-        }
-
         if ($this->columnNamesAsValue != null) {
             throw new Exception('Header can only be set once!');
         }
@@ -365,13 +412,15 @@ class Csv implements Iterator
 
         $fh = fopen($toFile, 'w');
 
-        $this->puts($this->header(), $fh);
+        $this->puts($this->getHeader(), $fh);
 
-        foreach ($this->rows as $row) {
+        foreach ($this as $row) {
             $this->puts($row, $fh);
         }
 
         fclose($fh);
+
+        // TODO: If in sip mode, reset to beginning.
     }
 
     /**
@@ -391,15 +440,42 @@ class Csv implements Iterator
     }
 
     /**
-     * @param array $columns
+     * @return bool
      */
-    public function only($columns)
+    public function isReading()
     {
-        // TODO: Make sure this is done before reading starts.
+        // FIXME: if reading started but there were no rows, this will still return false!
+        if ($this->currentRow !== false || count($this->rows)) {
+            return true;
+        }
 
-        $this->only = $columns;
+        return false;
+    }
 
-        return $this;
+    /**
+     * @param array $columns
+     *
+     * @return Csv New CSV instance
+     */
+    public function only(array $columns)
+    {
+        $indexedColumns = [];
+
+        foreach ($columns as $column) {
+            $indexedColumns[$this->columnNamesAsKey[$column]] = $column;
+        }
+
+        /** @var Csv $only */
+        $only = (new static)->parseOptions([
+            'save' => false,
+            'file' => $this->getFile()
+        ]);
+
+        $only->setHeader($indexedColumns)
+            ->setStrictMode(false)
+            ->read();
+
+        return $only;
     }
 
     /**
@@ -409,7 +485,9 @@ class Csv implements Iterator
      */
     public function exclude($columns)
     {
-        // TODO: Make sure this is done before reading starts.
+        if ($this->isReading()) {
+            throw new Exception("Csv::exclude() must be called before reading starts.");
+        }
 
         $this->exclude = $columns;
 
@@ -418,7 +496,7 @@ class Csv implements Iterator
 
     /**
      * If file option is not set, the file will not be read.
-     * If  file option IS set, the file will automatically be read.
+     * If file option IS set, the file will automatically be read.
      *
      * @param $options
      *
@@ -427,6 +505,8 @@ class Csv implements Iterator
      */
     public function parseOptions($options)
     {
+        $this->parsedOptions = $options;
+
         if (is_string($options)) {
             $this->csvFile = $options;
 
@@ -465,6 +545,13 @@ class Csv implements Iterator
         return $this;
     }
 
+    /**
+     * More options.
+     *
+     * @param $options
+     *
+     * @return $this
+     */
     public function presets($options)
     {
         foreach ($options as $option => $value) {
@@ -538,10 +625,16 @@ class Csv implements Iterator
         return $this;
     }
 
+    /**
+     * @param \ColbyGatte\SmartCsv\Csv $csvToSearch
+     * @param array                    $parameters
+     *
+     * @return \ColbyGatte\SmartCsv\Csv
+     */
     public function findMatches(Csv $csvToSearch, array $parameters)
     {
         /** @var \ColbyGatte\SmartCsv\Csv $resultCsv */
-        $resultCsv = (new static)->header($csvToSearch->header());
+        $resultCsv = (new static)->setHeader($csvToSearch->getHeader());
 
         foreach ($this as $row) {
             foreach ($csvToSearch as $rowToSearch) {
@@ -648,37 +741,4 @@ class Csv implements Iterator
         return $indexString;
     }
 
-
-    /**
-     * @param      $data
-     * @param bool $fh
-     */
-    private function puts($data, $fh = false)
-    {
-        if (! $fh) {
-            $fh = $this->fileHandle;
-        }
-
-        if ($data instanceof Row) {
-            $data = $data->toArray();
-        }
-
-        fputcsv($fh, $data, $this->delimiter);
-    }
-
-    /**
-     * @param resource $fh
-     *
-     * @return \ColbyGatte\SmartCsv\Row|array
-     */
-    private function gets($makeRow = true)
-    {
-        $data = fgetcsv($this->fileHandle, 0, $this->delimiter);
-
-        if ($makeRow && $data !== false) {
-            return new Row($this, $data);
-        }
-
-        return $data;
-    }
 }
