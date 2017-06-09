@@ -208,10 +208,18 @@ class CsvTest extends TestCase
     public function adding_row_with_incorrect_amount_of_columns_appends_extra_columns()
     {
         $csv = csv()
+            ->setStrictMode(false)
             ->setHeader(['one', 'two', 'three'])
             ->append(['one']);
 
         $this->assertCount(3, $csv->first());
+    }
+
+    /** @test */
+    public function cannot_read_row_with_too_few_columns_in_strict_mode()
+    {
+        $csv = csv()->setHeader(['one', 'two', 'three'])
+            ->append(['hi']);
     }
 
     /** @test */

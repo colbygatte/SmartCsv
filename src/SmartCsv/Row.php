@@ -17,13 +17,17 @@ class Row implements Iterator
     public function __construct(Csv $csv, array $data)
     {
         $dataCount = count($data);
-        $columnCount =  $csv->columnCount();
+        $columnCount = $csv->columnCount();
 
-        if ($dataCount != $columnCount && $csv->isStrictMode()) {
+        if ($dataCount != $columnCount) {
+            if ($csv->isStrictMode()) {
+                throw new exception("Expected $columnCount data entry(s), received $dataCount.");
+            }
+
             $data = array_pad($data, $csv->columnCount(), '');
         }
 
-        if ($dataCount > $columnCount && $csv->isStrictMode()) {
+        if ($dataCount < $columnCount && $csv->isStrictMode()) {
             throw new Exception("Expected $columnCount data entry(s), received $dataCount.");
         }
 
