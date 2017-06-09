@@ -95,7 +95,7 @@ class Row implements Iterator
      *
      * @return bool
      */
-    public function checkIfEmpty($columns = [])
+    public function isEmpty($columns = [])
     {
         if (empty($columns)) {
             $columns = $this->csv->getHeader();
