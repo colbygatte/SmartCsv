@@ -248,6 +248,4 @@ class CsvTest extends TestCase
 
         $this->assertEquals('Expected 1 data entry(s), received 2.', $error);
     }
-
-
 }

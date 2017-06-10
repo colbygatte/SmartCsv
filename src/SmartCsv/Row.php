@@ -27,10 +27,6 @@ class Row implements Iterator
             $data = array_pad($data, $csv->columnCount(), '');
         }
 
-        if ($dataCount < $columnCount && $csv->isStrictMode()) {
-            throw new Exception("Expected $columnCount data entry(s), received $dataCount.");
-        }
-
         $this->csv = $csv;
 
         foreach (array_keys($csv->getHeader()) as $index) {
