@@ -85,6 +85,11 @@ class ColumnGroupingHelper
         $this->cacheGroupColumnsSearch($mandatoryColumn, $additionalColumns, $cacheData, $info);
     }
 
+    /**
+     * @param $name
+     *
+     * @return array
+     */
     public function getColumnGroup($name)
     {
         if (! $info = isset($this->cachedIndexGroups['info'][$name]) ? $this->cachedIndexGroups['info'][$name] : false) {
@@ -125,7 +130,12 @@ class ColumnGroupingHelper
         return false;
     }
 
-
+    /**
+     * @param $mandatoryColumn
+     * @param $additionalColumns
+     * @param $cache
+     * @param $info
+     */
     public function cacheGroupColumnsSearch($mandatoryColumn, $additionalColumns, $cache, $info)
     {
         if (empty($additionalColumns)) {
@@ -171,6 +181,11 @@ class ColumnGroupingHelper
         return serialize($additionalColumns);
     }
 
+    /**
+     * @param \ColbyGatte\SmartCsv\Row $row
+     *
+     * @return $this
+     */
     public function setCurrentRow(Row $row)
     {
         $this->currentRow = $row;

@@ -21,6 +21,7 @@ trait CsvIterator
      */
     public function current()
     {
+        // If we are in save mode, all data is loaded already.
         if ($this->saveRows) {
             return current($this->rows);
         }

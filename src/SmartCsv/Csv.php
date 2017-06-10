@@ -91,8 +91,16 @@ class Csv implements Iterator
      */
     private $coders = [];
 
+    /**
+     * @var bool
+     */
     private $optionsParsed = false;
 
+    /**
+     * The CSV delimiter.
+     *
+     * @var string
+     */
     private $delimiter = ',';
 
     /**
@@ -100,12 +108,13 @@ class Csv implements Iterator
      */
     public $columnGroupingHelper;
 
-    private $columnGroups = [];
-
     /**
-     * @var Csv|false
+     * A container holding column group data passed to $this->makeGroup()
+     * until the header has been read.
+     *
+     * @var array
      */
-    private $only = false;
+    private $columnGroups = [];
 
     /**
      * @var array|false
@@ -466,39 +475,21 @@ class Csv implements Iterator
      */
     public function only(array $columns)
     {
-        $indexedColumns = [];
+        $columnIndexes = [];
 
         foreach ($columns as $column) {
-            $indexedColumns[$this->columnNamesAsKey[$column]] = $column;
+            $columnIndexes[$this->columnNamesAsKey[$column]] = $column;
         }
 
-        /** @var Csv $only */
-        $only = (new static)->parseOptions([
+        $options = [
             'save' => false,
             'file' => $this->getFile()
-        ]);
+        ];
 
-        $only->setHeader($indexedColumns)
+        return (new static)->parseOptions($options)
+            ->setHeader($columnIndexes)
             ->setStrictMode(false)
             ->read();
-
-        return $only;
-    }
-
-    /**
-     * @param array $columns
-     *
-     * @return $this
-     */
-    public function exclude($columns)
-    {
-        if ($this->isReading()) {
-            throw new Exception("Csv::exclude() must be called before reading starts.");
-        }
-
-        $this->exclude = $columns;
-
-        return $this;
     }
 
     /**
@@ -747,5 +738,4 @@ class Csv implements Iterator
 
         return $indexString;
     }
-
 }
