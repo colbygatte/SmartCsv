@@ -381,6 +381,13 @@ class Csv implements Iterator
 
         $this->columnNamesAsKey = array_flip($header);
         $this->columnNamesAsValue = $header;
+
+        // If $this->columnNamesAsKey & $this->columnNamesAsValue are different,
+        // all the column titles were not unique.
+        if (count($this->columnNamesAsValue) != count($this->columnNamesAsKey)) {
+            throw new Exception('Column titles must be unique.');
+        }
+
         $this->columnGroupingHelper->setColumnNames($header);
         $this->findIndexes();
 

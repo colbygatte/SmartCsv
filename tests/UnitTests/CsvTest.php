@@ -248,4 +248,14 @@ class CsvTest extends TestCase
 
         $this->assertEquals('Expected 1 data entry(s), received 2.', $error);
     }
+
+    /** @test */
+    public function column_headers_must_all_be_unique()
+    {
+        $e = get_thrown_message(function() {
+            csv()->setHeader(['Hi', 'Hi'])->getHeader();
+        });
+
+        $this->assertEquals('Column titles must be unique.', $e);
+    }
 }
