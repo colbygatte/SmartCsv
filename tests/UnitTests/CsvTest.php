@@ -218,8 +218,13 @@ class CsvTest extends TestCase
     /** @test */
     public function cannot_read_row_with_too_few_columns_in_strict_mode()
     {
-        $csv = csv()->setHeader(['one', 'two', 'three'])
-            ->append(['hi']);
+        $m = get_thrown_message(function () {
+            csv()
+                ->setHeader(['one', 'two', 'three'])
+                ->append(['hi']);
+        });
+
+        $this->assertEquals('Expected 3 data entry(s), received 1.', $m);
     }
 
     /** @test */
