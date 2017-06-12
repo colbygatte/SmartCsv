@@ -232,9 +232,9 @@ class CsvTest extends TestCase
     {
         $csv = csv(SAMPLE_CSV);
 
-        $this->assertTrue($csv->hasColumns(['name', 'age']));
+        $this->assertEmpty($csv->hasColumns(['name', 'age']));
 
-        $this->assertFalse($csv->hasColumns(['phone number', 'social security number']));
+        $this->assertNotEmpty($csv->hasColumns(['phone number', 'social security number']));
     }
 
     /** @test */

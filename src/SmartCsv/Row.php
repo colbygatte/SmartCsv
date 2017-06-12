@@ -81,7 +81,7 @@ class Row implements Iterator
     /**
      * @param array $columns
      *
-     * @return bool
+     * @return string[]
      */
     public function hasColumns($columns)
     {

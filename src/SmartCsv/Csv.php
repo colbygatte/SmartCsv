@@ -442,17 +442,19 @@ class Csv implements Iterator
     /**
      * @param $columns
      *
-     * @return bool
+     * @return string[] The missing columns (empty array if none)
      */
     public function hasColumns($columns)
     {
+        $missing = [];
+
         foreach ($columns as $column) {
             if (! isset($this->columnNamesAsKey[$column])) {
-                return false;
+                $missing[] = $column;
             }
         }
 
-        return true;
+        return $missing;
     }
 
     /**
