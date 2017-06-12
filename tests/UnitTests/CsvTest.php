@@ -256,6 +256,6 @@ class CsvTest extends TestCase
             csv()->setHeader(['Hi', 'Hi'])->getHeader();
         });
 
-        $this->assertEquals('Column titles must be unique.', $e);
+        $this->assertEquals('Duplicate headers: Hi', $e);
     }
 }

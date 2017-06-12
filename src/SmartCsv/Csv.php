@@ -394,7 +394,20 @@ class Csv implements Iterator
         // If $this->columnNamesAsKey & $this->columnNamesAsValue are different,
         // all the column titles were not unique.
         if (count($this->columnNamesAsValue) != count($this->columnNamesAsKey)) {
-            throw new Exception('Column titles must be unique.');
+            $counts = [];
+            foreach ($header as $column) {
+                if (! isset($counts[$column])) {
+                    $counts[$column] = 1;
+                } else {
+                    $counts[$column]++;
+                }
+            }
+
+            $more = array_flip(array_filter($counts, function ($value) {
+                return $value > 1;
+            }));
+
+            throw new Exception('Duplicate headers: '.implode(', ', $more));
         }
 
         $this->columnGroupingHelper->setColumnNames($header);
