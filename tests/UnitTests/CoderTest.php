@@ -3,6 +3,7 @@
 namespace Tests\UnitTests;
 
 use ColbyGatte\SmartCsv\Coders\CoderInterface;
+use ColbyGatte\SmartCsv\Coders\Trimmer;
 use PHPUnit\Framework\TestCase;
 
 class TestCoder implements CoderInterface
@@ -27,12 +28,11 @@ class CoderTest extends TestCase
     /** @test */
     public function can_use_encoder()
     {
-        sample_csv()->addCoder('name', TestCoder::class)->write($path = '/tmp/dummy_csv.csv');
+        sample_csv()
+            ->addCoder('name', TestCoder::class)
+            ->write($path = '/tmp/dummy_csv.csv');
 
-        $this->assertEquals(
-            serialize('Prof. Adrian Schmeler IV'),
-            csv($path)->first()->name
-        );
+        $this->assertEquals(serialize('Prof. Adrian Schmeler IV'), csv($path)->first()->name);
     }
 
     /** @test */
@@ -40,18 +40,20 @@ class CoderTest extends TestCase
     {
         $path = '/tmp/dummy_csv.csv';
 
-        sample_csv()->addCoder('name', TestCoder::class)->write($path);
+        sample_csv()
+            ->addCoder('name', TestCoder::class)
+            ->write($path);
 
-        $this->assertEquals(
-            'Prof. Adrian Schmeler IV',
-            csv()->addCoder('name', TestCoder::class)->read($path)->first()->name
-        );
+        $this->assertEquals('Prof. Adrian Schmeler IV', csv()
+            ->addCoder('name', TestCoder::class)
+            ->read($path)
+            ->first()->name);
     }
 
     /** @test */
     public function cannot_use_invalid_coder()
     {
-        $message = get_thrown_message(function() {
+        $message = get_thrown_message(function () {
             sample_csv()->addCoder('name', InvalidCoder::class);
         });
 
@@ -75,9 +77,24 @@ class CoderTest extends TestCase
             ->append([$serialized])
             ->write('/tmp/csv_helper_coder.csv');
 
+        $this->assertEquals($serialized, csv($path)->first()->data);
+    }
+
+    /** @test */
+    public function will_trim_whitespace()
+    {
+        $file = '/tmp/whitespace_test.csv';
+
+        csv()
+            ->setHeader(['Name'])
+            ->append(['   Colby   '])
+            ->write($file);
+
         $this->assertEquals(
-            $serialized,
-            csv($path)->first()->data
+            'Colby',
+            csv()->addCoder('Name', Trimmer::class)
+                ->read($file)
+                ->first()->Name
         );
     }
 }

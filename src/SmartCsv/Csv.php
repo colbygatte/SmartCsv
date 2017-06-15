@@ -384,6 +384,10 @@ class Csv implements Iterator
      */
     public function setHeader($header)
     {
+        if (! is_array($header)) {
+            throw new Exception("Header must be an array.");
+        }
+
         if ($this->columnNamesAsValue != null) {
             throw new Exception('Header can only be set once!');
         }
