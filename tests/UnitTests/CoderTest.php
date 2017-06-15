@@ -97,5 +97,23 @@ class CoderTest extends TestCase
                 ->first()->Name
         );
     }
+
+    /** @test */
+    public function coders_work_with_aliases() // TODO: implement
+    {
+        $file = '/tmp/whitespace_test.csv';
+
+        csv()
+            ->setHeader(['Name'])
+            ->append(['   Colby   '])
+            ->write($file);
+
+        $this->assertEquals(
+            'Colby',
+            csv(['aliases' => ['nm' => 'Name']])->addCoder('nm', Trimmer::class)
+                ->read($file)
+                ->first()->nm
+        );
+    }
 }
 
