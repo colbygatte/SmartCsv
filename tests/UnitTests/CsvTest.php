@@ -232,9 +232,9 @@ class CsvTest extends TestCase
     {
         $csv = csv(SAMPLE_CSV);
 
-        $this->assertEmpty($csv->hasColumns(['name', 'age']));
+        $this->assertEmpty($csv->missingColumns(['name', 'age']));
 
-        $this->assertNotEmpty($csv->hasColumns(['phone number', 'social security number']));
+        $this->assertNotEmpty($csv->missingColumns(['phone number', 'social security number']));
     }
 
     /** @test */
@@ -257,5 +257,23 @@ class CsvTest extends TestCase
         });
 
         $this->assertEquals('Duplicate headers: Hi', $e);
+    }
+    
+    /** Disabled for now. Not implemented. */
+    public function csv_search_rows_are_clone() 
+    {
+        $orig = csv()->setHeader(['name'])->append(['Colby']);
+
+        $results = csv_search($orig, [
+            function ($row) {
+                $row->name = "Tara";
+                
+                return true;
+            }
+        ]);
+
+       $this->assertEquals('Colby', $orig->first()->name);
+
+       $this->assertEquals('Tara', $results->first()->name); 
     }
 }

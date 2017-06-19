@@ -18,10 +18,4 @@ class OnlyAndExcludeTest extends TestCase
         $this->assertEquals(['name', 'value 1'], array_keys($csv->next()
             ->toArray(true)));
     }
-
-    /** @test */
-    public function test()
-    {
-        csv()->setHeader(['hello'])->append(['what'])->first()->hi;
-    }
 }

@@ -194,6 +194,8 @@ class Csv implements Iterator
     }
 
     /**
+     * Append row only if there the same isntance isn't already present.
+     *
      * @param \ColbyGatte\SmartCsv\Row $row
      */
     public function appendIfUnique(Row $row)
@@ -461,7 +463,7 @@ class Csv implements Iterator
      *
      * @return string[] The missing columns (empty array if none)
      */
-    public function hasColumns($columns)
+    public function missingColumns($columns)
     {
         $missing = [];
 

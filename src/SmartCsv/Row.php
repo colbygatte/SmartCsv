@@ -83,9 +83,9 @@ class Row implements Iterator
      *
      * @return string[]
      */
-    public function hasColumns($columns)
+    public function missingColumns($columns)
     {
-        return $this->csv->hasColumns($columns);
+        return $this->csv->missingColumns($columns);
     }
 
     /**
