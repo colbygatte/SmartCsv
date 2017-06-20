@@ -79,6 +79,23 @@ class Row implements Iterator
     }
 
     /**
+     * Pull only the given column data. Pulled data is not returned with associative keys.
+     *
+     * @param array $columns
+     *
+     * @return array
+     */
+    public function pull($columns) {
+        $data = [];
+
+        foreach ($columns as $column) {
+            $data[] = $this->get($column);
+        }
+
+        return $data;
+    }
+
+    /**
      * @param array $columns
      *
      * @return string[]

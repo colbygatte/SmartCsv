@@ -276,4 +276,16 @@ class CsvTest extends TestCase
 
        $this->assertEquals('Tara', $results->first()->name); 
     }
+
+    /** @test */
+    function can_pull_data() {
+        $csv = csv()->setHeader(['name', 'age', 'weight'])
+            ->append(
+                ['Colby', '23', '230']
+            );
+
+        $data = $csv->first()->pull(['age', 'weight']);
+
+        $this->assertEquals(['23', '230'], $data);
+    }
 }
