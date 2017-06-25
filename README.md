@@ -186,7 +186,7 @@ When you have multiple columns that you need to bring together, you can use grou
 $csv = csv()->header(['Spec 1', 'Val 1', 'UOM 1', 'Spec 2', 'Val 2', 'UOM 2'])
     ->append(
         ['Height', '21', 'in', 'Weight', '30', 'lb']
-    ]);
+    );
 
 $csv->columnGroup('spec', 'Spec', ['Val', 'UOM']);
 
