@@ -56,7 +56,6 @@ trait CsvIterator
         // If $this->saveRows is set, all rows have been loaded already.
         if ($this->saveRows) {
             next($this->rows);
-
             return;
         }
 
@@ -67,7 +66,6 @@ trait CsvIterator
 
         if (! ($row = $this->gets())) {
             $this->currentRow = null;
-
             return;
         }
 

@@ -11,26 +11,26 @@ use ColbyGatte\SmartCsv\Row;
 trait CsvIo
 {
     /**
-     * @param      $data
-     * @param bool $fh
+     * @param array|Row $data
+     * @param resource  $fh
      */
-    private function puts($data, $fh = false)
+    private function puts($data, $fh = null)
     {
-        if (! $fh) {
-            $fh = $this->fileHandle;
-        }
-
         if ($data instanceof Row) {
             $data = $data->toArray(false);
         }
 
-        fputcsv($fh, $data, $this->delimiter);
+        fputcsv(
+            $fh ?: $this->fileHandle,
+            $data,
+            $this->delimiter
+        );
     }
 
     /**
-     * @param resource $fh
+     * @param bool $makeRow
      *
-     * @return \ColbyGatte\SmartCsv\Row|array
+     * @return array|\ColbyGatte\SmartCsv\Row
      */
     private function gets($makeRow = true)
     {

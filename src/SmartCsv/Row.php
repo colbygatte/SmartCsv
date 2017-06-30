@@ -10,7 +10,7 @@ class Row implements Iterator, Countable
     /**
      * @var \ColbyGatte\SmartCsv\Csv
      */
-    private $csv;
+    protected $csv;
 
     /**
      * @var array
@@ -52,7 +52,7 @@ class Row implements Iterator, Countable
      *
      * @return void
      */
-    private function runDecoders()
+    protected function runDecoders()
     {
         /**
          * @var string                                     $column
@@ -236,13 +236,18 @@ class Row implements Iterator, Countable
     {
         $copy = $this->data;
 
+        /**
+         * @var string                                     $column
+         * @var \ColbyGatte\SmartCsv\Coders\CoderInterface $coder
+         */
         foreach ($this->csv->getCoders() as $column => $coder) {
             $index = $this->csv->getIndex($column);
 
             if ($index === false) {
                 continue;
             }
-            $copy[$index] = call_user_func([$coder, 'encode'], $this->data[$index]);
+
+            $copy[$index] = $coder::encode($this->data[$index]);
         }
 
         if ($associative) {
@@ -327,14 +332,12 @@ class Row implements Iterator, Countable
     }
 
     /**
-     * @param $name
-     * @param $value
-     *
-     * @return bool
+     * @param string $name
+     * @param mixed  $value
      */
     public function __set($name, $value)
     {
-        return $this->set($name, $value);
+        $this->set($name, $value);
     }
 
     /**
@@ -397,6 +400,9 @@ class Row implements Iterator, Countable
         return count($this->data);
     }
 
+    /**
+     * Append an empty column onto the row. Should only be called from Csv::addColumn().
+     */
     public function addColumn()
     {
         array_push($this->data, '');

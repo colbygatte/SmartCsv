@@ -15,7 +15,7 @@ class Csv implements Iterator
     /**
      * @var bool
      */
-    private $strictMode = true;
+    protected $strictMode = true;
 
     /**
      * compatibility
@@ -37,7 +37,7 @@ class Csv implements Iterator
      *
      * @var array
      */
-    private $columnNamesAsKey = [];
+    protected $columnNamesAsKey = [];
 
     /**
      * Key: index of rows
@@ -45,7 +45,7 @@ class Csv implements Iterator
      *
      * @var array
      */
-    private $columnNamesAsValue = [];
+    protected $columnNamesAsValue = [];
 
     /**
      * Whether or not the csv file has been read or written.
@@ -53,17 +53,17 @@ class Csv implements Iterator
      *
      * @var bool
      */
-    private $read = false;
+    protected $read = false;
 
     /**
      * The CSV file being read.
      */
-    private $csvFile;
+    protected $csvFile;
 
     /**
      * @var \ColbyGatte\SmartCsv\Row[]
      */
-    private $rows = [];
+    protected $rows = [];
 
     /**
      * The CSV file handle.
@@ -72,7 +72,7 @@ class Csv implements Iterator
      *
      * @var resource|bool
      */
-    private $fileHandle = false;
+    protected $fileHandle = false;
 
     /**
      * Save rows when reading?
@@ -82,14 +82,14 @@ class Csv implements Iterator
      *
      * @var bool
      */
-    private $saveRows = true;
+    protected $saveRows = true;
 
     /**
      * They key is the column to code.
      * The values are the coder to run it through.
      * Each column can only have one coder.
      */
-    private $coders = [];
+    protected $coders = [];
 
     /**
      * @var bool
@@ -269,8 +269,9 @@ class Csv implements Iterator
      * Ran before writing to a CSV file.
      *
      * @return $this
+     * @throws \ColbyGatte\SmartCsv\Exception
      */
-    private function setUp()
+    protected function setUp()
     {
         if (($this->fileHandle = fopen($this->csvFile, 'r')) === false) {
             throw new Exception("Could not open {$this->csvFile}.");
@@ -303,7 +304,7 @@ class Csv implements Iterator
      *
      * @return $this
      */
-    private function tearDown()
+    protected function tearDown()
     {
         fclose($this->fileHandle);
 
@@ -316,6 +317,7 @@ class Csv implements Iterator
      * @param \ColbyGatte\SmartCsv\Search $search
      *
      * @return \ColbyGatte\SmartCsv\Csv
+     * @throws \ColbyGatte\SmartCsv\Exception
      */
     public function runSearch(Search $search)
     {
@@ -339,6 +341,7 @@ class Csv implements Iterator
      * @param string $coder
      *
      * @return $this
+     * @throws \ColbyGatte\SmartCsv\Exception
      */
     public function addCoder($column, $coder)
     {
@@ -383,6 +386,7 @@ class Csv implements Iterator
      * @param array $header
      *
      * @return $this
+     * @throws \ColbyGatte\SmartCsv\Exception
      */
     public function setHeader($header)
     {
@@ -424,19 +428,24 @@ class Csv implements Iterator
 
         foreach ($this->columnNamesAsValue as $column) {
             if (! isset($counts[$column])) {
-                $counts[$column] = 1;
-            } else {
-                $counts[$column]++;
+                $counts[$column] = 0;
             }
+
+            $counts[$column]++;
         }
 
         $more = array_flip(array_filter($counts, function ($value) {
             return $value > 1;
         }));
 
-        throw new Exception('Duplicate headers: '.implode(', ', $more));
+        throw new Exception('Duplicate headers: ' . implode(', ', $more));
     }
 
+    /**
+     * @param string $title
+     *
+     * @throws \ColbyGatte\SmartCsv\Exception
+     */
     public function addColumn($title)
     {
         if ($this->saveRows != true) {
@@ -559,7 +568,7 @@ class Csv implements Iterator
      * @param $options
      *
      * @return $this
-     * @throws \Exception
+     * @throws \ColbyGatte\SmartCsv\Exception
      */
     public function parseOptions($options)
     {
@@ -598,7 +607,7 @@ class Csv implements Iterator
             }
         }
 
-        // Parse more options. These are more config type options.
+        // Parse more options. These are config type options.
         $this->presets($options);
 
         return $this;
@@ -626,12 +635,12 @@ class Csv implements Iterator
 
                 case 'coders':
                     foreach ($value as $column => $coder) {
-                        call_user_func([$this, 'addCoder'], $column, $coder);
+                        $this->addCoder($column, $coder);
                     }
                     break;
 
                 case 'column-groups':
-                    call_user_func_array([$this, 'makeGroup'], $value);
+                    $this->makeGroup(...$value);
                     break;
             }
         }
@@ -763,7 +772,7 @@ class Csv implements Iterator
      *
      * @return $this
      */
-    private function findIndexes()
+    protected function findIndexes()
     {
         foreach ($this->indexAliases as $indexName => $indexSearchTerm) {
             $index = array_search($indexSearchTerm, $this->columnNamesAsValue);
