@@ -1,0 +1,300 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+AliasesTest	tests/UnitTests/AliasesTest.php	/^class AliasesTest extends TestCase$/;"	c
+CoderInterface	src/SmartCsv/Coders/CoderInterface.php	/^interface CoderInterface$/;"	i
+CoderTest	tests/UnitTests/CoderTest.php	/^class CoderTest extends TestCase$/;"	c
+ColumnGroupingHelper	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^class ColumnGroupingHelper$/;"	c
+Csv	src/SmartCsv/Csv.php	/^class Csv implements Iterator$/;"	c
+CsvTest	tests/UnitTests/CsvTest.php	/^class CsvTest extends TestCase$/;"	c
+InvalidCoder	tests/UnitTests/CoderTest.php	/^class InvalidCoder$/;"	c
+OnlyAndExcludeTest	tests/UnitTests/OnlyAndExcludeTest.php	/^class OnlyAndExcludeTest extends TestCase$/;"	c
+Row	src/SmartCsv/Row.php	/^class Row implements Iterator$/;"	c
+SAMPLE_CSV	tests/helpers.php	/^define('SAMPLE_CSV', __DIR__ . '\/sample.csv');$/;"	d
+Search	src/SmartCsv/Search.php	/^class Search$/;"	c
+SearchTest	tests/UnitTests/SearchTest.php	/^class SearchTest extends TestCase$/;"	c
+Serialize	src/SmartCsv/Coders/Serialize.php	/^class Serialize implements CoderInterface$/;"	c
+TestCoder	tests/UnitTests/CoderTest.php	/^class TestCoder implements CoderInterface$/;"	c
+Trimmer	src/SmartCsv/Coders/Trimmer.php	/^class Trimmer implements CoderInterface$/;"	c
+__construct	src/SmartCsv/Csv.php	/^    public function __construct()$/;"	f
+__construct	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    public function __construct(Csv $csv, $columnNamesAsValue = [])$/;"	f
+__construct	src/SmartCsv/Row.php	/^    public function __construct(Csv $csv, array $data)$/;"	f
+__get	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    public function __get($name)$/;"	f
+__get	src/SmartCsv/Row.php	/^    function __get($name)$/;"	f
+__set	src/SmartCsv/Row.php	/^    function __set($name, $value)$/;"	f
+addCoder	src/SmartCsv/Csv.php	/^    public function addCoder($column, $coder)$/;"	f
+addFilter	src/SmartCsv/Search.php	/^    public function addFilter($filter)$/;"	f
+adding_row_with_incorrect_amount_of_columns_appends_extra_columns	tests/UnitTests/CsvTest.php	/^    public function adding_row_with_incorrect_amount_of_columns_appends_extra_columns()$/;"	f
+additionalColumns	src/SmartCsv/Csv.php	/^    public function makeGroup($name, $mandatoryColumn, $additionalColumns = [])$/;"	v
+additionalColumns	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    public function columnGroup($name, $mandatoryColumn, $additionalColumns = [])$/;"	v
+ages	tests/UnitTests/CsvTest.php	/^        $ages = [];$/;"	v
+agesFromIterate	tests/UnitTests/CsvTest.php	/^        $agesFromIterate = [];$/;"	v
+aliasesFlipped	src/SmartCsv/Csv.php	/^        $aliasesFlipped = array_flip($this->indexAliases);$/;"	v
+alter	src/SmartCsv/Csv.php	/^                    $this->alter = fopen($value, 'w');$/;"	v
+alter	src/SmartCsv/Traits/CsvIterator.php	/^    private $alter;$/;"	v
+append	src/SmartCsv/Csv.php	/^    public function append()$/;"	f
+appendIfUnique	src/SmartCsv/Csv.php	/^    public function appendIfUnique(Row $row)$/;"	f
+attributePossibilities	tests/helpers.php	/^    $attributePossibilities = [$/;"	v
+cacheData	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^        $cacheData = [];$/;"	v
+cacheGroupColumnsSearch	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    public function cacheGroupColumnsSearch($mandatoryColumn, $additionalColumns, $cache, $info)$/;"	f
+cacheId	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    public function cacheId($mandatoryColumn, $additionalColumns)$/;"	f
+cacheIndexes	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^            $cacheIndexes = [$this->csv->getIndex($columnName)];$/;"	v
+cachedIndexGroups	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    private $cachedIndexGroups = [$/;"	v
+can_change_delimiter	tests/UnitTests/CsvTest.php	/^    public function can_change_delimiter()$/;"	f
+can_change_value_using_alias	tests/UnitTests/CsvTest.php	/^    public function can_change_value_using_alias()$/;"	f
+can_check_if_csv_has_columns	tests/UnitTests/CsvTest.php	/^    public function can_check_if_csv_has_columns()$/;"	f
+can_delete_row_from_csv	tests/UnitTests/CsvTest.php	/^    public function can_delete_row_from_csv()$/;"	f
+can_delete_row_using_row_instance	tests/UnitTests/CsvTest.php	/^    public function can_delete_row_using_row_instance()$/;"	f
+can_do_key_values_grouping	tests/UnitTests/AliasesTest.php	/^    public function can_do_key_values_grouping()$/;"	f
+can_edit_row_and_save	tests/UnitTests/CsvTest.php	/^    public function can_edit_row_and_save()$/;"	f
+can_group_a_single_column	tests/UnitTests/AliasesTest.php	/^    public function can_group_a_single_column()$/;"	f
+can_iterate_and_alter_each_row_and_save_to_new_file	tests/UnitTests/CsvTest.php	/^    public function can_iterate_and_alter_each_row_and_save_to_new_file()$/;"	f
+can_iterate_line_by_line	tests/UnitTests/CsvTest.php	/^    public function can_iterate_line_by_line()$/;"	f
+can_use_decoder	tests/UnitTests/CoderTest.php	/^    public function can_use_decoder()$/;"	f
+can_use_encoder	tests/UnitTests/CoderTest.php	/^    public function can_use_encoder()$/;"	f
+can_use_load_only_column_feature	tests/UnitTests/OnlyAndExcludeTest.php	/^    public function can_use_load_only_column_feature()$/;"	f
+can_user_coder_through_csv_helper_function	tests/UnitTests/CoderTest.php	/^    public function can_user_coder_through_csv_helper_function()$/;"	f
+can_write_csv	tests/UnitTests/CsvTest.php	/^    public function can_write_csv()$/;"	f
+can_write_using_aliases_as_header_title	tests/UnitTests/CsvTest.php	/^    public function can_write_using_aliases_as_header_title()$/;"	f
+cannot_add_more_entries_than_columns	tests/UnitTests/CsvTest.php	/^    public function cannot_add_more_entries_than_columns()$/;"	f
+cannot_read_row_with_too_few_columns_in_strict_mode	tests/UnitTests/CsvTest.php	/^    public function cannot_read_row_with_too_few_columns_in_strict_mode()$/;"	f
+cannot_set_header_twice	tests/UnitTests/CsvTest.php	/^    public function cannot_set_header_twice()$/;"	f
+cannot_use_invalid_coder	tests/UnitTests/CoderTest.php	/^    public function cannot_use_invalid_coder()$/;"	f
+coders	src/SmartCsv/Csv.php	/^    private $coders = [];$/;"	v
+coders_work_with_aliases	tests/UnitTests/CoderTest.php	/^    public function coders_work_with_aliases() \/\/ TODO: implement$/;"	f
+column	src/SmartCsv/Csv.php	/^                    foreach ($value as $column => $coder) {$/;"	v
+column	src/SmartCsv/Csv.php	/^                foreach ($parameters as $column => $columnToMatch) {$/;"	v
+column	src/SmartCsv/Row.php	/^        foreach ($this->csv->getCoders() as $column => $coder) {$/;"	v
+columnCount	src/SmartCsv/Csv.php	/^    public function columnCount()$/;"	f
+columnCount	src/SmartCsv/Row.php	/^        $columnCount = $csv->columnCount();$/;"	v
+columnGroup	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    public function columnGroup($name, $mandatoryColumn, $additionalColumns = [])$/;"	f
+columnGroupingHelper	src/SmartCsv/Csv.php	/^        $this->columnGroupingHelper = new ColumnGroupingHelper($this);$/;"	v
+columnGroupingHelper	src/SmartCsv/Csv.php	/^    public $columnGroupingHelper;$/;"	v
+columnGroups	src/SmartCsv/Csv.php	/^    private $columnGroups = [];$/;"	v
+columnIndexes	src/SmartCsv/Csv.php	/^        $columnIndexes = [];$/;"	v
+columnNamesAsKey	src/SmartCsv/Csv.php	/^        $this->columnNamesAsKey = array_flip($header);$/;"	v
+columnNamesAsKey	src/SmartCsv/Csv.php	/^    private $columnNamesAsKey = [];$/;"	v
+columnNamesAsValue	src/SmartCsv/Csv.php	/^        $this->columnNamesAsValue = $header;$/;"	v
+columnNamesAsValue	src/SmartCsv/Csv.php	/^        $this->columnNamesAsValue = array_flip($this->columnNamesAsKey);$/;"	v
+columnNamesAsValue	src/SmartCsv/Csv.php	/^    private $columnNamesAsValue = [];$/;"	v
+columnNamesAsValue	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^        $this->columnNamesAsValue = $columnNamesAsValue;$/;"	v
+columnNamesAsValue	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    private $columnNamesAsValue;$/;"	v
+columnNamesAsValue	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    public function __construct(Csv $csv, $columnNamesAsValue = [])$/;"	v
+column_headers_must_all_be_unique	tests/UnitTests/CsvTest.php	/^    public function column_headers_must_all_be_unique()$/;"	f
+columns	src/SmartCsv/Row.php	/^            $columns = $this->csv->getHeader();$/;"	v
+convertAliases	src/SmartCsv/Csv.php	/^    public function convertAliases()$/;"	f
+copy	src/SmartCsv/Row.php	/^            $copy = array_combine($this->csv->getHeader(), $copy);$/;"	v
+copy	src/SmartCsv/Row.php	/^        $copy = $this->data;$/;"	v
+copy	tests/helpers.php	/^        $copy = $attributePossibilities;$/;"	v
+count	src/SmartCsv/Csv.php	/^    public function count()$/;"	f
+count	tests/UnitTests/CsvTest.php	/^        $count = csv_search($csv, [$/;"	v
+counts	src/SmartCsv/Csv.php	/^            $counts = [];$/;"	v
+csv	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^        $this->csv = $csv;$/;"	v
+csv	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    private $csv;$/;"	v
+csv	src/SmartCsv/Row.php	/^        $this->csv = $csv;$/;"	v
+csv	src/SmartCsv/Row.php	/^    private $csv;$/;"	v
+csv	src/helpers.php	/^        $csv = new Csv;$/;"	v
+csv	src/helpers.php	/^    function csv($options = false)$/;"	f
+csv	tests/UnitTests/AliasesTest.php	/^        $csv = csv()->setHeader([$/;"	v
+csv	tests/UnitTests/CoderTest.php	/^        $csv = csv([$/;"	v
+csv	tests/UnitTests/CsvTest.php	/^        $csv = csv($path);$/;"	v
+csv	tests/UnitTests/CsvTest.php	/^        $csv = csv($savePath);$/;"	v
+csv	tests/UnitTests/CsvTest.php	/^        $csv = csv()$/;"	v
+csv	tests/UnitTests/CsvTest.php	/^        $csv = csv()->read($path);$/;"	v
+csv	tests/UnitTests/CsvTest.php	/^        $csv = csv(SAMPLE_CSV);$/;"	v
+csv	tests/UnitTests/CsvTest.php	/^        $csv = csv([$/;"	v
+csv	tests/UnitTests/CsvTest.php	/^        $csv = csv(['aliases' => ['cat' => 'Category', 'sku' => 'Product #']])$/;"	v
+csv	tests/UnitTests/CsvTest.php	/^        $csv = csv(['file' => SAMPLE_CSV, 'save' => false]);$/;"	v
+csv	tests/UnitTests/CsvTest.php	/^        $csv = quick_csv_ages();$/;"	v
+csv	tests/UnitTests/OnlyAndExcludeTest.php	/^        $csv = csv(['save' => false])$/;"	v
+csv	tests/UnitTests/SearchTest.php	/^        $csv = csv()$/;"	v
+csv	tests/UnitTests/SearchTest.php	/^        $csv = csv(['alter' => '\/tmp\/__what.csv'], [$/;"	v
+csv	tests/helpers.php	/^    $csv = csv()$/;"	v
+csv	tests/helpers.php	/^    $csv = csv()->setHeader($header);$/;"	v
+csvFile	src/SmartCsv/Csv.php	/^                    $this->csvFile = $value;$/;"	v
+csvFile	src/SmartCsv/Csv.php	/^            $this->csvFile = $options;$/;"	v
+csvFile	src/SmartCsv/Csv.php	/^    private $csvFile;$/;"	v
+csv_alter	src/helpers.php	/^    function csv_alter($file, $writeTo, $options = [])$/;"	f
+csv_faker	tests/helpers.php	/^function csv_faker($writeTo, $rows = 20)$/;"	f
+csv_search	src/helpers.php	/^    function csv_search($csv, $filters)$/;"	f
+csv_search_rows_are_clone	tests/UnitTests/CsvTest.php	/^    public function csv_search_rows_are_clone() $/;"	f
+csv_sip	src/helpers.php	/^    function csv_sip($file, $options = [])$/;"	f
+csv_slurp	src/helpers.php	/^    function csv_slurp($file, $options = [])$/;"	f
+current	src/SmartCsv/Row.php	/^    public function current()$/;"	f
+current	src/SmartCsv/Traits/CsvIterator.php	/^    public function current()$/;"	f
+currentRow	src/SmartCsv/Csv.php	/^                $this->currentRow = false;$/;"	v
+currentRow	src/SmartCsv/Csv.php	/^            $this->currentRow = $this->gets();$/;"	v
+currentRow	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^        $this->currentRow = $row;$/;"	v
+currentRow	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    private $currentRow;$/;"	v
+currentRow	src/SmartCsv/Traits/CsvIterator.php	/^            $this->currentRow = null;$/;"	v
+currentRow	src/SmartCsv/Traits/CsvIterator.php	/^        $this->currentRow = $row;$/;"	v
+currentRow	src/SmartCsv/Traits/CsvIterator.php	/^    private $currentRow = false;$/;"	v
+data	src/SmartCsv/Row.php	/^            $data = array_pad($data, $csv->columnCount(), '');$/;"	v
+data	src/SmartCsv/Row.php	/^        $data = $this->csv->columnGroupingHelper->getColumnGroup($name);$/;"	v
+data	src/SmartCsv/Row.php	/^    private $data = [];$/;"	v
+data	src/SmartCsv/Traits/CsvGetsAndPuts.php	/^            $data = $data->toArray();$/;"	v
+data	src/SmartCsv/Traits/CsvGetsAndPuts.php	/^        $data = fgetcsv($this->fileHandle, 0, $this->delimiter);$/;"	v
+data	tests/UnitTests/AliasesTest.php	/^        $data = $csv->first()->groups()->specs;$/;"	v
+data	tests/UnitTests/CoderTest.php	/^        $data = ['name' => 'Colby'];$/;"	v
+dataCount	src/SmartCsv/Row.php	/^        $dataCount = count($data);$/;"	v
+decode	src/SmartCsv/Coders/CoderInterface.php	/^    public static function decode($data);$/;"	f
+decode	src/SmartCsv/Coders/Serialize.php	/^    public static function decode($data)$/;"	f
+decode	src/SmartCsv/Coders/Trimmer.php	/^    public static function decode($data)$/;"	f
+decode	tests/UnitTests/CoderTest.php	/^    public static function decode($data)$/;"	f
+delete	src/SmartCsv/Csv.php	/^    public function delete($row, $reindex = true)$/;"	f
+delete	src/SmartCsv/Row.php	/^    public function delete()$/;"	f
+delimiter	src/SmartCsv/Csv.php	/^                    $this->delimiter = $value;$/;"	v
+delimiter	src/SmartCsv/Csv.php	/^    private $delimiter = ',';$/;"	v
+e	tests/UnitTests/CsvTest.php	/^        $e = get_thrown_message(function() {$/;"	v
+each	src/SmartCsv/Traits/CsvIterator.php	/^    public function each(callable $callback)$/;"	f
+encode	src/SmartCsv/Coders/CoderInterface.php	/^    public static function encode($data);$/;"	f
+encode	src/SmartCsv/Coders/Serialize.php	/^    public static function encode($data)$/;"	f
+encode	src/SmartCsv/Coders/Trimmer.php	/^    public static function encode($data)$/;"	f
+encode	tests/UnitTests/CoderTest.php	/^    public static function encode($data)$/;"	f
+ending	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^            $ending = substr($columnName, $searchKeyLength);$/;"	v
+ending	src/SmartCsv/Row.php	/^            $ending = $group['ending'];$/;"	v
+error	tests/UnitTests/CsvTest.php	/^        $error = get_thrown_message(function () {$/;"	v
+error	tests/helpers.php	/^        $error = $e->getMessage();$/;"	v
+error	tests/helpers.php	/^    $error = null;$/;"	v
+exclude	src/SmartCsv/Csv.php	/^    private $exclude = false;$/;"	v
+faker	tests/helpers.php	/^        $faker = \\Faker\\Factory::create();$/;"	v
+faker	tests/helpers.php	/^    static $faker;$/;"	v
+faker	tests/helpers.php	/^function faker()$/;"	f
+fh	src/SmartCsv/Csv.php	/^        $fh = fopen($toFile, 'w');$/;"	v
+fh	src/SmartCsv/Traits/CsvGetsAndPuts.php	/^            $fh = $this->fileHandle;$/;"	v
+fh	src/SmartCsv/Traits/CsvGetsAndPuts.php	/^    private function puts($data, $fh = false)$/;"	v
+file	tests/UnitTests/CoderTest.php	/^        $file = '\/tmp\/whitespace_test.csv';$/;"	v
+fileHandle	src/SmartCsv/Csv.php	/^    private $fileHandle = false;$/;"	v
+findIndexes	src/SmartCsv/Csv.php	/^    private function findIndexes()$/;"	f
+findMatches	src/SmartCsv/Csv.php	/^    public function findMatches(Csv $csvToSearch, array $parameters)$/;"	f
+first	src/SmartCsv/Csv.php	/^    public function first()$/;"	f
+foods	tests/helpers.php	/^    $foods = [$/;"	v
+fullSearchValue	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^                $fullSearchValue = $searchValue . $ending;$/;"	v
+get	src/SmartCsv/Csv.php	/^    public function get($rowIndex)$/;"	f
+get	src/SmartCsv/Row.php	/^    public function get($indexString)$/;"	f
+getByIndex	src/SmartCsv/Row.php	/^    public function getByIndex($index)$/;"	f
+getCachedGroupColumnsSearch	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    public function getCachedGroupColumnsSearch($mandatoryColumn, $additionalColumns)$/;"	f
+getCoders	src/SmartCsv/Csv.php	/^    public function getCoders()$/;"	f
+getColumnGroup	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    public function getColumnGroup($name)$/;"	f
+getFile	src/SmartCsv/Csv.php	/^    public function getFile()$/;"	f
+getHeader	src/SmartCsv/Csv.php	/^    public function getHeader()$/;"	f
+getIndex	src/SmartCsv/Csv.php	/^    public function getIndex($indexString)$/;"	f
+getIndexString	src/SmartCsv/Csv.php	/^    public function getIndexString($index)$/;"	f
+get_thrown_message	tests/helpers.php	/^function get_thrown_message($callable)$/;"	f
+gets	src/SmartCsv/Traits/CsvGetsAndPuts.php	/^    private function gets($makeRow = true)$/;"	f
+group	src/SmartCsv/Row.php	/^    public function group($name, $trimEndings = true)$/;"	f
+groupMultipleColumnsFromCache	src/SmartCsv/Row.php	/^    private function groupMultipleColumnsFromCache($cached, $trimEnding)$/;"	f
+groupSingleColumnsFromCache	src/SmartCsv/Row.php	/^    private function groupSingleColumnsFromCache($cached)$/;"	f
+groups	src/SmartCsv/Row.php	/^    public function groups()$/;"	f
+hasColumns	src/SmartCsv/Csv.php	/^    public function hasColumns($columns)$/;"	f
+hasColumns	src/SmartCsv/Row.php	/^    public function hasColumns($columns)$/;"	f
+header	tests/helpers.php	/^    $header = [$/;"	v
+headerUsingAliases	src/SmartCsv/Csv.php	/^        $headerUsingAliases = [];$/;"	v
+header_must_be_set_before_adding_rows	tests/UnitTests/CsvTest.php	/^    public function header_must_be_set_before_adding_rows()$/;"	f
+id	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^        $id = $this->cacheId($mandatoryColumn, $additionalColumns);$/;"	v
+index	src/SmartCsv/Csv.php	/^            $index = array_search($indexSearchTerm, $this->columnNamesAsValue);$/;"	v
+index	src/SmartCsv/Csv.php	/^        $index = isset($this->columnNamesAsKey[$indexString]) ? $this->columnNamesAsKey[$indexString] : false;$/;"	v
+index	src/SmartCsv/Row.php	/^                $index = $group['indexes'][$key];$/;"	v
+index	src/SmartCsv/Row.php	/^            $index = $this->csv->getIndex($column);$/;"	v
+indexAliases	src/SmartCsv/Csv.php	/^                    $this->indexAliases = $value;$/;"	v
+indexAliases	src/SmartCsv/Csv.php	/^    public $indexAliases = [];$/;"	v
+indexName	src/SmartCsv/Csv.php	/^        foreach ($this->indexAliases as $indexName => $indexSearchTerm) {$/;"	v
+indexString	src/SmartCsv/Csv.php	/^        $indexString = isset($this->columnNamesAsValue[$index]) ? $this->columnNamesAsValue[$index] : false;$/;"	v
+indexString	src/SmartCsv/Row.php	/^            $indexString = $this->csv->indexAliases[$indexString];$/;"	v
+index_aliases	tests/UnitTests/CsvTest.php	/^    public function index_aliases()$/;"	f
+info	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^        $info = [$/;"	v
+info	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^        if (! $info = isset($this->cachedIndexGroups['info'][$name]) ? $this->cachedIndexGroups['info'][$name] : false) {$/;"	v
+isEmpty	src/SmartCsv/Row.php	/^    public function isEmpty($columns = [])$/;"	f
+isReading	src/SmartCsv/Csv.php	/^    public function isReading()$/;"	f
+isStrictMode	src/SmartCsv/Csv.php	/^    public function isStrictMode()$/;"	f
+key	src/SmartCsv/Row.php	/^            foreach ($cached['search'] as $key => $search) {$/;"	v
+key	src/SmartCsv/Row.php	/^    public function key()$/;"	f
+key	src/SmartCsv/Traits/CsvIterator.php	/^    public function key()$/;"	f
+m	tests/UnitTests/CsvTest.php	/^        $m = get_thrown_message(function () {$/;"	v
+makeGroup	src/SmartCsv/Csv.php	/^    public function makeGroup($name, $mandatoryColumn, $additionalColumns = [])$/;"	f
+matchup	tests/UnitTests/SearchTest.php	/^    public function matchup()$/;"	f
+message	tests/UnitTests/CoderTest.php	/^        $message = get_thrown_message(function () {$/;"	v
+missing	src/SmartCsv/Csv.php	/^        $missing = [];$/;"	v
+more	src/SmartCsv/Csv.php	/^            $more = array_flip(array_filter($counts, function ($value) {$/;"	v
+next	src/SmartCsv/Row.php	/^    public function next()$/;"	f
+next	src/SmartCsv/Traits/CsvIterator.php	/^    public function next()$/;"	f
+only	src/SmartCsv/Csv.php	/^    public function only(array $columns)$/;"	f
+option	src/SmartCsv/Csv.php	/^        foreach ($options as $option => $value) {$/;"	v
+options	src/SmartCsv/Csv.php	/^        $options = [$/;"	v
+options	src/helpers.php	/^    function csv_alter($file, $writeTo, $options = [])$/;"	v
+options	src/helpers.php	/^    function csv_sip($file, $options = [])$/;"	v
+options	src/helpers.php	/^    function csv_slurp($file, $options = [])$/;"	v
+options	tests/UnitTests/CsvTest.php	/^        $options = [$/;"	v
+optionsParsed	src/SmartCsv/Csv.php	/^            $this->optionsParsed = true;$/;"	v
+optionsParsed	src/SmartCsv/Csv.php	/^        $this->optionsParsed = true;$/;"	v
+optionsParsed	src/SmartCsv/Csv.php	/^    private $optionsParsed = false;$/;"	v
+orig	tests/UnitTests/CsvTest.php	/^        $orig = csv()->setHeader(['name'])->append(['Colby']);$/;"	v
+parseOptions	src/SmartCsv/Csv.php	/^    public function parseOptions($options)$/;"	f
+parsedOptions	src/SmartCsv/Csv.php	/^        $this->parsedOptions = $options;$/;"	v
+parsedOptions	src/SmartCsv/Csv.php	/^    private $parsedOptions = false;$/;"	v
+path	tests/UnitTests/CoderTest.php	/^        $path = '\/tmp\/csv_helper_coder.csv';$/;"	v
+path	tests/UnitTests/CoderTest.php	/^        $path = '\/tmp\/dummy_csv.csv';$/;"	v
+path	tests/UnitTests/CsvTest.php	/^        $path = '\/tmp\/changing_delimiter.csv';$/;"	v
+presets	src/SmartCsv/Csv.php	/^    public function presets($options)$/;"	f
+puts	src/SmartCsv/Traits/CsvGetsAndPuts.php	/^    private function puts($data, $fh = false)$/;"	f
+quick_csv_ages	tests/helpers.php	/^function quick_csv_ages($path = '\/tmp\/smart-csv-dummy.csv')$/;"	f
+randomAttribute	tests/helpers.php	/^            $randomAttribute = array_rand($attributePossibilities);$/;"	v
+read	src/SmartCsv/Csv.php	/^        $this->read = true;$/;"	v
+read	src/SmartCsv/Csv.php	/^    private $read = false;$/;"	v
+read	src/SmartCsv/Csv.php	/^    public function read($options = null)$/;"	f
+reindex	src/SmartCsv/Csv.php	/^    public function delete($row, $reindex = true)$/;"	v
+result	src/SmartCsv/Row.php	/^            $result = [];$/;"	v
+resultCsv	src/SmartCsv/Csv.php	/^        $resultCsv = (new static)->setHeader($csvToSearch->getHeader());$/;"	v
+resultCsv	tests/UnitTests/SearchTest.php	/^        $resultCsv = csv_search($csv, [$/;"	v
+resultCsv	tests/UnitTests/SearchTest.php	/^        $resultCsv = csv_search(csv_sip(SAMPLE_CSV), [$/;"	v
+resultCsv	tests/UnitTests/SearchTest.php	/^        $resultCsv = sample_csv()->findMatches($csv, [$/;"	v
+results	src/SmartCsv/Csv.php	/^        $results = csv()->setHeader($this->getHeader());$/;"	v
+results	src/SmartCsv/Row.php	/^        $results = [];$/;"	v
+results	tests/UnitTests/CsvTest.php	/^        $results = csv_search($orig, [$/;"	v
+rewind	src/SmartCsv/Row.php	/^    public function rewind()$/;"	f
+rewind	src/SmartCsv/Traits/CsvIterator.php	/^    public function rewind()$/;"	f
+rowData	tests/helpers.php	/^        $rowData = [$/;"	v
+rows	src/SmartCsv/Csv.php	/^                $this->rows = array_values($this->rows);$/;"	v
+rows	tests/helpers.php	/^function csv_faker($writeTo, $rows = 20)$/;"	v
+runDecoders	src/SmartCsv/Row.php	/^    private function runDecoders()$/;"	f
+runFilters	src/SmartCsv/Search.php	/^    public function runFilters(Row $row)$/;"	f
+runSearch	src/SmartCsv/Csv.php	/^    public function runSearch(Search $search)$/;"	f
+sample_csv	tests/helpers.php	/^function sample_csv()$/;"	f
+savePath	tests/UnitTests/CsvTest.php	/^            'alter' => $savePath = '\/tmp\/iterated.csv'$/;"	v
+saveRows	src/SmartCsv/Csv.php	/^                        $this->saveRows = $value;$/;"	v
+saveRows	src/SmartCsv/Csv.php	/^                    $this->saveRows = false;$/;"	v
+saveRows	src/SmartCsv/Csv.php	/^    private $saveRows = true;$/;"	v
+search	src/helpers.php	/^        $search = new Search;$/;"	v
+searchFilters	src/SmartCsv/Search.php	/^    private $searchFilters = array();$/;"	v
+searchKeyLength	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^        $searchKeyLength = strlen($mandatoryColumn);$/;"	v
+search_in_alter_mode_throws	tests/UnitTests/SearchTest.php	/^    public function search_in_alter_mode_throws()$/;"	f
+search_test_sip	tests/UnitTests/SearchTest.php	/^    public function search_test_sip()$/;"	f
+search_test_slurp	tests/UnitTests/SearchTest.php	/^    public function search_test_slurp()$/;"	f
+serialized	tests/UnitTests/CoderTest.php	/^        $serialized = serialize($data);$/;"	v
+set	src/SmartCsv/Row.php	/^    public function set($indexString, $value)$/;"	f
+setByIndex	src/SmartCsv/Row.php	/^    public function setByIndex($index, $value)$/;"	f
+setColumnNames	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    public function setColumnNames($columnNamesAsValue)$/;"	f
+setCurrentRow	src/SmartCsv/Helper/ColumnGroupingHelper.php	/^    public function setCurrentRow(Row $row)$/;"	f
+setHeader	src/SmartCsv/Csv.php	/^    public function setHeader($header)$/;"	f
+setStrictMode	src/SmartCsv/Csv.php	/^    public function setStrictMode($mode)$/;"	f
+setUp	src/SmartCsv/Csv.php	/^    private function setUp()$/;"	f
+strictMode	src/SmartCsv/Csv.php	/^        $this->strictMode = $mode;$/;"	v
+strictMode	src/SmartCsv/Csv.php	/^    private $strictMode = true;$/;"	v
+tearDown	src/SmartCsv/Csv.php	/^    private function tearDown()$/;"	f
+threw	tests/UnitTests/SearchTest.php	/^            $threw = true;$/;"	v
+threw	tests/UnitTests/SearchTest.php	/^        $threw = false;$/;"	v
+toArray	src/SmartCsv/Row.php	/^    public function toArray($associative = false)$/;"	f
+trimEndings	src/SmartCsv/Row.php	/^    public function group($name, $trimEndings = true)$/;"	v
+useAliases	src/SmartCsv/Csv.php	/^        $this->useAliases = true;$/;"	v
+useAliases	src/SmartCsv/Csv.php	/^    public $useAliases = false;$/;"	v
+useAliases	src/SmartCsv/Csv.php	/^    public function useAliases()$/;"	f
+valOrEmpty	tests/helpers.php	/^    $valOrEmpty = function ($val) {$/;"	v
+valid	src/SmartCsv/Row.php	/^    public function valid()$/;"	f
+valid	src/SmartCsv/Traits/CsvIterator.php	/^    public function valid()$/;"	f
+value	src/SmartCsv/Row.php	/^                $value = $this->data[$index];$/;"	v
+value	src/SmartCsv/Row.php	/^            $value = $this->data[$index];$/;"	v
+will_trim_whitespace	tests/UnitTests/CoderTest.php	/^    public function will_trim_whitespace()$/;"	f
+write	src/SmartCsv/Csv.php	/^    public function write($toFile)$/;"	f

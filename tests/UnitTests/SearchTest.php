@@ -27,7 +27,7 @@ class SearchTest extends TestCase
 
         $this->assertEquals(1, $resultCsv->count());
 
-        $this->assertEquals(['Sarah', '22'], $resultCsv->first()
+        $this->assertEquals(['name' => 'Sarah', 'age' => '22'], $resultCsv->first()
             ->toArray());
     }
 
@@ -48,6 +48,7 @@ class SearchTest extends TestCase
     }
 
     /** @test */
+    // NOTE: not sure exactly how this test is working
     public function search_in_alter_mode_throws()
     {
         $csv = csv(['alter' => '/tmp/__what.csv'], [
@@ -57,7 +58,7 @@ class SearchTest extends TestCase
             ['Ben', '50']
         ]);
 
-        $threw = false;
+       $threw = false;
 
         try {
             csv_search($csv, [
@@ -78,11 +79,12 @@ class SearchTest extends TestCase
     /** @test */
     public function matchup()
     {
-        $csv = csv()
-            ->setHeader(['awesome_human', 'awesome_email', 'value 2'])
+        $csv = csv()->setHeader(['awesome_human', 'awesome_email', 'value 2'])
             ->setStrictMode(false)
-            ->append(['Bernardo Turcotte', 'sloot@sllootsrus.com'],
-                ['Prof. Gregorio Schowalter Sr.', 'lrunte@hotmail.com', 'sushi']);
+            ->append(
+                ['Bernardo Turcotte', 'sloot@sllootsrus.com'],
+                ['Prof. Gregorio Schowalter Sr.', 'lrunte@hotmail.com', 'sushi']
+            );
 
         $resultCsv = sample_csv()->findMatches($csv, [
             'name' => 'awesome_human',

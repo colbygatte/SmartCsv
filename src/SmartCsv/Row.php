@@ -3,17 +3,28 @@
 namespace ColbyGatte\SmartCsv;
 
 use Iterator;
-use Exception;
+use Countable;
 
-class Row implements Iterator
+class Row implements Iterator, Countable
 {
     /**
      * @var \ColbyGatte\SmartCsv\Csv
      */
     private $csv;
 
-    private $data = [];
+    /**
+     * @var array
+     */
+    protected $data = [];
 
+    /**
+     * Row constructor.
+     *
+     * @param \ColbyGatte\SmartCsv\Csv $csv
+     * @param array                    $data
+     *
+     * @throws \ColbyGatte\SmartCsv\Exception
+     */
     public function __construct(Csv $csv, array $data)
     {
         $dataCount = count($data);
@@ -21,7 +32,7 @@ class Row implements Iterator
 
         if ($dataCount != $columnCount) {
             if ($csv->isStrictMode()) {
-                throw new exception("Expected $columnCount data entry(s), received $dataCount.");
+                throw new Exception("Expected $columnCount data entry(s), received $dataCount.");
             }
 
             $data = array_pad($data, $csv->columnCount(), '');
@@ -43,6 +54,10 @@ class Row implements Iterator
      */
     private function runDecoders()
     {
+        /**
+         * @var string                                     $column
+         * @var \ColbyGatte\SmartCsv\Coders\CoderInterface $coder
+         */
         foreach ($this->csv->getCoders() as $column => $coder) {
             $index = $this->csv->getIndex($column);
 
@@ -50,7 +65,7 @@ class Row implements Iterator
                 continue;
             }
 
-            $this->data[$index] = call_user_func([$coder, 'decode'], $this->data[$index]);
+            $this->data[$index] = $coder::decode($this->data[$index]);
         }
     }
 
@@ -85,7 +100,8 @@ class Row implements Iterator
      *
      * @return array
      */
-    public function pull($columns) {
+    public function pluck($columns)
+    {
         $data = [];
 
         foreach ($columns as $column) {
@@ -138,10 +154,13 @@ class Row implements Iterator
     }
 
     /**
+     * Set the value of a column using the column's header string.
+     *
      * @param $indexString
      * @param $value
      *
      * @return $this
+     * @throws \ColbyGatte\SmartCsv\Exception
      */
     public function set($indexString, $value)
     {
@@ -163,9 +182,13 @@ class Row implements Iterator
     }
 
     /**
+     * Set the value of a column using that columns zero-based index.
+     *
      * @param $index
+     * @param $value
      *
      * @return $this
+     * @throws \ColbyGatte\SmartCsv\Exception
      */
     public function setByIndex($index, $value)
     {
@@ -205,11 +228,49 @@ class Row implements Iterator
     }
 
     /**
-     * @param $cached
-     * @param $discardEmptyValues
-     * @param $trimEnding
+     * For coders, we use a new instance of Row.
+     *
+     * @return mixed
      */
-    private function groupSingleColumnsFromCache($cached)
+    public function toArray($associative = true)
+    {
+        $copy = $this->data;
+
+        foreach ($this->csv->getCoders() as $column => $coder) {
+            $index = $this->csv->getIndex($column);
+
+            if ($index === false) {
+                continue;
+            }
+            $copy[$index] = call_user_func([$coder, 'encode'], $this->data[$index]);
+        }
+
+        if ($associative) {
+            $copy = array_combine($this->csv->getHeader(), $copy);
+        }
+
+        return $copy;
+    }
+
+    /**
+     * @return string
+     */
+    public function toJson($options = 0, $depth = 512)
+    {
+        return json_encode($this->toArray(), $options, $depth);
+    }
+
+    public function groups()
+    {
+        return $this->csv->columnGroupingHelper->setCurrentRow($this);
+    }
+
+    /**
+     * @param $cached
+     *
+     * @return array
+     */
+    protected function groupSingleColumnsFromCache($cached)
     {
         $results = [];
 
@@ -232,7 +293,7 @@ class Row implements Iterator
      *
      * @return array
      */
-    private function groupMultipleColumnsFromCache($cached, $trimEnding)
+    protected function groupMultipleColumnsFromCache($cached, $trimEnding)
     {
         $results = [];
 
@@ -256,41 +317,11 @@ class Row implements Iterator
     }
 
     /**
-     * For coders, we use a new instance of Row.
-     *
-     * @return mixed
-     */
-    public function toArray($associative = false)
-    {
-        $copy = $this->data;
-
-        foreach ($this->csv->getCoders() as $column => $coder) {
-            $index = $this->csv->getIndex($column);
-
-            if ($index === false) {
-                continue;
-            }
-            $copy[$index] = call_user_func([$coder, 'encode'], $this->data[$index]);
-        }
-
-        if ($associative) {
-            $copy = array_combine($this->csv->getHeader(), $copy);
-        }
-
-        return $copy;
-    }
-
-    public function groups()
-    {
-        return $this->csv->columnGroupingHelper->setCurrentRow($this);
-    }
-
-    /**
      * @param $name
      *
      * @return false|mixed
      */
-    function __get($name)
+    public function __get($name)
     {
         return $this->get($name);
     }
@@ -301,9 +332,17 @@ class Row implements Iterator
      *
      * @return bool
      */
-    function __set($name, $value)
+    public function __set($name, $value)
     {
         return $this->set($name, $value);
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->toJson();
     }
 
     /**
@@ -346,5 +385,20 @@ class Row implements Iterator
     public function rewind()
     {
         reset($this->data);
+    }
+
+    /**
+     * Number of columns in the row.
+     *
+     * @return int The custom count as an integer.
+     */
+    public function count()
+    {
+        return count($this->data);
+    }
+
+    public function addColumn()
+    {
+        array_push($this->data, '');
     }
 }

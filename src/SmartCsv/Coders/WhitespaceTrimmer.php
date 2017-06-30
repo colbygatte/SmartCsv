@@ -2,7 +2,7 @@
 
 namespace ColbyGatte\SmartCsv\Coders;
 
-class Trimmer implements CoderInterface
+class WhitespaceTrimmer implements CoderInterface
 {
     /**
      * @param $data

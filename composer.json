@@ -20,7 +20,7 @@
       "ColbyGatte\\SmartCsv\\": "src/SmartCsv"
     },
     "files": [
-      "src/helpers.php"
+      "utilities/helpers.php"
     ]
   },
   "autoload-dev": {

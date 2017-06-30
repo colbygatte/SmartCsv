@@ -3,7 +3,7 @@
 namespace Tests\UnitTests;
 
 use ColbyGatte\SmartCsv\Coders\CoderInterface;
-use ColbyGatte\SmartCsv\Coders\Trimmer;
+use ColbyGatte\SmartCsv\Coders\WhitespaceTrimmer;
 use PHPUnit\Framework\TestCase;
 
 class TestCoder implements CoderInterface
@@ -92,7 +92,7 @@ class CoderTest extends TestCase
 
         $this->assertEquals(
             'Colby',
-            csv()->addCoder('Name', Trimmer::class)
+            csv()->addCoder('Name', WhitespaceTrimmer::class)
                 ->read($file)
                 ->first()->Name
         );
@@ -110,7 +110,7 @@ class CoderTest extends TestCase
 
         $this->assertEquals(
             'Colby',
-            csv(['aliases' => ['nm' => 'Name']])->addCoder('nm', Trimmer::class)
+            csv(['aliases' => ['nm' => 'Name']])->addCoder('nm', WhitespaceTrimmer::class)
                 ->read($file)
                 ->first()->nm
         );

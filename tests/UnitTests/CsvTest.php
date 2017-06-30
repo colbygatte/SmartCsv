@@ -185,13 +185,11 @@ class CsvTest extends TestCase
     /** @test */
     public function cannot_set_header_twice()
     {
-        $error = get_thrown_message(function () {
-            csv()
-                ->setHeader(['hi'])
-                ->setHeader(['hi']);
-        });
-
-        $this->assertEquals('Header can only be set once!', $error);
+        $this->assertEquals('Header can only be set once!', get_thrown_message(function () {
+                csv()
+                    ->setHeader(['hi'])
+                    ->setHeader(['hi']);
+            }));
     }
 
     /** @test */
@@ -252,40 +250,51 @@ class CsvTest extends TestCase
     /** @test */
     public function column_headers_must_all_be_unique()
     {
-        $e = get_thrown_message(function() {
-            csv()->setHeader(['Hi', 'Hi'])->getHeader();
+        $e = get_thrown_message(function () {
+            csv()
+                ->setHeader(['Hi', 'Hi'])
+                ->getHeader();
         });
 
         $this->assertEquals('Duplicate headers: Hi', $e);
     }
-    
+
     /** Disabled for now. Not implemented. */
-    public function csv_search_rows_are_clone() 
+    public function csv_search_rows_are_clone()
     {
-        $orig = csv()->setHeader(['name'])->append(['Colby']);
+        $orig = csv()
+            ->setHeader(['name'])
+            ->append(['Colby']);
 
         $results = csv_search($orig, [
             function ($row) {
                 $row->name = "Tara";
-                
+
                 return true;
             }
         ]);
 
-       $this->assertEquals('Colby', $orig->first()->name);
+        $this->assertEquals('Colby', $orig->first()->name);
 
-       $this->assertEquals('Tara', $results->first()->name); 
+        $this->assertEquals('Tara', $results->first()->name);
     }
 
     /** @test */
-    function can_pull_data() {
-        $csv = csv()->setHeader(['name', 'age', 'weight'])
-            ->append(
-                ['Colby', '23', '230']
-            );
+    function can_pluck_data()
+    {
+        $csv = csv()
+            ->setHeader(['name', 'age', 'weight'])
+            ->append(['Colby', '23', '230']);
 
-        $data = $csv->first()->pull(['age', 'weight']);
+        $data = $csv->first()
+            ->pluck(['age', 'weight']);
 
         $this->assertEquals(['23', '230'], $data);
+    }
+
+    /** @test */
+    public function can_use_first_function_when_in_sip_mode()
+    {
+        $this->assertNotFalse(csv_sip(SAMPLE_CSV)->first());
     }
 }

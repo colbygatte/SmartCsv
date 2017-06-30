@@ -7,12 +7,18 @@ use ColbyGatte\SmartCsv\Row;
 
 class ColumnGroupingHelper
 {
+    /**
+     * @var array
+     */
     private $cachedIndexGroups = [
         'single' => [],
         'multiple' => [],
         'info' => []
     ];
-    
+
+    /**
+     * @var array
+     */
     private $columnNamesAsValue;
 
     /**
@@ -24,18 +30,32 @@ class ColumnGroupingHelper
      * @var \ColbyGatte\SmartCsv\Row
      */
     private $currentRow;
-    
+
+    /**
+     * ColumnGroupingHelper constructor.
+     *
+     * @param \ColbyGatte\SmartCsv\Csv $csv
+     * @param array                    $columnNamesAsValue
+     */
     public function __construct(Csv $csv, $columnNamesAsValue = [])
     {
         $this->csv = $csv;
         $this->columnNamesAsValue = $columnNamesAsValue;
     }
 
+    /**
+     * @param $columnNamesAsValue
+     */
     public function setColumnNames($columnNamesAsValue)
     {
         $this->columnNamesAsValue = $columnNamesAsValue;
     }
-    
+
+    /**
+     * @param       $name
+     * @param       $mandatoryColumn
+     * @param array $additionalColumns
+     */
     public function columnGroup($name, $mandatoryColumn, $additionalColumns = [])
     {
         $searchKeyLength = strlen($mandatoryColumn);
@@ -131,10 +151,12 @@ class ColumnGroupingHelper
     }
 
     /**
-     * @param $mandatoryColumn
-     * @param $additionalColumns
+     * @param string $mandatoryColumn
+     * @param string[] $additionalColumns
      * @param $cache
      * @param $info
+     *
+     * @return void
      */
     public function cacheGroupColumnsSearch($mandatoryColumn, $additionalColumns, $cache, $info)
     {

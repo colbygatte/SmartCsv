@@ -4,7 +4,11 @@ namespace ColbyGatte\SmartCsv\Traits;
 
 use ColbyGatte\SmartCsv\Row;
 
-trait CsvGetsAndPuts
+/**
+ * CSV Input/Output
+ * @package ColbyGatte\SmartCsv\Traits
+ */
+trait CsvIo
 {
     /**
      * @param      $data
@@ -17,7 +21,7 @@ trait CsvGetsAndPuts
         }
 
         if ($data instanceof Row) {
-            $data = $data->toArray();
+            $data = $data->toArray(false);
         }
 
         fputcsv($fh, $data, $this->delimiter);
