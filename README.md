@@ -216,7 +216,7 @@ print_r($grouped);
 ```php
 <?php
 $csv = csv(['aliases' => ['shortname' => 'A Really Long Column Name']])
-    ->header(['A Really Long Column Name'])
+    ->setHeader(['A Really Long Column Name'])
     ->append(
         ['I LOVE PHP'],
         ['WOOOOOOOOO']
