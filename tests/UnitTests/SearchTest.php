@@ -48,32 +48,20 @@ class SearchTest extends TestCase
     }
 
     /** @test */
-    // NOTE: not sure exactly how this test is working
     public function search_in_alter_mode_throws()
     {
-        $csv = csv(['alter' => '/tmp/__what.csv'], [
-            ['name', 'age'],
-            ['Frankenstein', '26'],
-            ['Sarah', '22'],
-            ['Ben', '50']
-        ]);
-
-       $threw = false;
-
-        try {
-            csv_search($csv, [
-                function ($row) {
-                    return $row->age < 30;
-                },
-                function ($row) {
-                    return strlen($row->name) < 6;
-                }
-            ]);
-        } catch (\Exception $e) {
-            $threw = true;
-        }
-
-        $this->assertTrue($threw);
+        $this->assertNotEmpty(
+            thrown_message(function () {
+                csv_search(csv_alter(SAMPLE_CSV, '/tmp/alter-file.csv'), [
+                    function ($row) {
+                        return $row->age < 30;
+                    },
+                    function ($row) {
+                        return strlen($row->name) < 6;
+                    }
+                ]);
+            })
+        );
     }
 
     /** @test */

@@ -28,9 +28,7 @@ class Search
      */
     public function addFilters($filters)
     {
-        foreach ($filters as $filter) {
-            $this->addFilter($filter);
-        }
+        array_map([$this, 'addFilter'], $filters);
 
         return $this;
     }

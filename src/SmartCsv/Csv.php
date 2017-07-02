@@ -375,6 +375,14 @@ class Csv implements Iterator
     }
 
     /**
+     * @return string
+     */
+    public function getDelimiter()
+    {
+        return $this->delimiter;
+    }
+
+    /**
      * @return \string[]
      */
     public function getHeader($useAliases = null)
@@ -617,10 +625,6 @@ class Csv implements Iterator
                     foreach ($value as $column => $coder) {
                         $this->addCoder($column, $coder);
                     }
-                    break;
-
-                case 'column-groups':
-                    $this->makeGroup(...$value);
                     break;
             }
         }

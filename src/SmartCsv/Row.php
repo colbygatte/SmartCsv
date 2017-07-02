@@ -230,7 +230,7 @@ class Row implements Iterator, Countable
     /**
      * For coders, we use a new instance of Row.
      *
-     * @return mixed
+     * @return array
      */
     public function toArray($associative = true)
     {
@@ -263,6 +263,20 @@ class Row implements Iterator, Countable
     public function toJson($options = 0, $depth = 512)
     {
         return json_encode($this->toArray(), $options, $depth);
+    }
+
+    /**
+     * @return string
+     */
+    public function toCsv()
+    {
+        $fh = fopen('php://output', 'w');
+
+        ob_start();
+
+        fputcsv($fh, $this->toArray(false), $this->csv->getDelimiter());
+
+        return ob_get_clean();
     }
 
     /**
@@ -349,7 +363,7 @@ class Row implements Iterator, Countable
      */
     public function __toString()
     {
-        return $this->toJson();
+        return $this->toCsv();
     }
 
     /**

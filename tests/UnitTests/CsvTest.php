@@ -119,17 +119,11 @@ class CsvTest extends TestCase
     /** @test */
     public function can_iterate_and_alter_each_row_and_save_to_new_file()
     {
-        $options = [
-            'file' => SAMPLE_CSV,
-            'alter' => $savePath = '/tmp/iterated.csv'
-        ];
-
         // Delete the row with name 'Kyra Stevens'
         // Change all emails to 'nocontact'
-        foreach (csv($options) as $row) {
+        foreach (csv_alter(SAMPLE_CSV, $savePath = '/tmp/iterated.csv') as $row) {
             if ($row->name == 'Mrs. Emilie Pacocha Jr.') {
                 $row->delete();
-
                 continue;
             }
 
@@ -138,7 +132,7 @@ class CsvTest extends TestCase
 
         $csv = csv($savePath);
 
-        $count = csv_search($csv, [
+        $count = csv_search($savePath, [
             function ($row) {
                 return $row->name == 'Mrs. Emilie Pacocha Jr.';
             }
@@ -167,9 +161,7 @@ class CsvTest extends TestCase
 
         $agesFromIterate = [];
 
-        $csv = csv(['file' => SAMPLE_CSV, 'save' => false]);
-
-        foreach ($csv as $row) {
+        foreach ($csv = csv_sip(SAMPLE_CSV) as $row) {
             $agesFromIterate[] = $row->age;
         }
 
@@ -247,9 +239,7 @@ class CsvTest extends TestCase
     public function cannot_add_more_entries_than_columns()
     {
         $m = thrown_message(function () {
-            csv()
-                ->setHeader(['just one'])
-                ->append(['one', 'two']);
+            csv()->setHeader(['just one'])->append(['one', 'two']);
         });
 
         $this->assertEquals('Expected 1 data entry(s), received 2.', $m);
