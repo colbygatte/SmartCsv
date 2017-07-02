@@ -67,7 +67,7 @@ Searching can be done in sip or slurp mode.
 ```php
 <?php
 // Returns new Csv instance
-$results = csv_search(csv_sip('prices.csv'), [
+$results = csv_search('prices.csv', [
     function ($row) {
         return $row->amount > 50;
     }
@@ -85,7 +85,7 @@ A helper function `csv()` is provided for elegant syntax. The first parameter ca
 ```php
 <?php
 // Create CSV
-csv()->header(['name', 'age'])
+csv()->setHeader(['name', 'age'])
     // Each parameter passed to append must be an array, representing a row in the CSV.
     ->append(
         ['Colby', '25'],
@@ -114,7 +114,7 @@ Rows can also be deleted.
 $path = '/tmp/iterate.csv';
 
 // make dummy csv
-csv()->header(['name', 'age'])
+csv()->setHeader(['name', 'age'])
     ->append(
         ['name', 'age'],
         ['Colby', '26'],
@@ -151,7 +151,7 @@ Sarah,102510
 
 ### Searching
 ```php
-$csv = csv()->header(['name', 'age'])
+$csv = csv()->setHeader(['name', 'age'])
     ->append(
         ['name', 'age'],
         ['Frankenstein', '26'],
@@ -183,7 +183,7 @@ When you have multiple columns that you need to bring together, you can use grou
 ```php
 <?php
 // Grouping data
-$csv = csv()->header(['Spec 1', 'Val 1', 'UOM 1', 'Spec 2', 'Val 2', 'UOM 2'])
+$csv = csv()->setHeader(['Spec 1', 'Val 1', 'UOM 1', 'Spec 2', 'Val 2', 'UOM 2'])
     ->append(
         ['Height', '21', 'in', 'Weight', '30', 'lb']
     );
@@ -246,7 +246,7 @@ __IMPORTANT:__ Coders are ran when reading a CSV and when writing it, NOT when a
 <?php
 use ColbyGatte\SmartCsv\Coders\Serialize;
 
-$csv = csv()->header(['some_column_title'])
+$csv = csv()->setHeader(['some_column_title'])
     ->append(
         [['oh', 'my', 'goodness']]
     );
