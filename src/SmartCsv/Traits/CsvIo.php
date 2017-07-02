@@ -16,13 +16,9 @@ trait CsvIo
      */
     private function puts($data, $fh = null)
     {
-        if ($data instanceof Row) {
-            $data = $data->toArray(false);
-        }
-
         fputcsv(
             $fh ?: $this->fileHandle,
-            $data,
+            $data instanceof Row ? $data->toArray(false) : $data,
             $this->delimiter
         );
     }

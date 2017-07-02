@@ -18,8 +18,6 @@ class Csv implements Iterator
     protected $strictMode = true;
 
     /**
-     * compatibility
-     * ['alias' => 'Original']
      * @var array
      */
     public $indexAliases = [];
@@ -57,6 +55,8 @@ class Csv implements Iterator
 
     /**
      * The CSV file being read.
+     *
+     * @var string
      */
     protected $csvFile;
 
@@ -88,6 +88,8 @@ class Csv implements Iterator
      * They key is the column to code.
      * The values are the coder to run it through.
      * Each column can only have one coder.
+     *
+     * @var array
      */
     protected $coders = [];
 
@@ -97,8 +99,6 @@ class Csv implements Iterator
     protected $optionsParsed = false;
 
     /**
-     * The CSV delimiter.
-     *
      * @var string
      */
     protected $delimiter = ',';
@@ -117,25 +117,18 @@ class Csv implements Iterator
     protected $columnGroups = [];
 
     /**
-     * @var array|false
+     * Csv constructor.
      */
-    protected $exclude = false;
-
-    /**
-     * Holds the options originally passed to this instance.
-     * @var bool
-     */
-    protected $parsedOptions = false;
-
     public function __construct()
     {
         $this->columnGroupingHelper = new ColumnGroupingHelper($this);
     }
 
     /**
-     * @param string|null $csvFile
+     * @param null $options
      *
      * @return $this
+     * @throws \ColbyGatte\SmartCsv\Exception
      */
     public function read($options = null)
     {
@@ -172,9 +165,8 @@ class Csv implements Iterator
 
 
     /**
-     * @param Row\array
-     *
      * @return $this
+     * @throws \ColbyGatte\SmartCsv\Exception
      */
     public function append()
     {
@@ -194,9 +186,11 @@ class Csv implements Iterator
     }
 
     /**
-     * Append row only if there the same isntance isn't already present.
+     * Append row only if there the same instance isn't already present.
      *
      * @param \ColbyGatte\SmartCsv\Row $row
+     *
+     * @return \ColbyGatte\SmartCsv\Csv
      */
     public function appendIfUnique(Row $row)
     {
@@ -208,13 +202,20 @@ class Csv implements Iterator
     }
 
     /**
-     * Used for only & except modes, where column header count won't be the same as the data count recieved.
+     * Used for only mode, where column header count won't be the same as the data count recieved.
+     *
+     * @return bool
      */
     public function isStrictMode()
     {
         return $this->strictMode;
     }
 
+    /**
+     * @param bool $mode
+     *
+     * @return \ColbyGatte\SmartCsv\Csv
+     */
     public function setStrictMode($mode)
     {
         $this->strictMode = $mode;
@@ -278,7 +279,7 @@ class Csv implements Iterator
             throw new Exception("Could not open {$this->csvFile}.");
         }
 
-        // If strict mode is turned off (which it is for $this->only() & $this->exclude()
+        // If strict mode is turned off (which it is for $this->only()
         // and the header is already set, throw it away
         if ($this->columnNamesAsKey != null) {
             if ($this->isStrictMode()) {
@@ -378,7 +379,7 @@ class Csv implements Iterator
      */
     public function getHeader($useAliases = null)
     {
-        $useAliases = ($useAliases !== null) ? $useAliases : $this->useAliases();
+        $useAliases = ($useAliases !== null) ? $useAliases : $this->setUseAliases();
 
         return $useAliases ? $this->convertAliases() : $this->columnNamesAsValue;
     }
@@ -444,7 +445,7 @@ class Csv implements Iterator
 
     /**
      * @param string $title
-     * @param mixed $defaultValue Default value to assign to each new cell
+     * @param mixed  $defaultValue Default value to assign to each new cell
      *
      * @return $this
      * @throws \ColbyGatte\SmartCsv\Exception
@@ -565,9 +566,6 @@ class Csv implements Iterator
     }
 
     /**
-     * If file option is not set, the file will not be read.
-     * If file option IS set, the file will automatically be read.
-     *
      * @param $options
      *
      * @return $this
@@ -575,8 +573,6 @@ class Csv implements Iterator
      */
     public function parseOptions($options)
     {
-        $this->parsedOptions = $options;
-
         if (is_string($options)) {
             $this->csvFile = $options;
 
@@ -607,26 +603,7 @@ class Csv implements Iterator
                         $this->saveRows = $value;
                     }
                     break;
-            }
-        }
 
-        // Parse more options. These are config type options.
-        $this->presets($options);
-
-        return $this;
-    }
-
-    /**
-     * More options.
-     *
-     * @param $options
-     *
-     * @return $this
-     */
-    public function presets($options)
-    {
-        foreach ($options as $option => $value) {
-            switch ($option) {
                 case 'del':
                     $this->delimiter = $value;
                     break;
@@ -650,7 +627,6 @@ class Csv implements Iterator
 
         return $this;
     }
-
 
     /**
      * Convert the header line of the CSV to use the defined
@@ -754,11 +730,13 @@ class Csv implements Iterator
     }
 
     /**
+     * @param bool $useAliases
+     *
      * @return $this
      */
-    public function useAliases()
+    public function setUseAliases($useAliases)
     {
-        $this->useAliases = true;
+        $this->useAliases = $useAliases;
 
         return $this;
     }

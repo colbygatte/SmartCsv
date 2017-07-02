@@ -27,7 +27,7 @@ class CsvTest extends TestCase
         ])
             ->setHeader(['Category', 'Product #'])
             ->append(['flowers', '234234'])
-            ->useAliases()
+            ->setUseAliases()
             ->write($path = '/tmp/dummy-csv.csv');
 
         $this->assertEquals('234234', csv($path)->first()->sku);
@@ -110,7 +110,7 @@ class CsvTest extends TestCase
         });
 
         // Index aliases can also be used in place of the original column name when writing
-        $csv->useAliases()
+        $csv->setUseAliases()
             ->write('/tmp/using_aliases.csv');
 
         $this->assertEquals('i love php', csv('/tmp/using_aliases.csv')->first()->shortstring);
@@ -183,7 +183,7 @@ class CsvTest extends TestCase
     {
         csv()
             ->setHeader(['name', 'age'])
-            ->presets(['del' => '|'])
+            ->parseOptions(['del' => '|'])
             ->write($path = '/tmp/changing_delimiter.csv');
 
         $this->assertEquals("name|age\n", file_get_contents($path));

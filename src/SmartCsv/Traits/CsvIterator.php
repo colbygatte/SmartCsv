@@ -88,6 +88,7 @@ trait CsvIterator
 
     /**
      * Checks if current position is valid
+     *
      * @return bool
      */
     public function valid()
@@ -117,9 +118,7 @@ trait CsvIterator
      */
     public function each(callable $callback)
     {
-        foreach ($this as $row) {
-            $callback($row);
-        }
+        array_map($callback, $this->rows);
 
         return $this;
     }

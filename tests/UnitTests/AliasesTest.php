@@ -14,7 +14,7 @@ class AliasesTest extends TestCase
             'Value 3', 'UOM 3'])
             ->append(['Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb']);
 
-        $csv->presets([
+        $csv->parseOptions([
             'column-groups' => ['specs', 'Specification', ['Value', 'UOM']]
         ]);
 
