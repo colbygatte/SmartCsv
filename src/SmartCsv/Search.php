@@ -22,6 +22,20 @@ class Search
     }
 
     /**
+     * @param callable[] $filters
+     *
+     * @return $this
+     */
+    public function addFilters($filters)
+    {
+        foreach ($filters as $filter) {
+            $this->addFilter($filter);
+        }
+
+        return $this;
+    }
+
+    /**
      * @param \ColbyGatte\SmartCsv\Row $row
      *
      * @return bool

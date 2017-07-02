@@ -53,7 +53,7 @@ class CoderTest extends TestCase
     /** @test */
     public function cannot_use_invalid_coder()
     {
-        $message = get_thrown_message(function () {
+        $message = thrown_message(function () {
             csv(SAMPLE_CSV)->addCoder('name', InvalidCoder::class);
         });
 

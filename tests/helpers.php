@@ -13,7 +13,6 @@ function faker()
 }
 
 /**
- * The point of this is to create a text csv and nothing else.
  * A generic CSV that all features of this library can be tested on is created.
  *
  * @param     $writeTo
@@ -123,9 +122,7 @@ function csv_faker($writeTo, $rows = 20)
  *
  * @return null|string
  */
-function get_thrown_message($callable)
+function thrown_message($callable)
 {
-    try { $callable(); }
-    catch (\Exception $e) { return $e->getMessage(); }
-    return null;
+    try { $callable(); } catch (\Exception $e) { return $e->getMessage(); }
 }

@@ -62,20 +62,20 @@ if (! function_exists('csv_sip')) {
 
 if (! function_exists('csv_search')) {
     /**
-     * @param \ColbyGatte\SmartCsv\Csv $csv
+     * @param \ColbyGatte\SmartCsv\Csv|string $csv
      * @param callable[]               $filters
      *
      * @return Csv
      */
     function csv_search($csv, $filters)
     {
-        $search = new Search;
-
-        foreach ($filters as $filter) {
-            $search->addFilter($filter);
+        if (is_string($csv)) {
+            $csv = csv_sip($csv);
         }
 
-        return $csv->runSearch($search);
+        return $csv->runSearch(
+            (new Search)->addFilters($filters)
+        );
     }
 }
 

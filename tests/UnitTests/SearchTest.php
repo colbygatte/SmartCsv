@@ -34,7 +34,7 @@ class SearchTest extends TestCase
     /** @test */
     public function search_test_sip()
     {
-        $resultCsv = csv_search(csv_sip(SAMPLE_CSV), [
+        $resultCsv = csv_search(SAMPLE_CSV, [
             function ($row) {
                 return (int) $row->age > 70;
             }

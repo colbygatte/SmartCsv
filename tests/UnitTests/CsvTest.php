@@ -196,10 +196,8 @@ class CsvTest extends TestCase
     {
         $this->assertEquals(
             'Header can only be set once!',
-            get_thrown_message(function () {
-                csv()
-                    ->setHeader(['hi'])
-                    ->setHeader(['hi']);
+            thrown_message(function () {
+                csv()->setHeader(['hi'])->setHeader(['hi']);
             })
         );
     }
@@ -207,7 +205,7 @@ class CsvTest extends TestCase
     /** @test */
     public function header_must_be_set_before_adding_rows()
     {
-        $m = get_thrown_message(function () {
+        $m = thrown_message(function () {
             csv()->append(['hi']);
         });
 
@@ -228,10 +226,8 @@ class CsvTest extends TestCase
     /** @test */
     public function cannot_read_row_with_too_few_columns_in_strict_mode()
     {
-        $m = get_thrown_message(function () {
-            csv()
-                ->setHeader(['one', 'two', 'three'])
-                ->append(['hi']);
+        $m = thrown_message(function () {
+            csv()->setHeader(['one', 'two', 'three'])->append(['hi']);
         });
 
         $this->assertEquals('Expected 3 data entry(s), received 1.', $m);
@@ -250,7 +246,7 @@ class CsvTest extends TestCase
     /** @test */
     public function cannot_add_more_entries_than_columns()
     {
-        $m = get_thrown_message(function () {
+        $m = thrown_message(function () {
             csv()
                 ->setHeader(['just one'])
                 ->append(['one', 'two']);
@@ -262,10 +258,8 @@ class CsvTest extends TestCase
     /** @test */
     public function column_headers_must_all_be_unique()
     {
-        $m = get_thrown_message(function () {
-            csv()
-                ->setHeader(['Hi', 'Hi'])
-                ->getHeader();
+        $m = thrown_message(function () {
+            csv()->setHeader(['Hi', 'Hi'])->getHeader();
         });
 
         $this->assertEquals('Duplicate headers: Hi', $m);
