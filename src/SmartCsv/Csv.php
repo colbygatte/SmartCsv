@@ -227,6 +227,7 @@ class Csv implements Iterator
      * @param bool                         $reindex
      *
      * @return bool
+     * @throws \ColbyGatte\SmartCsv\Exception
      */
     public function delete($row, $reindex = true)
     {
@@ -369,7 +370,7 @@ class Csv implements Iterator
      */
     public function getFile()
     {
-        return (! empty($this->csvFile)) ? $this->csvFile : false;
+        return $this->csvFile ?: false;
     }
 
     /**
@@ -443,10 +444,12 @@ class Csv implements Iterator
 
     /**
      * @param string $title
+     * @param mixed $defaultValue Default value to assign to each new cell
      *
+     * @return $this
      * @throws \ColbyGatte\SmartCsv\Exception
      */
-    public function addColumn($title)
+    public function addColumn($title, $defaultValue = '')
     {
         if ($this->saveRows != true) {
             throw new Exception("addColumn() can only be used in slurp mode.");
@@ -465,10 +468,12 @@ class Csv implements Iterator
         $this->setHeader($header);
 
         foreach ($this as $row) {
-            $row->addColumn();
+            $row->addColumn($defaultValue);
         }
 
         $this->columnGroupingHelper = new ColumnGroupingHelper($this);
+
+        return $this;
     }
 
     /**
@@ -487,7 +492,7 @@ class Csv implements Iterator
      */
     public function write($toFile)
     {
-        // if we are trying to write, then do not allow reading
+        // If we are trying to write, then do not allow reading
         $this->read = true;
 
         $fh = fopen($toFile, 'w');
@@ -499,8 +504,6 @@ class Csv implements Iterator
         }
 
         fclose($fh);
-
-        // TODO: If in sip mode, reset to beginning.
     }
 
     /**
@@ -684,11 +687,9 @@ class Csv implements Iterator
         // If the header hasn't been set, groups can't be made. Save them until then.
         if (empty($this->columnNamesAsValue)) {
             $this->columnGroups[] = [$name, $mandatoryColumn, $additionalColumns];
-
-            return $this;
+        } else {
+            $this->columnGroupingHelper->columnGroup($name, $mandatoryColumn, $additionalColumns);
         }
-
-        $this->columnGroupingHelper->columnGroup($name, $mandatoryColumn, $additionalColumns);
 
         return $this;
     }
@@ -743,7 +744,6 @@ class Csv implements Iterator
     {
         return $this->rows[$rowIndex];
     }
-    // endregion
 
     /**
      * @return int
@@ -764,11 +764,7 @@ class Csv implements Iterator
     }
 
     /**
-     * Say you have a CSV whose index is Category IDs, but
-     * all other CSV's are category_ids. Use index mappers for this:
-     *  [
-     *      'category_ids' => 'Category IDs'
-     *  ]
+     * Add index aliases to Csv::$columnNamesAsKey
      *
      * @return $this
      */
@@ -792,7 +788,7 @@ class Csv implements Iterator
      *
      * @param string $indexString
      *
-     * @return bool|int
+     * @return int|false
      */
     public function getIndex($indexString)
     {
@@ -804,7 +800,7 @@ class Csv implements Iterator
     /**
      * @param $index
      *
-     * @return string|bool
+     * @return string|false
      */
     public function getIndexString($index)
     {

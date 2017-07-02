@@ -10,7 +10,7 @@ class ColumnGroupingHelper
     /**
      * @var array
      */
-    private $cachedIndexGroups = [
+    protected $cachedIndexGroups = [
         'single' => [],
         'multiple' => [],
         'info' => []
@@ -19,28 +19,36 @@ class ColumnGroupingHelper
     /**
      * @var array
      */
-    private $columnNamesAsValue;
+    protected $columnNamesAsValue;
 
     /**
      * @var \ColbyGatte\SmartCsv\Csv
      */
-    private $csv;
+    protected $csv;
 
     /**
      * @var \ColbyGatte\SmartCsv\Row
      */
-    private $currentRow;
+    protected $currentRow;
 
     /**
      * ColumnGroupingHelper constructor.
      *
-     * @param \ColbyGatte\SmartCsv\Csv $csv
-     * @param array                    $columnNamesAsValue
+     * @param \ColbyGatte\SmartCsv\Csv              $csv
+     * @param array                                 $columnNamesAsValue
      */
     public function __construct(Csv $csv, $columnNamesAsValue = [])
     {
         $this->csv = $csv;
         $this->columnNamesAsValue = $columnNamesAsValue;
+    }
+
+    /**
+     * @return \ColbyGatte\SmartCsv\Helper\RowGroupGetter
+     */
+    public function getRowGroupGetter()
+    {
+        return new RowGroupGetter($this->currentRow);
     }
 
     /**
@@ -52,7 +60,7 @@ class ColumnGroupingHelper
     }
 
     /**
-     * @param       $name
+     * @param       $name Name used to access the column group.
      * @param       $mandatoryColumn
      * @param array $additionalColumns
      */
@@ -69,12 +77,6 @@ class ColumnGroupingHelper
             }
 
             if (empty($additionalColumns)) {
-                if (empty($value)) {
-                    $cacheData[] = $this->csv->getIndex($columnName);
-
-                    continue;
-                }
-
                 $cacheData[] = $this->csv->getIndex($columnName);
 
                 continue;
@@ -94,7 +96,8 @@ class ColumnGroupingHelper
             }
 
             $cacheData[] = [
-                'ending' => $ending, 'indexes' => $cacheIndexes
+                'ending' => $ending,
+                'indexes' => $cacheIndexes
             ];
         }
 
@@ -151,10 +154,10 @@ class ColumnGroupingHelper
     }
 
     /**
-     * @param string $mandatoryColumn
+     * @param string   $mandatoryColumn
      * @param string[] $additionalColumns
-     * @param $cache
-     * @param $info
+     * @param          $cache
+     * @param          $info
      *
      * @return void
      */
@@ -163,7 +166,6 @@ class ColumnGroupingHelper
         if (empty($additionalColumns)) {
             $this->cachedIndexGroups['single'][$mandatoryColumn] = $cache;
 
-            // add some info to info (lol)
             $info['type'] = 'single';
             $info['id'] = $mandatoryColumn;
 
@@ -198,6 +200,7 @@ class ColumnGroupingHelper
     public function cacheId($mandatoryColumn, $additionalColumns)
     {
         sort($additionalColumns);
+
         $additionalColumns[] = $mandatoryColumn;
 
         return serialize($additionalColumns);
@@ -216,15 +219,10 @@ class ColumnGroupingHelper
     }
 
     /**
-     * A little magic.
-     * Allows for $csv->first()->groups()->spec
-     *
-     * @param $name
-     *
-     * @return array
+     * @return \ColbyGatte\SmartCsv\Row
      */
-    public function __get($name)
+    public function getCurrentRow()
     {
-        return $this->currentRow->group($name);
+        return $this->currentRow;
     }
 }

@@ -5,38 +5,28 @@ use ColbyGatte\SmartCsv\Search;
 
 if (! function_exists('csv')) {
     /**
-     * If $file is string, the file will automatically be read.
-     * If $file is an array of options, the options will be parsed.
-     * If 'file' option is passed, the file will automatically be read and $rows will be ignored.
+     * Create a new Csv instance. If the file name is set in $options,
+     * the file will automatically be read.
      *
      * @param string|array $options
-     * @param array        $rows
      *
      * @return Csv
      */
-    function csv($options = false)
+    function csv($options = [])
     {
-        $csv = new Csv;
+        $csv = (new Csv)->parseOptions($options);
 
-        if (false === $options) {
-            return $csv;
-        }
-
-        // If we are here, assume $file can be parsed by $csv->parseOptions()
-        $csv->parseOptions($options);
-
-        // If $csv->csvFile was set, read it!
-        if ($csv->getFile() !== false ) {
-            // Return now to ensure ignoring $rows. If $rows is accidentally set,
-            // it would override the header row from the original read above.
-            return $csv->read();
-        }
-
-        return $csv;
+        return $csv->getFile() ? $csv->read() : $csv;
     }
 }
 
 if (! function_exists('csv_slurp')) {
+    /**
+     * @param string $file
+     * @param array  $options
+     *
+     * @return \ColbyGatte\SmartCsv\Csv
+     */
     function csv_slurp($file, $options = [])
     {
         return csv(array_merge(['file' => $file], $options));
@@ -44,13 +34,26 @@ if (! function_exists('csv_slurp')) {
 }
 
 if (! function_exists('csv_alter')) {
-    function csv_alter($file, $writeTo, $options = [])
+    /**
+     * @param string $csv
+     * @param string $writeTo
+     * @param array  $options
+     *
+     * @return \ColbyGatte\SmartCsv\Csv
+     */
+    function csv_alter($csv, $writeTo, $options = [])
     {
-        return csv(array_merge(['file' => $file, 'alter' => $writeTo], $options));
+        return csv(array_merge(['file' => $csv, 'alter' => $writeTo], $options));
     }
 }
 
 if (! function_exists('csv_sip')) {
+    /**
+     * @param string $file
+     * @param array  $options
+     *
+     * @return \ColbyGatte\SmartCsv\Csv
+     */
     function csv_sip($file, $options = [])
     {
         return csv(array_merge(['file' => $file, 'save' => false], $options));

@@ -9,12 +9,27 @@ use ColbyGatte\SmartCsv\Row;
  *
  * Single-use trait extracted from ColbyGatte\SmartCsv\Csv.
  *
- * Currently not in use so this library will be compatible with PHP 5.3
- *
  * @package ColbyGatte\SmartCsv\Traits
  */
 trait CsvIterator
 {
+    /**
+     * Used for iteration.
+     *
+     * A starting value of false is used before reading, null is used after reading.
+     *
+     * @var null|false|\ColbyGatte\SmartCsv\Row
+     */
+    protected $currentRow = false;
+
+    /**
+     * Do we want to save each previous row from the loop?
+     * This only happens in no-save mode ($save is false).
+     *
+     * @var null|resource
+     */
+    protected $alter;
+
     /**
      * Return the current element
      * @return \ColbyGatte\SmartCsv\Row
@@ -28,23 +43,6 @@ trait CsvIterator
 
         return $this->currentRow;
     }
-
-    /**
-     * Used for iteration.
-     *
-     * A starting value of false is used before reading, null is used after reading.
-     *
-     * @var null|false|\ColbyGatte\SmartCsv\Row
-     */
-    private $currentRow = false;
-
-    /**
-     * Do we want to save each previous row from the loop?
-     * This only happens in no-save mode ($save is false).
-     *
-     * @var null|resource
-     */
-    private $alter;
 
     /**
      * Move forward to next element

@@ -9,11 +9,7 @@ function faker()
 {
     static $faker;
 
-    if (! isset($faker)) {
-        $faker = \Faker\Factory::create();
-    }
-
-    return $faker;
+    return $faker ?: $faker = \Faker\Factory::create();
 }
 
 /**
@@ -123,44 +119,13 @@ function csv_faker($writeTo, $rows = 20)
 }
 
 /**
- * @param string $path
- *
- * @return \ColbyGatte\SmartCsv\Csv
- */
-function quick_csv_ages($path = '/tmp/smart-csv-dummy.csv')
-{
-    $csv = csv()
-        ->setHeader(['name', 'age'])
-        ->append(['Colby', '25'], ['Sarah', '22']);
-
-    $csv->write($path);
-
-    return $csv;
-}
-
-
-/**
- * @return \ColbyGatte\SmartCsv\Csv
- */
-function sample_csv()
-{
-    return csv(SAMPLE_CSV);
-}
-
-/**
  * @param $callable
  *
  * @return null|string
  */
 function get_thrown_message($callable)
 {
-    $error = null;
-
-    try {
-        $callable();
-    } catch (\Exception $e) {
-        $error = $e->getMessage();
-    }
-
-    return $error;
+    try { $callable(); }
+    catch (\Exception $e) { return $e->getMessage(); }
+    return null;
 }

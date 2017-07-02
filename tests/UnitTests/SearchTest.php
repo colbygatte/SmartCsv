@@ -77,7 +77,7 @@ class SearchTest extends TestCase
     }
 
     /** @test */
-    public function matchup()
+    public function match_up()
     {
         $csv = csv()->setHeader(['awesome_human', 'awesome_email', 'value 2'])
             ->setStrictMode(false)
@@ -86,7 +86,7 @@ class SearchTest extends TestCase
                 ['Prof. Gregorio Schowalter Sr.', 'lrunte@hotmail.com', 'sushi']
             );
 
-        $resultCsv = sample_csv()->findMatches($csv, [
+        $resultCsv = csv(SAMPLE_CSV)->findMatches($csv, [
             'name' => 'awesome_human',
             'contact 1' => 'awesome_email',
             'value 2' => 'value 2'

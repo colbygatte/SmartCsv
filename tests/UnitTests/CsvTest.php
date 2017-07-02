@@ -36,17 +36,21 @@ class CsvTest extends TestCase
     /** @test */
     public function can_write_csv()
     {
-        quick_csv_ages($path = '/tmp/dummy_csv.csv');
+        csv()
+            ->setHeader(['name', 'age'])
+            ->append(['Colby', '25'], ['Sarah', '22'])
+            ->write($path = '/tmp/ages.csv');
 
-        $csv = csv()->read($path);
-
-        $this->assertEquals('Colby', $csv->first()->name);
+        $this->assertEquals('Colby', csv($path)->first()->name);
     }
 
     /** @test */
     public function can_delete_row_from_csv()
     {
-        quick_csv_ages($path = '/tmp/dummy_csv.csv');
+        csv()
+            ->setHeader(['name', 'age'])
+            ->append(['Colby', '25'], ['Sarah', '22'])
+            ->write($path = '/tmp/dummy_csv.csv');
 
         $csv = csv($path);
 
@@ -61,7 +65,10 @@ class CsvTest extends TestCase
     /** @test */
     public function can_edit_row_and_save()
     {
-        quick_csv_ages($path = '/tmp/dummy_csv.csv');
+        csv()
+            ->setHeader(['name', 'age'])
+            ->append(['Colby', '25'], ['Sarah', '22'])
+            ->write($path = '/tmp/dummy_csv.csv');
 
         $csv = csv($path);
 
@@ -75,7 +82,11 @@ class CsvTest extends TestCase
     /** @test */
     public function can_delete_row_using_row_instance()
     {
-        $csv = quick_csv_ages();
+        $csv = csv()
+            ->setHeader(['name', 'age'])
+            ->append(['Colby', '25'], ['Sarah', '22']);
+
+        $csv->write('/tmp/dummy_csv.csv');
 
         $csv->first()
             ->delete();
@@ -150,7 +161,7 @@ class CsvTest extends TestCase
     {
         $ages = [];
 
-        foreach (sample_csv() as $row) {
+        foreach (csv(SAMPLE_CSV) as $row) {
             $ages[] = $row->age;
         }
 
@@ -170,12 +181,10 @@ class CsvTest extends TestCase
     /** @test */
     public function can_change_delimiter()
     {
-        $path = '/tmp/changing_delimiter.csv';
-
         csv()
             ->setHeader(['name', 'age'])
             ->presets(['del' => '|'])
-            ->write($path);
+            ->write($path = '/tmp/changing_delimiter.csv');
 
         $this->assertEquals("name|age\n", file_get_contents($path));
 
@@ -185,21 +194,24 @@ class CsvTest extends TestCase
     /** @test */
     public function cannot_set_header_twice()
     {
-        $this->assertEquals('Header can only be set once!', get_thrown_message(function () {
+        $this->assertEquals(
+            'Header can only be set once!',
+            get_thrown_message(function () {
                 csv()
                     ->setHeader(['hi'])
                     ->setHeader(['hi']);
-            }));
+            })
+        );
     }
 
     /** @test */
     public function header_must_be_set_before_adding_rows()
     {
-        $error = get_thrown_message(function () {
+        $m = get_thrown_message(function () {
             csv()->append(['hi']);
         });
 
-        $this->assertEquals('Header must be set before adding rows!', $error);
+        $this->assertEquals('Header must be set before adding rows!', $m);
     }
 
     /** @test */
@@ -238,25 +250,25 @@ class CsvTest extends TestCase
     /** @test */
     public function cannot_add_more_entries_than_columns()
     {
-        $error = get_thrown_message(function () {
+        $m = get_thrown_message(function () {
             csv()
                 ->setHeader(['just one'])
                 ->append(['one', 'two']);
         });
 
-        $this->assertEquals('Expected 1 data entry(s), received 2.', $error);
+        $this->assertEquals('Expected 1 data entry(s), received 2.', $m);
     }
 
     /** @test */
     public function column_headers_must_all_be_unique()
     {
-        $e = get_thrown_message(function () {
+        $m = get_thrown_message(function () {
             csv()
                 ->setHeader(['Hi', 'Hi'])
                 ->getHeader();
         });
 
-        $this->assertEquals('Duplicate headers: Hi', $e);
+        $this->assertEquals('Duplicate headers: Hi', $m);
     }
 
     /** Disabled for now. Not implemented. */
@@ -289,7 +301,7 @@ class CsvTest extends TestCase
         $data = $csv->first()
             ->pluck(['age', 'weight']);
 
-        $this->assertEquals(['23', '230'], $data);
+        $this->assertEquals(['age' => '23', 'weight' => '230'], $data);
     }
 
     /** @test */

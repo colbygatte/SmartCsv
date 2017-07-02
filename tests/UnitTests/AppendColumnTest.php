@@ -10,6 +10,7 @@ class AppendColumnTest extends TestCase
     public function can_append_column()
     {
         $csv = csv(SAMPLE_CSV);
+
         $columnCount = $csv->columnCount();
 
         $csv->addColumn('Favorite coffee');

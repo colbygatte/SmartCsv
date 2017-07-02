@@ -28,7 +28,7 @@ class CoderTest extends TestCase
     /** @test */
     public function can_use_encoder()
     {
-        sample_csv()
+        csv(SAMPLE_CSV)
             ->addCoder('name', TestCoder::class)
             ->write($path = '/tmp/dummy_csv.csv');
 
@@ -40,7 +40,7 @@ class CoderTest extends TestCase
     {
         $path = '/tmp/dummy_csv.csv';
 
-        sample_csv()
+        csv(SAMPLE_CSV)
             ->addCoder('name', TestCoder::class)
             ->write($path);
 
@@ -54,7 +54,7 @@ class CoderTest extends TestCase
     public function cannot_use_invalid_coder()
     {
         $message = get_thrown_message(function () {
-            sample_csv()->addCoder('name', InvalidCoder::class);
+            csv(SAMPLE_CSV)->addCoder('name', InvalidCoder::class);
         });
 
         $this->assertEquals('Tests\UnitTests\InvalidCoder does not implement CoderInterface.', $message);
@@ -63,19 +63,13 @@ class CoderTest extends TestCase
     /** @test */
     public function can_user_coder_through_csv_helper_function()
     {
-        $path = '/tmp/csv_helper_coder.csv';
-        $data = ['name' => 'Colby'];
-        $serialized = serialize($data);
+        $csv = csv(['coders' => ['data' => TestCoder::class]])
+            ->setHeader(['data'])
+            ->append([
+                $serialized = serialize(['name' => 'Colby'])
+            ]);
 
-        $csv = csv([
-            'coders' => [
-                'data' => TestCoder::class
-            ]
-        ]);
-
-        $csv->setHeader(['data'])
-            ->append([$serialized])
-            ->write('/tmp/csv_helper_coder.csv');
+        $csv->write($path = '/tmp/csv_helper_coder.csv');
 
         $this->assertEquals($serialized, csv($path)->first()->data);
     }
@@ -90,12 +84,10 @@ class CoderTest extends TestCase
             ->append(['   Colby   '])
             ->write($file);
 
-        $this->assertEquals(
-            'Colby',
-            csv()->addCoder('Name', WhitespaceTrimmer::class)
-                ->read($file)
-                ->first()->Name
-        );
+        $this->assertEquals('Colby', csv()
+            ->addCoder('Name', WhitespaceTrimmer::class)
+            ->read($file)
+            ->first()->Name);
     }
 
     /** @test */
@@ -108,12 +100,10 @@ class CoderTest extends TestCase
             ->append(['   Colby   '])
             ->write($file);
 
-        $this->assertEquals(
-            'Colby',
-            csv(['aliases' => ['nm' => 'Name']])->addCoder('nm', WhitespaceTrimmer::class)
-                ->read($file)
-                ->first()->nm
-        );
+        $this->assertEquals('Colby', csv(['aliases' => ['nm' => 'Name']])
+            ->addCoder('nm', WhitespaceTrimmer::class)
+            ->read($file)
+            ->first()->nm);
     }
 }
 

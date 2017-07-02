@@ -105,7 +105,7 @@ class Row implements Iterator, Countable
         $data = [];
 
         foreach ($columns as $column) {
-            $data[] = $this->get($column);
+            $data[$column] = $this->get($column);
         }
 
         return $data;
@@ -265,9 +265,13 @@ class Row implements Iterator, Countable
         return json_encode($this->toArray(), $options, $depth);
     }
 
+    /**
+     * @return \ColbyGatte\SmartCsv\Helper\RowGroupGetter
+     */
     public function groups()
     {
-        return $this->csv->columnGroupingHelper->setCurrentRow($this);
+        return $this->csv->columnGroupingHelper->setCurrentRow($this)
+            ->getRowGroupGetter();
     }
 
     /**
@@ -402,9 +406,11 @@ class Row implements Iterator, Countable
 
     /**
      * Append an empty column onto the row. Should only be called from Csv::addColumn().
+     *
+     * @param string $value
      */
-    public function addColumn()
+    public function addColumn($value = '')
     {
-        array_push($this->data, '');
+        array_push($this->data, $value);
     }
 }
