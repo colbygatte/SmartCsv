@@ -379,7 +379,7 @@ class Csv implements Iterator
      */
     public function getHeader($useAliases = null)
     {
-        $useAliases = ($useAliases !== null) ? $useAliases : $this->setUseAliases();
+        $useAliases = ($useAliases !== null) ? $useAliases : $this->useAliases();
 
         return $useAliases ? $this->convertAliases() : $this->columnNamesAsValue;
     }
@@ -445,7 +445,7 @@ class Csv implements Iterator
 
     /**
      * @param string $title
-     * @param mixed  $defaultValue Default value to assign to each new cell
+     * @param mixed $defaultValue Default value to assign to each new cell
      *
      * @return $this
      * @throws \ColbyGatte\SmartCsv\Exception
@@ -730,13 +730,11 @@ class Csv implements Iterator
     }
 
     /**
-     * @param bool $useAliases
-     *
      * @return $this
      */
-    public function setUseAliases($useAliases)
+    public function useAliases()
     {
-        $this->useAliases = $useAliases;
+        $this->useAliases = true;
 
         return $this;
     }
