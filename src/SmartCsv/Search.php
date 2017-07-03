@@ -7,7 +7,7 @@ class Search
     /**
      * @var callable[]
      */
-    private $searchFilters = [];
+    protected $searchFilters = [];
 
     /**
      * @param callable $filter

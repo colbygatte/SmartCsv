@@ -128,11 +128,9 @@ class Row implements Iterator, Countable
      *
      * @return bool
      */
-    public function isEmpty($columns = [])
+    public function isEmpty($columns = null)
     {
-        if (empty($columns)) {
-            $columns = $this->csv->getHeader();
-        }
+        $columns = $columns ?: $this->csv->getHeader();
 
         foreach ($columns as $column) {
             if (! $this->$column) {

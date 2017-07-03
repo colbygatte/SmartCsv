@@ -97,8 +97,6 @@ class CsvTest extends TestCase
     /** @test */
     public function can_change_value_using_alias()
     {
-        $this->assertTrue(true);
-
         $csv = csv([
             'aliases' => ['shortstring' => 'A Really Long String Of Text']
         ])
@@ -145,7 +143,6 @@ class CsvTest extends TestCase
         foreach ($csv as $row) {
             $ages[] = $row->age;
         }
-
 
         $this->assertEquals(['noage'], array_keys(array_flip($ages)));
     }

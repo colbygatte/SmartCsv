@@ -47,13 +47,14 @@ trait CsvIterator
     /**
      * Move forward to next element
      *
-     * @return Row
+     * @return Row|null
      */
     public function next()
     {
         // If $this->saveRows is set, all rows have been loaded already.
         if ($this->saveRows) {
             next($this->rows);
+
             return;
         }
 
@@ -64,6 +65,7 @@ trait CsvIterator
 
         if (! ($row = $this->gets())) {
             $this->currentRow = null;
+
             return;
         }
 
@@ -93,11 +95,7 @@ trait CsvIterator
      */
     public function valid()
     {
-        if ($this->saveRows) {
-            return key($this->rows) !== null;
-        }
-
-        return $this->currentRow !== null;
+        return $this->saveRows ? key($this->rows) !== null : $this->currentRow !== null;
     }
 
     /**
@@ -118,7 +116,10 @@ trait CsvIterator
      */
     public function each(callable $callback)
     {
-        array_map($callback, $this->rows);
+        // array_map() is not used because it would not work in sip mode
+        foreach ($this as $row) {
+            $callback($row);
+        }
 
         return $this;
     }

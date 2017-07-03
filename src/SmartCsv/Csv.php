@@ -383,7 +383,7 @@ class Csv implements Iterator
     }
 
     /**
-     * @return \string[]
+     * @return string[]
      */
     public function getHeader($useAliases = null)
     {
