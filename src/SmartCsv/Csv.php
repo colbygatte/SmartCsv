@@ -323,7 +323,7 @@ class Csv implements Iterator
      */
     public function runSearch(Search $search)
     {
-        $results = csv()->setHeader($this->getHeader());
+        $results = (new static)->setHeader($this->getHeader());
 
         if ($this->alter) {
             throw new Exception('Cannot search in alter mode.');
@@ -395,7 +395,7 @@ class Csv implements Iterator
     /**
      * @param array $header
      *
-     * @return $this
+     * @return \ColbyGatte\SmartCsv\Csv
      * @throws \ColbyGatte\SmartCsv\Exception
      */
     public function setHeader($header)
@@ -497,14 +497,14 @@ class Csv implements Iterator
      * Write current CSV to file.
      * Note: After any writing is done, read() cannot be called.
      *
-     * @param $toFile
+     * @param string|resource $toFile
      */
     public function write($toFile)
     {
         // If we are trying to write, then do not allow reading
         $this->read = true;
 
-        $fh = fopen($toFile, 'w');
+        $fh = is_resource($toFile) ? $toFile : fopen($toFile, 'w');
 
         $this->puts($this->getHeader(), $fh);
 
@@ -682,7 +682,6 @@ class Csv implements Iterator
      */
     public function findMatches(Csv $csvToSearch, array $parameters)
     {
-        /** @var \ColbyGatte\SmartCsv\Csv $resultCsv */
         $resultCsv = (new static)->setHeader($csvToSearch->getHeader());
 
         foreach ($this as $row) {
