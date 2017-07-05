@@ -69,7 +69,9 @@ if (! function_exists('csv_search')) {
      */
     function csv_search($csv, $filters)
     {
-        return (is_string($csv) ? csv_sip($csv) : $csv)->runSearch(
+        $csv = is_string($csv) ? csv_sip($csv) : $csv;
+        
+        return $csv->runSearch(
             (new Search)->addFilters($filters)
         );
     }
