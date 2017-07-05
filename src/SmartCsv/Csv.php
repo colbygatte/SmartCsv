@@ -58,7 +58,7 @@ class Csv implements Iterator
      *
      * @var string
      */
-    protected $csvFile;
+    protected $csvFile = null;
 
     /**
      * @var \ColbyGatte\SmartCsv\Row[]

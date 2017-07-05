@@ -32,7 +32,9 @@ class Row implements Iterator, Countable
 
         if ($dataCount != $columnCount) {
             if ($csv->isStrictMode()) {
-                throw new Exception("Expected $columnCount data entry(s), received $dataCount.");
+                $message = $csv->getFile() ? " (File: {$csv->getFile()})" : ' (no file set)';
+
+                throw new Exception("Expected $columnCount data entry(s), received $dataCount.$message");
             }
 
             $data = array_pad($data, $csv->columnCount(), '');

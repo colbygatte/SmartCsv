@@ -219,7 +219,7 @@ class CsvTest extends TestCase
             csv()->setHeader(['one', 'two', 'three'])->append(['hi']);
         });
 
-        $this->assertEquals('Expected 3 data entry(s), received 1.', $m);
+        $this->assertEquals('Expected 3 data entry(s), received 1. (no file set)', $m);
     }
 
     /** @test */
@@ -239,7 +239,7 @@ class CsvTest extends TestCase
             csv()->setHeader(['just one'])->append(['one', 'two']);
         });
 
-        $this->assertEquals('Expected 1 data entry(s), received 2.', $m);
+        $this->assertEquals('Expected 1 data entry(s), received 2. (no file set)', $m);
     }
 
     /** @test */
