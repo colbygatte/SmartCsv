@@ -116,7 +116,6 @@ $path = '/tmp/iterate.csv';
 // make dummy csv
 csv()->setHeader(['name', 'age'])
     ->append(
-        ['name', 'age'],
         ['Colby', '26'],
         ['Sarah', '22'],
         ['Ben', '50']
@@ -153,7 +152,6 @@ Sarah,102510
 ```php
 $csv = csv()->setHeader(['name', 'age'])
     ->append(
-        ['name', 'age'],
         ['Frankenstein', '26'],
         ['Sarah', '22'],
         ['Ben', '50']
@@ -179,7 +177,8 @@ Sarah,22
 ```
 
 ### Grouping
-When you have multiple columns that you need to bring together, you can use groupColumns().
+When you have multiple columns that you need to bring together, you can use groupColumns(). 
+The columns can be in any order. The matches are made using the line endings.
 ```php
 <?php
 // Grouping data
@@ -211,6 +210,10 @@ print_r($grouped);
         )
 )
 ```
+The columns can be in any order, with any data in between the columns. The matches are made using the line endings. 
+Example: If the colums were in this order:
+`Spec 1,Some Random Column,Spec 2,Val 1,Val 2,UOM 1,UOM 2`
+You would still get the same result as above.
 
 ### Index Aliases
 ```php
