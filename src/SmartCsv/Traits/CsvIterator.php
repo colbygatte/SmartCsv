@@ -21,7 +21,7 @@ trait CsvIterator
      * @var null|false|\ColbyGatte\SmartCsv\Row
      */
     protected $currentRow = false;
-
+    
     /**
      * Do we want to save each previous row from the loop?
      * This only happens in no-save mode ($save is false).
@@ -29,9 +29,10 @@ trait CsvIterator
      * @var null|resource
      */
     protected $alter;
-
+    
     /**
      * Return the current element
+     *
      * @return \ColbyGatte\SmartCsv\Row
      */
     public function current()
@@ -40,10 +41,10 @@ trait CsvIterator
         if ($this->saveRows) {
             return current($this->rows);
         }
-
+        
         return $this->currentRow;
     }
-
+    
     /**
      * Move forward to next element
      *
@@ -54,26 +55,26 @@ trait CsvIterator
         // If $this->saveRows is set, all rows have been loaded already.
         if ($this->saveRows) {
             next($this->rows);
-
+            
             return;
         }
-
+        
         // If we are in alter mode, write the previous line (only if it hasn't been unset, which means the row was deleted)
         if (is_resource($this->alter) && $this->currentRow) {
             $this->puts($this->currentRow, $this->alter);
         }
-
+        
         if (! ($row = $this->gets())) {
             $this->currentRow = null;
-
+            
             return;
         }
-
+        
         $this->currentRow = $row;
-
+        
         return $row;
     }
-
+    
     /**
      * Return the key of the current element
      *
@@ -84,10 +85,10 @@ trait CsvIterator
         if ($this->saveRows) {
             return key($this->rows);
         }
-
+        
         return 0;
     }
-
+    
     /**
      * Checks if current position is valid
      *
@@ -97,7 +98,7 @@ trait CsvIterator
     {
         return $this->saveRows ? key($this->rows) !== null : $this->currentRow !== null;
     }
-
+    
     /**
      * Rewind the Iterator to the first element
      */
@@ -105,7 +106,7 @@ trait CsvIterator
     {
         reset($this->rows);
     }
-
+    
     /**
      * Iterate over each element.
      * $callable is passed the Row instance..
@@ -120,7 +121,7 @@ trait CsvIterator
         foreach ($this as $row) {
             $callback($row);
         }
-
+        
         return $this;
     }
 }

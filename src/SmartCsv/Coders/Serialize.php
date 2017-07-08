@@ -13,7 +13,7 @@ class Serialize implements CoderInterface
     {
         return serialize($data);
     }
-
+    
     /**
      * @param $data
      *

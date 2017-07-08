@@ -1,6 +1,6 @@
 <?php
 
-define('SAMPLE_CSV', __DIR__ . '/sample.csv');
+define('SAMPLE_CSV', __DIR__.'/sample.csv');
 
 /**
  * @return \Faker\Generator
@@ -8,7 +8,7 @@ define('SAMPLE_CSV', __DIR__ . '/sample.csv');
 function faker()
 {
     static $faker;
-
+    
     return $faker ?: $faker = \Faker\Factory::create();
 }
 
@@ -25,7 +25,7 @@ function csv_faker($writeTo, $rows = 20)
     $valOrEmpty = function ($val) {
         return faker()->boolean() ? faker()->$val : '';
     };
-
+    
     $foods = [
         'pizza',
         'sushi',
@@ -37,7 +37,7 @@ function csv_faker($writeTo, $rows = 20)
         'spaghetti',
         'grilled chicken caesar salad'
     ];
-
+    
     $attributePossibilities = [
         'hair color' => function () {
             return faker()->colorName;
@@ -49,13 +49,13 @@ function csv_faker($writeTo, $rows = 20)
             return faker()->city;
         },
         'height' => function () {
-            return faker()->numberBetween(4, 7) . 'ft ' . faker()->numberBetween(0, 11) . 'in';
+            return faker()->numberBetween(4, 7).'ft '.faker()->numberBetween(0, 11).'in';
         },
         'weight' => function () {
-            return faker()->numberBetween(100, 250) . 'lb';
+            return faker()->numberBetween(100, 250).'lb';
         }
     ];
-
+    
     $header = [
         'name',
         'age',
@@ -73,47 +73,47 @@ function csv_faker($writeTo, $rows = 20)
         'notes 3',
         'other_info'
     ];
-
+    
     $csv = csv()->setHeader($header);
-
+    
     for ($i = 0; $i < $rows; $i++) {
         $rowData = [
             faker()->name,
-
+            
             // age
             faker()->numberBetween(20, 100),
-
+            
             // 3x contact fields
             $valOrEmpty('email'),
             $valOrEmpty('email'),
             $valOrEmpty('email'),
         ];
-
+        
         $copy = $attributePossibilities;
         shuffle($copy);
-
+        
         // 3x attribute, value, notes
         for ($j = 0; $j < 3; $j++) {
             if (! faker()->boolean()) {
                 array_push($rowData, '', '', '');
-
+                
                 continue;
             }
-
+            
             $randomAttribute = array_rand($attributePossibilities);
-
+            
             array_push($rowData, $randomAttribute, $attributePossibilities[$randomAttribute](),
                 $valOrEmpty('sentence'));
         }
-
+        
         // random info
         array_push($rowData, serialize(['random-string' => faker()->randomAscii]));
-
+        
         $csv->append($rowData);
     }
-
+    
     $csv->write($writeTo);
-
+    
     return $writeTo;
 }
 
@@ -124,5 +124,9 @@ function csv_faker($writeTo, $rows = 20)
  */
 function thrown_message($callable)
 {
-    try { $callable(); } catch (\Exception $e) { return $e->getMessage(); }
+    try {
+        $callable();
+    } catch (\Exception $e) {
+        return $e->getMessage();
+    }
 }

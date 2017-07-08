@@ -6,15 +6,30 @@ use ColbyGatte\SmartCsv\Row;
 
 /**
  * CSV Input/Output
+ *
  * @package ColbyGatte\SmartCsv\Traits
  */
 trait CsvIo
 {
     /**
-     * @param array|Row $data
-     * @param resource  $fh
+     * The CSV file handle.
+     * $this->gets() and $this->puts() read from here if
+     * no file handle is given.
+     *
+     * @var resource|bool
      */
-    private function puts($data, $fh = null)
+    protected $fileHandle;
+    
+    /**
+     * @var string
+     */
+    protected $delimiter = ',';
+    
+    /**
+     * @param array|Row $data
+     * @param resource $fh
+     */
+    protected function puts($data, $fh = null)
     {
         fputcsv(
             $fh ?: $this->fileHandle,
@@ -22,20 +37,20 @@ trait CsvIo
             $this->delimiter
         );
     }
-
+    
     /**
      * @param bool $makeRow
      *
      * @return array|\ColbyGatte\SmartCsv\Row
      */
-    private function gets($makeRow = true)
+    protected function gets($makeRow = true)
     {
         $data = fgetcsv($this->fileHandle, 0, $this->delimiter);
-
+        
         if ($makeRow && $data !== false) {
             return new Row($this, $data);
         }
-
+        
         return $data;
     }
 }

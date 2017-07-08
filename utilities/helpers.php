@@ -15,7 +15,7 @@ if (! function_exists('csv')) {
     function csv($options = [])
     {
         $csv = (new Csv)->parseOptions($options);
-
+        
         return $csv->getFile() ? $csv->read() : $csv;
     }
 }
@@ -23,7 +23,7 @@ if (! function_exists('csv')) {
 if (! function_exists('csv_slurp')) {
     /**
      * @param string $file
-     * @param array  $options
+     * @param array $options
      *
      * @return \ColbyGatte\SmartCsv\Csv
      */
@@ -37,7 +37,7 @@ if (! function_exists('csv_alter')) {
     /**
      * @param string $csv
      * @param string $writeTo
-     * @param array  $options
+     * @param array $options
      *
      * @return \ColbyGatte\SmartCsv\Csv
      */
@@ -50,7 +50,7 @@ if (! function_exists('csv_alter')) {
 if (! function_exists('csv_sip')) {
     /**
      * @param string $file
-     * @param array  $options
+     * @param array $options
      *
      * @return \ColbyGatte\SmartCsv\Csv
      */
@@ -63,7 +63,7 @@ if (! function_exists('csv_sip')) {
 if (! function_exists('csv_search')) {
     /**
      * @param \ColbyGatte\SmartCsv\Csv|string $csv
-     * @param callable[]                      $filters
+     * @param callable[] $filters
      *
      * @return Csv
      */

@@ -3,32 +3,37 @@
 namespace ColbyGatte\SmartCsv;
 
 use ColbyGatte\SmartCsv\Coders\CoderInterface;
+use ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper;
 use ColbyGatte\SmartCsv\Traits\CsvIo;
 use ColbyGatte\SmartCsv\Traits\CsvIterator;
-use ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper;
 use Iterator;
 
 class Csv implements Iterator
 {
     use CsvIterator, CsvIo;
-
-    /**
-     * @var bool
-     */
-    protected $strictMode = true;
-
+    
     /**
      * @var array
      */
     public $indexAliases = [];
-
+    
     /**
      * Whether or not to use aliases when writing to a CSV (instead of using original values)
      *
      * @var bool
      */
     public $useAliases = false;
-
+    
+    /**
+     * @var \ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper
+     */
+    public $columnGroupingHelper;
+    
+    /**
+     * @var bool
+     */
+    protected $strictMode = true;
+    
     /**
      * Key: index alias strings
      * Value: corresponding index of each row
@@ -36,7 +41,7 @@ class Csv implements Iterator
      * @var array
      */
     protected $columnNamesAsKey = [];
-
+    
     /**
      * Key: index of rows
      * Value: index alias strings
@@ -44,7 +49,7 @@ class Csv implements Iterator
      * @var array
      */
     protected $columnNamesAsValue = [];
-
+    
     /**
      * Whether or not the csv file has been read or written.
      * Reading can only be done before any other actions are done.
@@ -52,28 +57,19 @@ class Csv implements Iterator
      * @var bool
      */
     protected $read = false;
-
+    
     /**
      * The CSV file being read.
      *
      * @var string
      */
     protected $csvFile = null;
-
+    
     /**
      * @var \ColbyGatte\SmartCsv\Row[]
      */
     protected $rows = [];
-
-    /**
-     * The CSV file handle.
-     * $this->gets() and $this->puts() read from here if
-     * no file handle is given.
-     *
-     * @var resource|bool
-     */
-    protected $fileHandle = false;
-
+    
     /**
      * Save rows when reading?
      *
@@ -83,7 +79,7 @@ class Csv implements Iterator
      * @var bool
      */
     protected $saveRows = true;
-
+    
     /**
      * They key is the column to code.
      * The values are the coder to run it through.
@@ -92,22 +88,12 @@ class Csv implements Iterator
      * @var array
      */
     protected $coders = [];
-
+    
     /**
      * @var bool
      */
     protected $optionsParsed = false;
-
-    /**
-     * @var string
-     */
-    protected $delimiter = ',';
-
-    /**
-     * @var \ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper
-     */
-    public $columnGroupingHelper;
-
+    
     /**
      * A container holding column group data passed to $this->makeGroup()
      * until the header has been read.
@@ -115,7 +101,7 @@ class Csv implements Iterator
      * @var array
      */
     protected $columnGroups = [];
-
+    
     /**
      * Csv constructor.
      */
@@ -123,7 +109,7 @@ class Csv implements Iterator
     {
         $this->columnGroupingHelper = new ColumnGroupingHelper($this);
     }
-
+    
     /**
      * @param null $options
      *
@@ -135,209 +121,116 @@ class Csv implements Iterator
         if ($this->read) {
             throw new Exception('File already read!');
         }
-
+        
         if ($options == null && ! $this->optionsParsed) {
             throw new Exception('No options have been set!');
         }
-
+        
         if ($options) {
             $this->parseOptions($options);
         }
-
+        
         $this->setUp();
-
+        
         // If we aren't saving the rows, read the first line only.
         if (! $this->saveRows) {
             $this->currentRow = $this->gets();
-
+            
             return $this;
         }
-
+        
         // Read EVERYTHING!
         while ($row = $this->gets()) {
             array_push($this->rows, $row);
         }
-
+        
         $this->tearDown();
-
+        
         return $this;
     }
-
-
+    
     /**
-     * @return $this
-     * @throws \ColbyGatte\SmartCsv\Exception
-     */
-    public function append()
-    {
-        if (empty($this->columnNamesAsValue)) {
-            throw new Exception('Header must be set before adding rows!');
-        }
-
-        foreach (func_get_args() as $data) {
-            if ($data instanceof Row) { // TODO: clone row in case it's coming from another CSV, check for equal amount of columns
-                $this->rows[] = $data;
-            } else {
-                $this->rows[] = new Row($this, $data);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Append row only if there the same instance isn't already present.
-     *
-     * @param \ColbyGatte\SmartCsv\Row $row
-     *
-     * @return \ColbyGatte\SmartCsv\Csv
-     */
-    public function appendIfUnique(Row $row)
-    {
-        if (! in_array($row, $this->rows)) {
-            $this->rows[] = $row;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Used for only mode, where column header count won't be the same as the data count recieved.
-     *
-     * @return bool
-     */
-    public function isStrictMode()
-    {
-        return $this->strictMode;
-    }
-
-    /**
-     * @param bool $mode
-     *
-     * @return \ColbyGatte\SmartCsv\Csv
-     */
-    public function setStrictMode($mode)
-    {
-        $this->strictMode = $mode;
-
-        return $this;
-    }
-
-    /**
-     * @param \ColbyGatte\SmartCsv\Row|int $row
-     * @param bool                         $reindex
-     *
-     * @return bool
-     * @throws \ColbyGatte\SmartCsv\Exception
-     */
-    public function delete($row, $reindex = true)
-    {
-        if ($row instanceof Row) {
-            // If we are in alter mode, deleting the row will mean not saving it to the new CSV file,
-            // so we just set the value of currentRow to false.
-            if ($this->alter) {
-                $this->currentRow = false;
-
-                return true;
-            }
-
-            if (($index = array_search($row, $this->rows)) !== false) {
-                unset($this->rows[$index]);
-
-                return true;
-            }
-
-            return false;
-        }
-
-        if (! is_int($row)) {
-            throw new Exception("Invalid row index $row.");
-        }
-
-        if (isset($this->rows[$row])) {
-            unset($this->rows[$row]);
-
-            if ($reindex) {
-                $this->rows = array_values($this->rows);
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Ran before writing to a CSV file.
+     * @param $options
      *
      * @return $this
      * @throws \ColbyGatte\SmartCsv\Exception
      */
-    protected function setUp()
+    public function parseOptions($options)
     {
-        if (($this->fileHandle = fopen($this->csvFile, 'r')) === false) {
-            throw new Exception("Could not open {$this->csvFile}.");
+        if (is_string($options)) {
+            $this->csvFile = $options;
+            
+            $this->optionsParsed = true;
+            
+            return $this;
         }
-
-        // If strict mode is turned off (which it is for $this->only()
-        // and the header is already set, throw it away
-        if ($this->columnNamesAsKey != null) {
-            if ($this->isStrictMode()) {
-                throw new Exception("Headers were already set before reading started!");
-            } else {
-                $this->gets(false);
-
-                return $this;
+        
+        if (! is_array($options)) {
+            throw new Exception('Csv needs a string or an array.');
+        }
+        
+        $this->optionsParsed = true;
+        
+        foreach ($options as $option => $value) {
+            switch ($option) {
+            case 'file':
+                $this->csvFile = $value;
+                break;
+            
+            case 'alter':
+                $this->alter = fopen($value, 'w');
+                $this->saveRows = false;
+                break;
+            
+            case 'save':
+                if (is_bool($value)) {
+                    $this->saveRows = $value;
+                }
+                break;
+            
+            case 'del':
+                $this->delimiter = $value;
+                break;
+            
+            case 'aliases':
+                $this->findIndexes($value);
+                break;
+            
+            case 'coders':
+                foreach ($value as $column => $coder) {
+                    $this->addCoder($column, $coder);
+                }
+                break;
             }
         }
-
-        $this->setHeader($this->gets(false));
-
-        // If we are in alter mode, output the header
-        if ($this->alter) {
-            $this->puts($this->getHeader(), $this->alter);
-        }
-
+        
         return $this;
     }
-
+    
     /**
-     * Ran after writing to a CSV file.
+     * Add index aliases to Csv::$columnNamesAsKey
      *
      * @return $this
      */
-    protected function tearDown()
+    protected function findIndexes($aliases = null)
     {
-        fclose($this->fileHandle);
-
-        $this->read = true;
-
-        return $this;
-    }
-
-    /**
-     * @param \ColbyGatte\SmartCsv\Search $search
-     *
-     * @return \ColbyGatte\SmartCsv\Csv
-     * @throws \ColbyGatte\SmartCsv\Exception
-     */
-    public function runSearch(Search $search)
-    {
-        $results = (new static)->setHeader($this->getHeader());
-
-        if ($this->alter) {
-            throw new Exception('Cannot search in alter mode.');
+        if (! is_null($aliases)) {
+            $this->indexAliases = $aliases;
         }
-
-        foreach ($this as $row) {
-            if ($search->runFilters($row)) {
-                $results->append($row);
+        
+        foreach ($aliases as $indexName => $indexSearchTerm) {
+            $index = array_search($indexSearchTerm, $this->columnNamesAsValue);
+            
+            if ($index !== false) {
+                $this->columnNamesAsKey[$indexName] = $index;
             }
         }
-
-        return $results;
+        
+        $this->columnNamesAsValue = array_flip($this->columnNamesAsKey);
+        
+        return $this;
     }
-
+    
     /**
      * @param string $column
      * @param string $coder
@@ -350,48 +243,68 @@ class Csv implements Iterator
         if (! is_subclass_of($coder, CoderInterface::class)) {
             throw new Exception("$coder does not implement CoderInterface.");
         }
-
+        
         $this->coders[$column] = $coder;
-
+        
         return $this;
     }
-
+    
     /**
-     * Used by Row.
+     * Ran before writing to a CSV file.
      *
-     * @return array
+     * @return $this
+     * @throws \ColbyGatte\SmartCsv\Exception
      */
-    public function getCoders()
+    protected function setUp()
     {
-        return $this->coders;
+        if (($this->fileHandle = fopen($this->csvFile, 'r')) === false) {
+            throw new Exception("Could not open {$this->csvFile}.");
+        }
+        
+        // If strict mode is turned off (which it is for $this->only()
+        // and the header is already set, throw it away
+        if ($this->columnNamesAsKey != null) {
+            if ($this->isStrictMode()) {
+                throw new Exception("Headers were already set before reading started!");
+            } else {
+                $this->gets(false);
+                
+                return $this;
+            }
+        }
+        
+        $this->setHeader($this->gets(false));
+        
+        // If we are in alter mode, output the header
+        if ($this->alter) {
+            $this->puts($this->getHeader(), $this->alter);
+        }
+        
+        return $this;
     }
-
+    
     /**
-     * @return string|false
+     * Used for only mode, where column header count won't be the same as the data count recieved.
+     *
+     * @return bool
      */
-    public function getFile()
+    public function isStrictMode()
     {
-        return $this->csvFile ?: false;
+        return $this->strictMode;
     }
-
+    
     /**
-     * @return string
+     * @param bool $mode
+     *
+     * @return \ColbyGatte\SmartCsv\Csv
      */
-    public function getDelimiter()
+    public function setStrictMode($mode)
     {
-        return $this->delimiter;
+        $this->strictMode = $mode;
+        
+        return $this;
     }
-
-    /**
-     * @return string[]
-     */
-    public function getHeader($useAliases = null)
-    {
-        $useAliases = ($useAliases !== null) ? $useAliases : $this->useAliases();
-
-        return $useAliases ? $this->convertAliases() : $this->columnNamesAsValue;
-    }
-
+    
     /**
      * @param array $header
      *
@@ -403,54 +316,233 @@ class Csv implements Iterator
         if (! is_array($header)) {
             throw new Exception('Header must be an array.');
         }
-
+        
         if ($this->columnNamesAsValue != null) {
             throw new Exception('Header can only be set once!');
         }
-
+        
         $this->columnNamesAsKey = array_flip($header);
         $this->columnNamesAsValue = $header;
-
+        
         // If $this->columnNamesAsKey & $this->columnNamesAsValue are different,
         // all the column titles were not unique. Lets tell throw an exception
         // showing which column titles were duplicates.
         if (count($this->columnNamesAsValue) != count($this->columnNamesAsKey)) {
             $this->throwColumnsNotUniqueException();
         }
-
+        
         $this->columnGroupingHelper->setColumnNames($header);
-
+        
         $this->findIndexes();
-
+        
         foreach ($this->columnGroups as $data) {
             $this->columnGroupingHelper->columnGroup(...$data);
         }
-
+        
         return $this;
     }
-
+    
     /**
      * @throws \ColbyGatte\SmartCsv\Exception
      */
     protected function throwColumnsNotUniqueException()
     {
         $counts = [];
-
+        
         foreach ($this->columnNamesAsValue as $column) {
             if (! isset($counts[$column])) {
                 $counts[$column] = 0;
             }
-
+            
             $counts[$column]++;
         }
-
+        
         $more = array_flip(array_filter($counts, function ($value) {
             return $value > 1;
         }));
-
-        throw new Exception('Duplicate headers: ' . implode(', ', $more));
+        
+        throw new Exception('Duplicate headers: '.implode(', ', $more));
     }
-
+    
+    /**
+     * @return string[]
+     */
+    public function getHeader($useAliases = null)
+    {
+        $useAliases = ($useAliases !== null) ? $useAliases : $this->useAliases();
+        
+        return $useAliases ? $this->convertAliases() : $this->columnNamesAsValue;
+    }
+    
+    /**
+     * @return $this
+     */
+    public function useAliases()
+    {
+        $this->useAliases = true;
+        
+        return $this;
+    }
+    
+    /**
+     * Convert the header line of the CSV to use the defined
+     * aliases instead of the original values.
+     *
+     * @return string[]
+     */
+    public function convertAliases()
+    {
+        $aliasesFlipped = array_flip($this->indexAliases);
+        
+        $headerUsingAliases = [];
+        
+        foreach ($this->columnNamesAsValue as $column) {
+            if (isset($aliasesFlipped[$column])) {
+                $headerUsingAliases[] = $aliasesFlipped[$column];
+            } else {
+                $headerUsingAliases[] = $column;
+            }
+        }
+        
+        return $headerUsingAliases;
+    }
+    
+    /**
+     * Ran after writing to a CSV file.
+     *
+     * @return $this
+     */
+    protected function tearDown()
+    {
+        fclose($this->fileHandle);
+        
+        $this->read = true;
+        
+        return $this;
+    }
+    
+    /**
+     * @return $this
+     * @throws \ColbyGatte\SmartCsv\Exception
+     */
+    public function append()
+    {
+        if (empty($this->columnNamesAsValue)) {
+            throw new Exception('Header must be set before adding rows!');
+        }
+        
+        foreach (func_get_args() as $data) {
+            if ($data instanceof Row) { // TODO: clone row in case it's coming from another CSV, check for equal amount of columns
+                $this->rows[] = $data;
+            } else {
+                $this->rows[] = new Row($this, $data);
+            }
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * Append row only if there the same instance isn't already present.
+     *
+     * @param \ColbyGatte\SmartCsv\Row $row
+     *
+     * @return \ColbyGatte\SmartCsv\Csv
+     */
+    public function appendIfUnique(Row $row)
+    {
+        if (! in_array($row, $this->rows)) {
+            $this->rows[] = $row;
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * @param \ColbyGatte\SmartCsv\Row|int $row
+     * @param bool $reindex
+     *
+     * @return bool
+     * @throws \ColbyGatte\SmartCsv\Exception
+     */
+    public function delete($row, $reindex = true)
+    {
+        if ($row instanceof Row) {
+            // If we are in alter mode, deleting the row will mean not saving it to the new CSV file,
+            // so we just set the value of currentRow to false.
+            if ($this->alter) {
+                $this->currentRow = false;
+                
+                return true;
+            }
+            
+            if (($index = array_search($row, $this->rows)) !== false) {
+                unset($this->rows[$index]);
+                
+                return true;
+            }
+            
+            return false;
+        }
+        
+        if (! is_int($row)) {
+            throw new Exception("Invalid row index $row.");
+        }
+        
+        if (isset($this->rows[$row])) {
+            unset($this->rows[$row]);
+            
+            if ($reindex) {
+                $this->rows = array_values($this->rows);
+            }
+            
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * @param \ColbyGatte\SmartCsv\Search $search
+     *
+     * @return \ColbyGatte\SmartCsv\Csv
+     * @throws \ColbyGatte\SmartCsv\Exception
+     */
+    public function runSearch(Search $search)
+    {
+        $results = (new static)->setHeader($this->getHeader());
+        
+        if ($this->alter) {
+            throw new Exception('Cannot search in alter mode.');
+        }
+        
+        foreach ($this as $row) {
+            if ($search->runFilters($row)) {
+                $results->append($row);
+            }
+        }
+        
+        return $results;
+    }
+    
+    /**
+     * Used by Row.
+     *
+     * @return array
+     */
+    public function getCoders()
+    {
+        return $this->coders;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getDelimiter()
+    {
+        return $this->delimiter;
+    }
+    
     /**
      * @param string $title
      * @param mixed $defaultValue Default value to assign to each new cell
@@ -463,28 +555,28 @@ class Csv implements Iterator
         if ($this->saveRows != true) {
             throw new Exception("addColumn() can only be used in slurp mode.");
         }
-
+        
         if (! is_string($title)) {
             throw new Exception("Title must be a string.");
         }
-
+        
         $header = $this->getHeader(false);
         array_push($header, $title);
-
+        
         $this->columnNamesAsValue = null;
         $this->columnNamesAsKey = null;
-
+        
         $this->setHeader($header);
-
+        
         foreach ($this as $row) {
             $row->addColumn($defaultValue);
         }
-
+        
         $this->columnGroupingHelper = new ColumnGroupingHelper($this);
-
+        
         return $this;
     }
-
+    
     /**
      * @return int
      */
@@ -492,7 +584,7 @@ class Csv implements Iterator
     {
         return count($this->columnNamesAsValue);
     }
-
+    
     /**
      * Write current CSV to file.
      * Note: After any writing is done, read() cannot be called.
@@ -503,18 +595,18 @@ class Csv implements Iterator
     {
         // If we are trying to write, then do not allow reading
         $this->read = true;
-
+        
         $fh = is_resource($toFile) ? $toFile : fopen($toFile, 'w');
-
+        
         $this->puts($this->getHeader(), $fh);
-
+        
         foreach ($this as $row) {
             $this->puts($row, $fh);
         }
-
+        
         fclose($fh);
     }
-
+    
     /**
      * @param $columns
      *
@@ -523,16 +615,16 @@ class Csv implements Iterator
     public function missingColumns($columns)
     {
         $missing = [];
-
+        
         foreach ($columns as $column) {
             if (! isset($this->columnNamesAsKey[$column])) {
                 $missing[] = $column;
             }
         }
-
+        
         return $missing;
     }
-
+    
     /**
      * @return bool
      */
@@ -542,10 +634,10 @@ class Csv implements Iterator
         if ($this->currentRow !== false || count($this->rows)) {
             return true;
         }
-
+        
         return false;
     }
-
+    
     /**
      * This must be called after the header has been parsed.
      * A new Csv instance will be returned, using sip mode.
@@ -557,107 +649,33 @@ class Csv implements Iterator
     public function only(array $columns)
     {
         $columnIndexes = [];
-
+        
         foreach ($columns as $column) {
             $columnIndexes[$this->columnNamesAsKey[$column]] = $column;
         }
-
+        
         $options = [
             'save' => false,
             'file' => $this->getFile()
         ];
-
+        
         return (new static)->parseOptions($options)
             ->setHeader($columnIndexes)
             ->setStrictMode(false)
             ->read();
     }
-
+    
     /**
-     * @param $options
-     *
-     * @return $this
-     * @throws \ColbyGatte\SmartCsv\Exception
+     * @return string|false
      */
-    public function parseOptions($options)
+    public function getFile()
     {
-        if (is_string($options)) {
-            $this->csvFile = $options;
-
-            $this->optionsParsed = true;
-
-            return $this;
-        }
-
-        if (! is_array($options)) {
-            throw new Exception('Csv needs a string or an array.');
-        }
-
-        $this->optionsParsed = true;
-
-        foreach ($options as $option => $value) {
-            switch ($option) {
-                case 'file':
-                    $this->csvFile = $value;
-                    break;
-
-                case 'alter':
-                    $this->alter = fopen($value, 'w');
-                    $this->saveRows = false;
-                    break;
-
-                case 'save':
-                    if (is_bool($value)) {
-                        $this->saveRows = $value;
-                    }
-                    break;
-
-                case 'del':
-                    $this->delimiter = $value;
-                    break;
-
-                case 'aliases':
-                    $this->indexAliases = $value;
-                    $this->findIndexes();
-                    break;
-
-                case 'coders':
-                    foreach ($value as $column => $coder) {
-                        $this->addCoder($column, $coder);
-                    }
-                    break;
-            }
-        }
-
-        return $this;
+        return $this->csvFile ?: false;
     }
-
+    
     /**
-     * Convert the header line of the CSV to use the defined
-     * aliases instead of the original values.
-     *
-     * @return string[]
-     */
-    public function convertAliases()
-    {
-        $aliasesFlipped = array_flip($this->indexAliases);
-
-        $headerUsingAliases = [];
-
-        foreach ($this->columnNamesAsValue as $column) {
-            if (isset($aliasesFlipped[$column])) {
-                $headerUsingAliases[] = $aliasesFlipped[$column];
-            } else {
-                $headerUsingAliases[] = $column;
-            }
-        }
-
-        return $headerUsingAliases;
-    }
-
-    /**
-     * @param string   $name
-     * @param string   $mandatoryColumn
+     * @param string $name
+     * @param string $mandatoryColumn
      * @param string[] $additionalColumns
      *
      * @return $this
@@ -670,35 +688,35 @@ class Csv implements Iterator
         } else {
             $this->columnGroupingHelper->columnGroup($name, $mandatoryColumn, $additionalColumns);
         }
-
+        
         return $this;
     }
-
+    
     /**
      * @param \ColbyGatte\SmartCsv\Csv $csvToSearch
-     * @param array                    $parameters
+     * @param array $parameters
      *
      * @return \ColbyGatte\SmartCsv\Csv
      */
     public function findMatches(Csv $csvToSearch, array $parameters)
     {
         $resultCsv = (new static)->setHeader($csvToSearch->getHeader());
-
+        
         foreach ($this as $row) {
             foreach ($csvToSearch as $rowToSearch) {
                 foreach ($parameters as $column => $columnToMatch) {
                     if ($row->$column == $rowToSearch->$columnToMatch) {
                         $resultCsv->appendIfUnique($rowToSearch);
-
+                        
                         break;
                     }
                 }
             }
         }
-
+        
         return $resultCsv;
     }
-
+    
     /**
      * Resets the rows array and returns the first row.
      * Only works in slurp mode.
@@ -710,10 +728,10 @@ class Csv implements Iterator
         if ($this->saveRows) {
             return reset($this->rows);
         }
-
+        
         return $this->current();
     }
-
+    
     /**
      * @param $rowIndex
      *
@@ -723,7 +741,7 @@ class Csv implements Iterator
     {
         return $this->rows[$rowIndex];
     }
-
+    
     /**
      * @return int
      */
@@ -731,37 +749,7 @@ class Csv implements Iterator
     {
         return count($this->rows);
     }
-
-    /**
-     * @return $this
-     */
-    public function useAliases()
-    {
-        $this->useAliases = true;
-
-        return $this;
-    }
-
-    /**
-     * Add index aliases to Csv::$columnNamesAsKey
-     *
-     * @return $this
-     */
-    protected function findIndexes()
-    {
-        foreach ($this->indexAliases as $indexName => $indexSearchTerm) {
-            $index = array_search($indexSearchTerm, $this->columnNamesAsValue);
-
-            if ($index !== false) {
-                $this->columnNamesAsKey[$indexName] = $index;
-            }
-        }
-
-        $this->columnNamesAsValue = array_flip($this->columnNamesAsKey);
-
-        return $this;
-    }
-
+    
     /**
      * Get the index based on the CSV header
      *
@@ -772,10 +760,10 @@ class Csv implements Iterator
     public function getIndex($indexString)
     {
         $index = isset($this->columnNamesAsKey[$indexString]) ? $this->columnNamesAsKey[$indexString] : false;
-
+        
         return $index;
     }
-
+    
     /**
      * @param $index
      *
@@ -784,7 +772,7 @@ class Csv implements Iterator
     public function getIndexString($index)
     {
         $indexString = isset($this->columnNamesAsValue[$index]) ? $this->columnNamesAsValue[$index] : false;
-
+        
         return $indexString;
     }
 }

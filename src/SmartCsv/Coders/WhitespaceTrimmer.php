@@ -13,7 +13,7 @@ class WhitespaceTrimmer implements CoderInterface
     {
         return $data;
     }
-
+    
     /**
      * @param string $data
      *
