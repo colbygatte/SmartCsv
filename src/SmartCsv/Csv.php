@@ -218,7 +218,7 @@ class Csv implements Iterator
             $this->indexAliases = $aliases;
         }
         
-        foreach ($aliases as $indexName => $indexSearchTerm) {
+        foreach ($this->indexAliases as $indexName => $indexSearchTerm) {
             $index = array_search($indexSearchTerm, $this->columnNamesAsValue);
             
             if ($index !== false) {

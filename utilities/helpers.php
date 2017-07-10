@@ -1,6 +1,7 @@
 <?php
 
 use ColbyGatte\SmartCsv\Csv;
+use ColbyGatte\SmartCsv\CsvWriter;
 use ColbyGatte\SmartCsv\Search;
 
 if (! function_exists('csv')) {
@@ -57,6 +58,24 @@ if (! function_exists('csv_sip')) {
     function csv_sip($file, $options = [])
     {
         return csv(array_merge(['file' => $file, 'save' => false], $options));
+    }
+}
+
+if (! function_exists('csv_writer')) {
+    /**
+     * @param string $file
+     * @param array $header
+     *
+     * @return $this
+     */
+    function csv_writer($file, $header = null)
+    {
+        $csv_writer = (new CsvWriter)
+            ->writeTo($file);
+        
+        return is_array($header)
+            ? $csv_writer->setHeader($header)
+            : $csv_writer;
     }
 }
 
