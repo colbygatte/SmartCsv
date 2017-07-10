@@ -26,6 +26,12 @@ class CsvWriter
      */
     public function writeTo($file)
     {
+        if (is_resource($file)) {
+            $this->fileHandle = $file;
+            
+            return $this;
+        }
+        
         if (! touch($file)) {
             throw new \Exception("$file is not writable.");
         }
