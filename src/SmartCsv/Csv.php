@@ -224,7 +224,7 @@ class Csv implements Iterator
         
         // If we are in sip mode (option save = false), apply to the first row because this method
         // will be called after reading the first row.
-        if (! $this->saveRows && $row = $this->get(0)) {
+        if (! $this->saveRows && $row = $this->currentRow) {
             $row->$column = $coder::decode($row->$column);
         }
         

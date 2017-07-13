@@ -2,6 +2,7 @@
 
 namespace Tests\UnitTests;
 
+use ColbyGatte\SmartCsv\Coders\Serialize;
 use PHPUnit\Framework\TestCase;
 
 class CsvTest extends TestCase
@@ -301,5 +302,13 @@ class CsvTest extends TestCase
         });
      
         $this->assertEquals('Error setting CSV header. Could the file be empty?', $m);
+    }
+    
+    /** @test */
+    public function can_add_coder_after_calling_csv_sip()
+    {
+        $csv = csv_sip(SAMPLE_CSV)->addCoder('other_info', Serialize::class);
+     
+        $this->assertTrue(is_array($csv->first()->other_info));
     }
 }
