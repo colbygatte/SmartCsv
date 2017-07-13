@@ -208,32 +208,8 @@ class Csv implements Iterator
     }
     
     /**
-     * Add index aliases to Csv::$columnNamesAsKey
-     *
-     * @return $this
-     */
-    protected function findIndexes($aliases = null)
-    {
-        if (! is_null($aliases)) {
-            $this->indexAliases = $aliases;
-        }
-        
-        foreach ($this->indexAliases as $indexName => $indexSearchTerm) {
-            $index = array_search($indexSearchTerm, $this->columnNamesAsValue);
-            
-            if ($index !== false) {
-                $this->columnNamesAsKey[$indexName] = $index;
-            }
-        }
-        
-        $this->columnNamesAsValue = array_flip($this->columnNamesAsKey);
-        
-        return $this;
-    }
-    
-    /**
      * @param string $column
-     * @param string $coder
+     * @param CoderInterface $coder
      *
      * @return $this
      * @throws \ColbyGatte\SmartCsv\Exception
@@ -246,42 +222,10 @@ class Csv implements Iterator
         
         $this->coders[$column] = $coder;
         
-        return $this;
-    }
-    
-    /**
-     * Ran before writing to a CSV file.
-     *
-     * @return $this
-     * @throws \ColbyGatte\SmartCsv\Exception
-     */
-    protected function setUp()
-    {
-        if (($this->fileHandle = fopen($this->csvFile, 'r')) === false) {
-            throw new Exception("Could not open {$this->csvFile}.");
-        }
-        
-        // If strict mode is turned off (which it is for $this->only()
-        // and the header is already set, throw it away
-        if ($this->columnNamesAsKey != null) {
-            if ($this->isStrictMode()) {
-                throw new Exception("Headers were already set before reading started!");
-            } else {
-                $this->gets(false);
-                
-                return $this;
-            }
-        }
-        
-        try {
-            $this->setHeader($this->gets(false));
-        } catch (\Exception $e) {
-            throw new Exception("Error setting CSV header. Could the file be empty?");
-        }
-        
-        // If we are in alter mode, output the header
-        if ($this->alter) {
-            $this->puts($this->getHeader(), $this->alter);
+        // If we are in sip mode (option save = false), apply to the first row because this method
+        // will be called after reading the first row.
+        if (! $this->saveRows && $row = $this->get(0)) {
+            $row->$column = $coder::decode($row->$column);
         }
         
         return $this;
@@ -304,7 +248,7 @@ class Csv implements Iterator
      */
     public function setStrictMode($mode)
     {
-        $this->strictMode = $mode;
+        $this->strictMode = ! ! $mode;
         
         return $this;
     }
@@ -344,28 +288,6 @@ class Csv implements Iterator
         }
         
         return $this;
-    }
-    
-    /**
-     * @throws \ColbyGatte\SmartCsv\Exception
-     */
-    protected function throwColumnsNotUniqueException()
-    {
-        $counts = [];
-        
-        foreach ($this->columnNamesAsValue as $column) {
-            if (! isset($counts[$column])) {
-                $counts[$column] = 0;
-            }
-            
-            $counts[$column]++;
-        }
-        
-        $more = array_flip(array_filter($counts, function ($value) {
-            return $value > 1;
-        }));
-        
-        throw new Exception('Duplicate headers: '.implode(', ', $more));
     }
     
     /**
@@ -409,20 +331,6 @@ class Csv implements Iterator
         }
         
         return $headerUsingAliases;
-    }
-    
-    /**
-     * Ran after writing to a CSV file.
-     *
-     * @return $this
-     */
-    protected function tearDown()
-    {
-        fclose($this->fileHandle);
-        
-        $this->read = true;
-        
-        return $this;
     }
     
     /**
@@ -743,7 +651,9 @@ class Csv implements Iterator
      */
     public function get($rowIndex)
     {
-        return $this->rows[$rowIndex];
+        return isset($this->rows[$rowIndex])
+            ? $this->rows[$rowIndex]
+            : false;
     }
     
     /**
@@ -778,5 +688,103 @@ class Csv implements Iterator
         $indexString = isset($this->columnNamesAsValue[$index]) ? $this->columnNamesAsValue[$index] : false;
         
         return $indexString;
+    }
+    
+    /**
+     * Add index aliases to Csv::$columnNamesAsKey
+     *
+     * @return $this
+     */
+    protected function findIndexes($aliases = null)
+    {
+        if (! is_null($aliases)) {
+            $this->indexAliases = $aliases;
+        }
+        
+        foreach ($this->indexAliases as $indexName => $indexSearchTerm) {
+            $index = array_search($indexSearchTerm, $this->columnNamesAsValue);
+            
+            if ($index !== false) {
+                $this->columnNamesAsKey[$indexName] = $index;
+            }
+        }
+        
+        $this->columnNamesAsValue = array_flip($this->columnNamesAsKey);
+        
+        return $this;
+    }
+    
+    /**
+     * Ran before writing to a CSV file.
+     *
+     * @return $this
+     * @throws \ColbyGatte\SmartCsv\Exception
+     */
+    protected function setUp()
+    {
+        if (($this->fileHandle = fopen($this->csvFile, 'r')) === false) {
+            throw new Exception("Could not open {$this->csvFile}.");
+        }
+        
+        // If strict mode is turned off (which it is for $this->only()
+        // and the header is already set, throw it away
+        if ($this->columnNamesAsKey != null) {
+            if ($this->isStrictMode()) {
+                throw new Exception("Headers were already set before reading started!");
+            } else {
+                $this->gets(false);
+                
+                return $this;
+            }
+        }
+        
+        try {
+            $this->setHeader($this->gets(false));
+        } catch (\Exception $e) {
+            throw new Exception("Error setting CSV header. Could the file be empty?");
+        }
+        
+        // If we are in alter mode, output the header
+        if ($this->alter) {
+            $this->puts($this->getHeader(), $this->alter);
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * @throws \ColbyGatte\SmartCsv\Exception
+     */
+    protected function throwColumnsNotUniqueException()
+    {
+        $counts = [];
+        
+        foreach ($this->columnNamesAsValue as $column) {
+            if (! isset($counts[$column])) {
+                $counts[$column] = 0;
+            }
+            
+            $counts[$column]++;
+        }
+        
+        $more = array_flip(array_filter($counts, function ($value) {
+            return $value > 1;
+        }));
+        
+        throw new Exception('Duplicate headers: '.implode(', ', $more));
+    }
+    
+    /**
+     * Ran after writing to a CSV file.
+     *
+     * @return $this
+     */
+    protected function tearDown()
+    {
+        fclose($this->fileHandle);
+        
+        $this->read = true;
+        
+        return $this;
     }
 }
