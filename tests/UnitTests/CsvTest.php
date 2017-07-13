@@ -290,4 +290,16 @@ class CsvTest extends TestCase
     {
         $this->assertNotFalse(csv_sip(SAMPLE_CSV)->first());
     }
+    
+    /** @test */
+    public function set_header_thrown_error_is_caught_and_re_throws_more_useful_error_message()
+    {
+        touch($emptyFile = '/tmp/empty-file.csv');
+        
+        $m = thrown_message(function () use ($emptyFile) {
+            csv_sip($emptyFile);
+        });
+     
+        $this->assertEquals('Error setting CSV header. Could the file be empty?', $m);
+    }
 }

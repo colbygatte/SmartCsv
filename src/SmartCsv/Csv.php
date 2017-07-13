@@ -273,7 +273,11 @@ class Csv implements Iterator
             }
         }
         
-        $this->setHeader($this->gets(false));
+        try {
+            $this->setHeader($this->gets(false));
+        } catch (\Exception $e) {
+            throw new Exception("Error setting CSV header. Could the file be empty?");
+        }
         
         // If we are in alter mode, output the header
         if ($this->alter) {

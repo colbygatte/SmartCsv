@@ -66,7 +66,7 @@ if (! function_exists('csv_writer')) {
      * @param string $file
      * @param array $header
      *
-     * @return $this
+     * @return CsvWriter
      */
     function csv_writer($file, $header = null)
     {
