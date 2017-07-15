@@ -9,7 +9,7 @@ class Serialize implements CoderInterface
      *
      * @return string
      */
-    public static function encode($data)
+    public function encode($data)
     {
         return serialize($data);
     }
@@ -19,7 +19,7 @@ class Serialize implements CoderInterface
      *
      * @return mixed
      */
-    public static function decode($data)
+    public function decode($data)
     {
         return unserialize($data);
     }

@@ -216,16 +216,18 @@ class Csv implements Iterator
      */
     public function addCoder($column, $coder)
     {
-        if (! is_subclass_of($coder, CoderInterface::class)) {
+        if (! in_array(CoderInterface::class, class_implements($coder))) {
             throw new Exception("$coder does not implement CoderInterface.");
         }
+        
+        $coder = is_string($coder) ? new $coder : $coder;
         
         $this->coders[$column] = $coder;
         
         // If we are in sip mode (option save = false), apply to the first row because this method
         // will be called after reading the first row.
         if (! $this->saveRows && $row = $this->currentRow) {
-            $row->$column = $coder::decode($row->$column);
+            $row->$column = $coder->decode($row->$column);
         }
         
         return $this;

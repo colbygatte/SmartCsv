@@ -8,12 +8,12 @@ use PHPUnit\Framework\TestCase;
 
 class TestCoder implements CoderInterface
 {
-    public static function encode($data)
+    public function encode($data)
     {
         return serialize($data);
     }
     
-    public static function decode($data)
+    public function decode($data)
     {
         return unserialize($data);
     }

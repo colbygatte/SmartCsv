@@ -9,12 +9,12 @@ interface CoderInterface
      *
      * @return mixed
      */
-    public static function encode($data);
+    public function encode($data);
     
     /**
      * @param mixed $data
      *
      * @return mixed
      */
-    public static function decode($data);
+    public function decode($data);
 }

@@ -67,7 +67,7 @@ class Row implements Iterator, Countable
                 continue;
             }
             
-            $this->data[$index] = $coder::decode($this->data[$index]);
+            $this->data[$index] = $coder->decode($this->data[$index]);
         }
     }
     
@@ -260,7 +260,7 @@ class Row implements Iterator, Countable
                 continue;
             }
             
-            $copy[$index] = $coder::encode($this->data[$index]);
+            $copy[$index] = $coder->encode($this->data[$index]);
         }
         
         if ($associative) {

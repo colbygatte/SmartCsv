@@ -17,7 +17,7 @@
   },
   "autoload": {
     "psr-4": {
-      "ColbyGatte\\SmartCsv\\": "src/SmartCsv"
+      "ColbyGatte\\": "src/"
     },
     "files": [
       "utilities/helpers.php"
