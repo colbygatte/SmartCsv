@@ -151,27 +151,6 @@ class Blank extends AbstractCsv
     }
     
     /**
-     * This can be used in all modes because it is using the Iterator interface.
-     *
-     * @param \ColbyGatte\SmartCsv\Search $search
-     *
-     * @return \ColbyGatte\SmartCsv\Csv\Blank
-     * @throws \ColbyGatte\SmartCsv\Exception
-     */
-    public function runSearch(Search $search)
-    {
-        $results = (new Blank)->setHeader($this->getHeader());
-        
-        foreach ($this as $row) {
-            if ($search->runFilters($row)) {
-                $results->append($row);
-            }
-        }
-        
-        return $results;
-    }
-    
-    /**
      * Append row only if there the same instance isn't already present.
      *
      * @param \ColbyGatte\SmartCsv\Row $row

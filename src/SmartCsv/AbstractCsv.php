@@ -3,6 +3,7 @@
 namespace ColbyGatte\SmartCsv;
 
 use ColbyGatte\SmartCsv\Coders\CoderInterface;
+use ColbyGatte\SmartCsv\Csv\Blank;
 use ColbyGatte\SmartCsv\Csv\Sip;
 use ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper;
 use ColbyGatte\SmartCsv\Traits\CsvIo;
@@ -135,6 +136,27 @@ abstract class AbstractCsv implements Iterator
         $this->delimiter = $delimiter;
         
         return $this;
+    }
+    
+    /**
+     * This can be used in all modes because it is using the Iterator interface.
+     *
+     * @param \ColbyGatte\SmartCsv\Search $search
+     *
+     * @return \ColbyGatte\SmartCsv\Csv\Blank
+     * @throws \ColbyGatte\SmartCsv\Exception
+     */
+    public function runSearch(Search $search)
+    {
+        $results = (new Blank)->setHeader($this->getHeader());
+        
+        foreach ($this as $row) {
+            if ($search->runFilters($row)) {
+                $results->append($row);
+            }
+        }
+        
+        return $results;
     }
     
     /**
