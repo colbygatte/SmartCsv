@@ -1,15 +1,12 @@
 <?php
 
-namespace ColbyGatte\SmartCsv;
+namespace ColbyGatte\SmartCsv\Csv;
 
+use ColbyGatte\SmartCsv\AbstractCsv;
+use ColbyGatte\SmartCsv\Row;
 use ColbyGatte\SmartCsv\Traits\CsvIo;
 
-/**
- * Class CsvWriter
- *
- * @package ColbyGatte\SmartCsv
- */
-class CsvWriter
+class Writer
 {
     use CsvIo;
     
@@ -24,7 +21,7 @@ class CsvWriter
      * @return $this
      * @throws \Exception
      */
-    public function writeTo($file)
+    public function setWriteFile($file)
     {
         if (is_resource($file)) {
             $this->fileHandle = $file;

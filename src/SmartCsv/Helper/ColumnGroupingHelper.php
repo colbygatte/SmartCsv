@@ -2,7 +2,7 @@
 
 namespace ColbyGatte\SmartCsv\Helper;
 
-use ColbyGatte\SmartCsv\Csv;
+use ColbyGatte\SmartCsv\AbstractCsv;
 use ColbyGatte\SmartCsv\Row;
 
 class ColumnGroupingHelper
@@ -22,7 +22,7 @@ class ColumnGroupingHelper
     protected $columnNamesAsValue;
     
     /**
-     * @var \ColbyGatte\SmartCsv\Csv
+     * @var \ColbyGatte\SmartCsv\AbstractCsv
      */
     protected $csv;
     
@@ -34,10 +34,10 @@ class ColumnGroupingHelper
     /**
      * ColumnGroupingHelper constructor.
      *
-     * @param \ColbyGatte\SmartCsv\Csv $csv
+     * @param \ColbyGatte\SmartCsv\AbstractCsv $csv
      * @param array $columnNamesAsValue
      */
-    public function __construct(Csv $csv, $columnNamesAsValue = [])
+    public function __construct(AbstractCsv $csv, $columnNamesAsValue = [])
     {
         $this->csv = $csv;
         $this->columnNamesAsValue = $columnNamesAsValue;

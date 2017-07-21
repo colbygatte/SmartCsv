@@ -1,6 +1,11 @@
 <?php
 
-use ColbyGatte\SmartCsv\Csv;
+use ColbyGatte\SmartCsv\AbstractCsv;
+use ColbyGatte\SmartCsv\Csv\Alter;
+use ColbyGatte\SmartCsv\Csv\Blank;
+use ColbyGatte\SmartCsv\Csv\Sip;
+use ColbyGatte\SmartCsv\Csv\Slurp;
+use ColbyGatte\SmartCsv\Csv\Writer;
 use ColbyGatte\SmartCsv\CsvWriter;
 use ColbyGatte\SmartCsv\Search;
 
@@ -11,53 +16,54 @@ if (! function_exists('csv')) {
      *
      * @param string|array $options
      *
-     * @return Csv
+     * @return AbstractCsv
      */
-    function csv($options = [])
+    function csv($header)
     {
-        $csv = (new Csv)->parseOptions($options);
+        $csv = (new Blank);
         
-        return $csv->getFile() ? $csv->read() : $csv;
+        if ($header) {
+            $csv->setHeader($header);
+        }
+        
+        return $csv;
     }
 }
 
 if (! function_exists('csv_slurp')) {
     /**
      * @param string $file
-     * @param array $options
      *
-     * @return \ColbyGatte\SmartCsv\Csv
+     * @return \ColbyGatte\SmartCsv\AbstractCsv
      */
-    function csv_slurp($file, $options = [])
+    function csv_slurp($file)
     {
-        return csv(array_merge(['file' => $file], $options));
+        return (new Slurp)->setSourceFile($file)->read();
     }
 }
 
 if (! function_exists('csv_alter')) {
     /**
-     * @param string $csv
-     * @param string $writeTo
-     * @param array $options
+     * @param string $sourceFile
+     * @param string $alterSourceFile
      *
-     * @return \ColbyGatte\SmartCsv\Csv
+     * @return \ColbyGatte\SmartCsv\AbstractCsv
      */
-    function csv_alter($csv, $writeTo, $options = [])
+    function csv_alter($sourceFile, $alterSourceFile)
     {
-        return csv(array_merge(['file' => $csv, 'alter' => $writeTo], $options));
+        return (new Alter)->setSourceFile($sourceFile)->setAlterSourceFile($alterSourceFile)->read();
     }
 }
 
 if (! function_exists('csv_sip')) {
     /**
      * @param string $file
-     * @param array $options
      *
-     * @return \ColbyGatte\SmartCsv\Csv
+     * @return \ColbyGatte\SmartCsv\AbstractCsv
      */
-    function csv_sip($file, $options = [])
+    function csv_sip($file)
     {
-        return csv(array_merge(['file' => $file, 'save' => false], $options));
+        return (new Sip)->setSourceFile($file)->read();
     }
 }
 
@@ -68,23 +74,24 @@ if (! function_exists('csv_writer')) {
      *
      * @return CsvWriter
      */
-    function csv_writer($file, $header = null)
+    function csv_writer($writeTo, $header = null)
     {
-        $csv_writer = (new CsvWriter)
-            ->writeTo($file);
+        $writer = new Writer;
         
-        return is_array($header)
-            ? $csv_writer->setHeader($header)
-            : $csv_writer;
+        if ($header) {
+            $writer->setHeader($writeTo);
+        }
+        
+        return $writer;
     }
 }
 
 if (! function_exists('csv_search')) {
     /**
-     * @param \ColbyGatte\SmartCsv\Csv|string $csv
+     * @param \ColbyGatte\SmartCsv\AbstractCsv $csv
      * @param callable[] $filters
      *
-     * @return Csv
+     * @return AbstractCsv
      */
     function csv_search($csv, $filters)
     {

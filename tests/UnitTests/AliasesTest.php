@@ -2,6 +2,7 @@
 
 namespace Tests\UnitTests;
 
+use ColbyGatte\SmartCsv\Csv\Blank as BlankCsv;
 use PHPUnit\Framework\TestCase;
 
 class AliasesTest extends TestCase
@@ -9,7 +10,7 @@ class AliasesTest extends TestCase
     /** @test */
     public function can_do_key_values_grouping()
     {
-        $csv = csv()->setHeader(['Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3', 'Value 3', 'UOM 3'])
+        $csv = (new BlankCsv)->setHeader(['Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3', 'Value 3', 'UOM 3'])
             ->append(['Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb'])
             ->makeGroup('specs', 'Specification', ['Value', 'UOM']);
         
@@ -21,7 +22,7 @@ class AliasesTest extends TestCase
     /** @test */
     public function can_group_a_single_column()
     {
-        $csv = csv()->setHeader(['Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3', 'Value 3', 'UOM 3'])
+        $csv = (new BlankCsv)->setHeader(['Specification 1', 'Value 1', 'UOM 1', 'Specification 2', 'Value 2', 'UOM 2', 'Specification 3', 'Value 3', 'UOM 3'])
             ->append(['Length', '20', 'in', 'Height', '30', 'in', 'Weight', '100', 'lb'])
             ->makeGroup('specs', 'Specification');
         

@@ -4,6 +4,10 @@ namespace Tests\UnitTests;
 
 use ColbyGatte\SmartCsv\Coders\CoderInterface;
 use ColbyGatte\SmartCsv\Coders\WhitespaceTrimmer;
+use ColbyGatte\SmartCsv\Csv\Blank;
+use ColbyGatte\SmartCsv\Csv\Blank as BlankCsv;
+use ColbyGatte\SmartCsv\Csv\Slurp;
+use ColbyGatte\SmartCsv\Csv\Slurp as SlurpCsv;
 use PHPUnit\Framework\TestCase;
 
 class TestCoder implements CoderInterface
@@ -28,50 +32,78 @@ class CoderTest extends TestCase
     /** @test */
     public function can_use_encoder()
     {
-        csv(SAMPLE_CSV)
-            ->addCoder('name', TestCoder::class)
+        $csv = new SlurpCsv;
+        $csv->setSourceFile(SAMPLE_CSV);
+        $csv->read();
+        
+        $csv->addCoder('name', TestCoder::class)
             ->write($path = '/tmp/dummy_csv.csv');
         
-        $this->assertEquals(serialize('Prof. Adrian Schmeler IV'), csv($path)->first()->name);
+        // ---
+        
+        $csv = new SlurpCsv;
+        $csv->setSourceFile($path);
+        $csv->read();
+        
+        $this->assertEquals(
+            serialize('Prof. Adrian Schmeler IV'),
+            $csv->first()->name
+        );
     }
     
     /** @test */
     public function can_use_decoder()
     {
+        // Setup
         $path = '/tmp/dummy_csv.csv';
         
-        csv(SAMPLE_CSV)->addCoder('name', TestCoder::class)->write($path);
+        $csv = new SlurpCsv;
+        $csv->setSourceFile(SAMPLE_CSV);
+        $csv->read();
         
+        $csv->addCoder('name', TestCoder::class)->write($path);
+        
+        // Assertion
         $this->assertEquals(
             'Prof. Adrian Schmeler IV',
-            csv()->addCoder('name', TestCoder::class)
+            (new SlurpCsv)->addCoder('name', TestCoder::class)
+                ->setSourceFile($path)
                 ->read($path)
-                ->first()->name
+                ->first()
+                ->name
         );
     }
     
     /** @test */
     public function cannot_use_invalid_coder()
     {
+        // Setup
         $message = thrown_message(function () {
-            csv(SAMPLE_CSV)->addCoder('name', InvalidCoder::class);
+            (new BlankCsv)->addCoder('name', InvalidCoder::class);
         });
         
+        // Assertion
         $this->assertEquals('Tests\UnitTests\InvalidCoder does not implement CoderInterface.', $message);
     }
     
     /** @test */
     public function can_user_coder_through_csv_helper_function()
     {
-        $csv = csv(['coders' => ['data' => TestCoder::class]])
-            ->setHeader(['data'])
-            ->append([
-                $serialized = serialize(['name' => 'Colby'])
-            ]);
+        // Setup
+        $serialized = serialize(['name' => 'Colby']);
+        
+        $csv = (new BlankCsv)->setHeader(['data'])->addCoder('data', TestCoder::class)
+            ->append([$serialized]);
         
         $csv->write($path = '/tmp/csv_helper_coder.csv');
         
-        $this->assertEquals($serialized, csv($path)->first()->data);
+        $csv->write($path = '/tmp/csv_helper_coder.csv');
+        
+        // Assertion
+        $this->assertEquals(
+            $serialized,
+            (new SlurpCsv)->setSourceFile($path)->read()->first()->data
+        );
     }
     
     /** @test */
@@ -79,14 +111,18 @@ class CoderTest extends TestCase
     {
         $file = '/tmp/whitespace_test.csv';
         
-        csv()->setHeader(['Name'])
+        $csv = (new BlankCsv)->setHeader(['Name'])
             ->append(['   Colby   '])
             ->write($file);
         
-        $this->assertEquals('Colby', csv()
-            ->addCoder('Name', WhitespaceTrimmer::class)
-            ->read($file)
-            ->first()->Name);
+        $this->assertEquals(
+            'Colby',
+            (new SlurpCsv)->setSourceFile($file)
+                ->addCoder('Name', WhitespaceTrimmer::class)
+                ->read()
+                ->first()
+                ->Name
+        );
     }
     
     /** @test */
@@ -94,14 +130,18 @@ class CoderTest extends TestCase
     {
         $file = '/tmp/whitespace_test.csv';
         
-        csv()->setHeader(['Name'])
+        (new Blank)->setHeader(['Name'])
             ->append(['   Colby   '])
             ->write($file);
         
-        $this->assertEquals('Colby', csv(['aliases' => ['nm' => 'Name']])
-            ->addCoder('nm', WhitespaceTrimmer::class)
-            ->read($file)
-            ->first()->nm);
+        $this->assertEquals(
+            'Colby',
+            (new Slurp)->setAliases(['nm' => 'Name'])
+                ->addCoder('nm', WhitespaceTrimmer::class)
+                ->setSourceFile($file)
+                ->read()
+                ->first()->nm
+        );
     }
 }
 

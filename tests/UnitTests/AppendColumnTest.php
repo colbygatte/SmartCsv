@@ -2,6 +2,7 @@
 
 namespace Tests\UnitTests;
 
+use ColbyGatte\SmartCsv\Csv\Slurp as CsvSlurp;
 use PHPUnit\Framework\TestCase;
 
 class AppendColumnTest extends TestCase
@@ -9,7 +10,9 @@ class AppendColumnTest extends TestCase
     /** @test */
     public function can_append_column()
     {
-        $csv = csv(SAMPLE_CSV);
+        $csv = new CsvSlurp;
+        $csv->setSourceFile(SAMPLE_CSV);
+        $csv->read();
         
         $columnCount = $csv->columnCount();
         
