@@ -23,26 +23,13 @@ trait CsvIterator
     protected $currentRow = false;
     
     /**
-     * Do we want to save each previous row from the loop?
-     * This only happens in no-save mode ($save is false).
-     *
-     * @var null|resource
-     */
-    protected $alter;
-    
-    /**
      * Return the current element
      *
      * @return \ColbyGatte\SmartCsv\Row
      */
     public function current()
     {
-        // If we are in save mode, all data is loaded already.
-        if ($this->saveRows) {
-            return current($this->rows);
-        }
-        
-        return $this->currentRow;
+        return current($this->rows);
     }
     
     /**
@@ -50,54 +37,24 @@ trait CsvIterator
      *
      * @return Row|null
      */
-    public function next()
-    {
-        // If $this->saveRows is set, all rows have been loaded already.
-        if ($this->saveRows) {
-            next($this->rows);
-            
-            return;
-        }
-        
-        // If we are in alter mode, write the previous line (only if it hasn't been unset, which means the row was deleted)
-        if (is_resource($this->alter) && $this->currentRow) {
-            $this->puts($this->currentRow, $this->alter);
-        }
-        
-        if (! ($row = $this->gets())) {
-            $this->currentRow = null;
-            
-            return;
-        }
-        
-        $this->currentRow = $row;
-        
-        return $row;
-    }
+    abstract public function next();
     
     /**
      * Return the key of the current element
      *
      * @return int
      */
-    public function key()
-    {
-        if ($this->saveRows) {
-            return key($this->rows);
-        }
-        
-        return 0;
-    }
+    abstract public function key();
     
     /**
      * Checks if current position is valid
      *
      * @return bool
      */
-    public function valid()
-    {
-        return $this->saveRows ? key($this->rows) !== null : $this->currentRow !== null;
-    }
+    abstract public function valid();
+    //{
+    //    return $this->saveRows ? key($this->rows) !== null : $this->currentRow !== null;
+    //}
     
     /**
      * Rewind the Iterator to the first element

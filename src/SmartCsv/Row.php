@@ -8,7 +8,7 @@ use Iterator;
 class Row implements Iterator, Countable
 {
     /**
-     * @var \ColbyGatte\SmartCsv\Csv
+     * @var \ColbyGatte\SmartCsv\AbstractCsv
      */
     protected $csv;
     
@@ -20,12 +20,12 @@ class Row implements Iterator, Countable
     /**
      * Row constructor.
      *
-     * @param \ColbyGatte\SmartCsv\Csv $csv
+     * @param \ColbyGatte\SmartCsv\AbstractCsv $csv
      * @param array $data
      *
      * @throws \ColbyGatte\SmartCsv\Exception
      */
-    public function __construct(Csv $csv, array $data)
+    public function __construct(AbstractCsv $csv, array $data)
     {
         $dataCount = count($data);
         $columnCount = $csv->columnCount();

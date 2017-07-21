@@ -1,6 +1,8 @@
 <?php
 
-use ColbyGatte\SmartCsv\Csv;
+use ColbyGatte\SmartCsv\AbstractCsv;
+use ColbyGatte\SmartCsv\Csv\Blank;
+use ColbyGatte\SmartCsv\Csv\Slurp\Slurp;
 use ColbyGatte\SmartCsv\CsvWriter;
 use ColbyGatte\SmartCsv\Search;
 
@@ -11,11 +13,11 @@ if (! function_exists('csv')) {
      *
      * @param string|array $options
      *
-     * @return Csv
+     * @return AbstractCsv
      */
-    function csv($options = [])
+    function csv()
     {
-        $csv = (new Csv)->parseOptions($options);
+        $csv = (new Blank);
         
         return $csv->getFile() ? $csv->read() : $csv;
     }
@@ -26,11 +28,11 @@ if (! function_exists('csv_slurp')) {
      * @param string $file
      * @param array $options
      *
-     * @return \ColbyGatte\SmartCsv\Csv
+     * @return \ColbyGatte\SmartCsv\AbstractCsv
      */
     function csv_slurp($file, $options = [])
     {
-        return csv(array_merge(['file' => $file], $options));
+        return new Slurp(array_merge(['file' => $file], $options));
     }
 }
 
@@ -40,7 +42,7 @@ if (! function_exists('csv_alter')) {
      * @param string $writeTo
      * @param array $options
      *
-     * @return \ColbyGatte\SmartCsv\Csv
+     * @return \ColbyGatte\SmartCsv\AbstractCsv
      */
     function csv_alter($csv, $writeTo, $options = [])
     {
@@ -53,7 +55,7 @@ if (! function_exists('csv_sip')) {
      * @param string $file
      * @param array $options
      *
-     * @return \ColbyGatte\SmartCsv\Csv
+     * @return \ColbyGatte\SmartCsv\AbstractCsv
      */
     function csv_sip($file, $options = [])
     {
@@ -81,10 +83,10 @@ if (! function_exists('csv_writer')) {
 
 if (! function_exists('csv_search')) {
     /**
-     * @param \ColbyGatte\SmartCsv\Csv|string $csv
+     * @param \ColbyGatte\SmartCsv\AbstractCsv|string $csv
      * @param callable[] $filters
      *
-     * @return Csv
+     * @return AbstractCsv
      */
     function csv_search($csv, $filters)
     {

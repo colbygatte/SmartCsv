@@ -18,7 +18,7 @@ function faker()
  * @param     $writeTo
  * @param int $rows
  *
- * @return \ColbyGatte\SmartCsv\Csv
+ * @return \ColbyGatte\SmartCsv\AbstractCsv
  */
 function csv_faker($writeTo, $rows = 20)
 {
