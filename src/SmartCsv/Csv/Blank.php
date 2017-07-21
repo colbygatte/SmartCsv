@@ -3,7 +3,10 @@
 namespace ColbyGatte\SmartCsv\Csv;
 
 use ColbyGatte\SmartCsv\AbstractCsv;
+use ColbyGatte\SmartCsv\Exception;
+use ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper;
 use ColbyGatte\SmartCsv\Row;
+use ColbyGatte\SmartCsv\Search;
 
 class Blank extends AbstractCsv
 {
@@ -152,12 +155,12 @@ class Blank extends AbstractCsv
      *
      * @param \ColbyGatte\SmartCsv\Search $search
      *
-     * @return \ColbyGatte\SmartCsv\AbstractCsv
+     * @return \ColbyGatte\SmartCsv\Csv\Blank
      * @throws \ColbyGatte\SmartCsv\Exception
      */
     public function runSearch(Search $search)
     {
-        $results = (new static)->setHeader($this->getHeader());
+        $results = (new Blank)->setHeader($this->getHeader());
         
         foreach ($this as $row) {
             if ($search->runFilters($row)) {

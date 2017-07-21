@@ -3,6 +3,11 @@
 namespace Tests\UnitTests;
 
 use ColbyGatte\SmartCsv\Coders\Serialize;
+use ColbyGatte\SmartCsv\Csv\Alter;
+use ColbyGatte\SmartCsv\Csv\Blank;
+use ColbyGatte\SmartCsv\Csv\Sip;
+use ColbyGatte\SmartCsv\Csv\Slurp;
+use ColbyGatte\SmartCsv\Search;
 use PHPUnit\Framework\TestCase;
 
 class CsvTest extends TestCase
@@ -10,7 +15,7 @@ class CsvTest extends TestCase
     /** @test */
     public function index_aliases()
     {
-        $csv = csv(['aliases' => ['cat' => 'Category', 'sku' => 'Product #']])
+        $csv = (new Blank)->setAliases(['cat' => 'Category', 'sku' => 'Product #'])
             ->setHeader(['Category', 'Product #'])
             ->append(['flowers', '234234']);
         
@@ -23,67 +28,74 @@ class CsvTest extends TestCase
     /** @test */
     public function can_write_using_aliases_as_header_title()
     {
-        csv([
-            'aliases' => ['cat' => 'Category', 'sku' => 'Product #']
-        ])
+        (new Blank)
+            ->setAliases(['cat' => 'Category', 'sku' => 'Product #'])
             ->setHeader(['Category', 'Product #'])
             ->append(['flowers', '234234'])
             ->useAliases()
             ->write($path = '/tmp/dummy-csv.csv');
         
-        $this->assertEquals('234234', csv($path)->first()->sku);
+        $this->assertEquals('234234', (new Slurp)->setSourceFile($path)->read()->first()->sku);
     }
     
     /** @test */
     public function can_write_csv()
     {
-        csv()
+        // Setup
+        (new Blank)
             ->setHeader(['name', 'age'])
             ->append(['Colby', '25'], ['Sarah', '22'])
             ->write($path = '/tmp/ages.csv');
         
-        $this->assertEquals('Colby', csv($path)->first()->name);
+        // Assertion
+        $this->assertEquals(
+            'Colby',
+            (new Slurp)->setSourceFile($path)->read()->first()->name
+        );
     }
     
     /** @test */
     public function can_delete_row_from_csv()
     {
-        csv()
+        (new Blank)
             ->setHeader(['name', 'age'])
             ->append(['Colby', '25'], ['Sarah', '22'])
             ->write($path = '/tmp/dummy_csv.csv');
         
-        $csv = csv($path);
+        $csv = (new Slurp)->setSourceFile($path)->read();
         
         $csv->first()
             ->delete();
         
         $csv->write($path);
         
-        $this->assertEquals('Sarah', csv($path)->first()->name);
+        $this->assertEquals('Sarah', (new Slurp)->setSourceFile($path)->read()->first()->name);
     }
     
     /** @test */
     public function can_edit_row_and_save()
     {
-        csv()
+        (new Blank)
             ->setHeader(['name', 'age'])
             ->append(['Colby', '25'], ['Sarah', '22'])
             ->write($path = '/tmp/dummy_csv.csv');
         
-        $csv = csv($path);
+        $csv = (new Slurp)->setSourceFile($path)->read();
         
         $csv->first()->name = 'Paul';
         
         $csv->write($path);
         
-        $this->assertEquals('Paul', csv($path)->first()->name);
+        $this->assertEquals(
+            'Paul',
+            (new Slurp)->setSourceFile($path)->read()->first()->name
+        );
     }
     
     /** @test */
     public function can_delete_row_using_row_instance()
     {
-        $csv = csv()
+        $csv = (new Blank)
             ->setHeader(['name', 'age'])
             ->append(['Colby', '25'], ['Sarah', '22']);
         
@@ -98,9 +110,8 @@ class CsvTest extends TestCase
     /** @test */
     public function can_change_value_using_alias()
     {
-        $csv = csv([
-            'aliases' => ['shortstring' => 'A Really Long String Of Text']
-        ])
+        $csv = (new Blank)
+            ->setAliases(['shortstring' => 'A Really Long String Of Text'])
             ->setHeader(['A Really Long String Of Text'])
             ->append(['I LOVE PHP'], ['WOOOOOOOOO']);
         
@@ -112,7 +123,10 @@ class CsvTest extends TestCase
         $csv->useAliases()
             ->write('/tmp/using_aliases.csv');
         
-        $this->assertEquals('i love php', csv('/tmp/using_aliases.csv')->first()->shortstring);
+        $this->assertEquals(
+            'i love php',
+            (new Slurp)->setSourceFile('/tmp/using_aliases.csv')->read()->first()->shortstring
+        );
     }
     
     /** @test */
@@ -120,7 +134,12 @@ class CsvTest extends TestCase
     {
         // Delete the row with name 'Kyra Stevens'
         // Change all emails to 'nocontact'
-        foreach (csv_alter(SAMPLE_CSV, $savePath = '/tmp/iterated.csv') as $row) {
+        $alter = (new Alter)
+            ->setSourceFile(SAMPLE_CSV)
+            ->setAlterSourceFile($savePath = '/tmp/iterated.csv')
+            ->read();
+        
+        foreach ($alter as $row) {
             if ($row->name == 'Mrs. Emilie Pacocha Jr.') {
                 $row->delete();
                 continue;
@@ -129,15 +148,16 @@ class CsvTest extends TestCase
             $row->age = 'noage';
         }
         
-        $csv = csv($savePath);
+        $csv = (new Slurp)->setSourceFile($savePath)->read();
         
-        $count = csv_search($savePath, [
-            function ($row) {
-                return $row->name == 'Mrs. Emilie Pacocha Jr.';
-            }
-        ])->count();
+        $search = (new Search)->addFilter(function ($row) {
+            return $row->name == 'Mrs. Emilie Pacocha Jr.';
+        });
         
-        $this->assertEquals(0, $count);
+        $this->assertEquals(
+            0,
+            $csv->runSearch($search)->count()
+        );
         
         $ages = [];
         
@@ -153,32 +173,37 @@ class CsvTest extends TestCase
     {
         $ages = [];
         
-        foreach (csv(SAMPLE_CSV) as $row) {
+        foreach ((new Slurp)->setSourceFile(SAMPLE_CSV)->read() as $row) {
             $ages[] = $row->age;
         }
         
         $agesFromIterate = [];
+    
+        $csv = (new Sip)->setSourceFile(SAMPLE_CSV)->read();
         
-        foreach ($csv = csv_sip(SAMPLE_CSV) as $row) {
+        foreach ($csv as $row) {
             $agesFromIterate[] = $row->age;
         }
         
         $this->assertEquals($ages, $agesFromIterate);
-        
-        $this->assertEquals(0, $csv->count());
     }
     
     /** @test */
     public function can_change_delimiter()
     {
-        csv()
+        // Setup
+        (new Blank)
             ->setHeader(['name', 'age'])
             ->setDelimiter('|')
             ->write($path = '/tmp/changing_delimiter.csv');
         
+        // Assertion
         $this->assertEquals("name|age\n", file_get_contents($path));
         
-        $this->assertEquals(['name', 'age'], csv(['file' => $path, 'del' => '|'])->getHeader());
+        $this->assertEquals(
+            ['name', 'age'],
+            (new Slurp)->setSourceFile($path)->setDelimiter('|')->read()->getHeader()
+        );
     }
     
     /** @test */
@@ -187,7 +212,7 @@ class CsvTest extends TestCase
         $this->assertEquals(
             'Header can only be set once!',
             thrown_message(function () {
-                csv()->setHeader(['hi'])->setHeader(['hi']);
+                (new Blank)->setHeader(['hi'])->setHeader(['hi']);
             })
         );
     }
@@ -196,7 +221,7 @@ class CsvTest extends TestCase
     public function header_must_be_set_before_adding_rows()
     {
         $m = thrown_message(function () {
-            csv()->append(['hi']);
+            (new Blank)->append(['hi']);
         });
         
         $this->assertEquals('Header must be set before adding rows!', $m);
@@ -205,7 +230,7 @@ class CsvTest extends TestCase
     /** @test */
     public function adding_row_with_incorrect_amount_of_columns_appends_extra_columns()
     {
-        $csv = csv()
+        $csv = (new Blank)
             ->setStrictMode(false)
             ->setHeader(['one', 'two', 'three'])
             ->append(['one']);
@@ -217,7 +242,7 @@ class CsvTest extends TestCase
     public function cannot_read_row_with_too_few_columns_in_strict_mode()
     {
         $m = thrown_message(function () {
-            csv()->setHeader(['one', 'two', 'three'])->append(['hi']);
+            (new Blank)->setHeader(['one', 'two', 'three'])->append(['hi']);
         });
         
         $this->assertEquals('Expected 3 data entry(s), received 1. (no file set)', $m);
@@ -226,7 +251,7 @@ class CsvTest extends TestCase
     /** @test */
     public function can_check_if_csv_has_columns()
     {
-        $csv = csv(SAMPLE_CSV);
+        $csv = (new Slurp)->setSourceFile(SAMPLE_CSV)->read();
         
         $this->assertEmpty($csv->missingColumns(['name', 'age']));
         
@@ -237,7 +262,7 @@ class CsvTest extends TestCase
     public function cannot_add_more_entries_than_columns()
     {
         $m = thrown_message(function () {
-            csv()->setHeader(['just one'])->append(['one', 'two']);
+            (new Blank)->setHeader(['just one'])->append(['one', 'two']);
         });
         
         $this->assertEquals('Expected 1 data entry(s), received 2. (no file set)', $m);
@@ -247,7 +272,7 @@ class CsvTest extends TestCase
     public function column_headers_must_all_be_unique()
     {
         $m = thrown_message(function () {
-            csv()->setHeader(['Hi', 'Hi'])->getHeader();
+            (new Blank)->setHeader(['Hi', 'Hi'])->getHeader();
         });
         
         $this->assertEquals('Duplicate headers: Hi', $m);
@@ -256,7 +281,7 @@ class CsvTest extends TestCase
     /** Disabled for now. Not implemented. */
     public function csv_search_rows_are_clone()
     {
-        $orig = csv()
+        $orig = (new Blank)
             ->setHeader(['name'])
             ->append(['Colby']);
         
@@ -276,7 +301,7 @@ class CsvTest extends TestCase
     /** @test */
     function can_pluck_data()
     {
-        $csv = csv()
+        $csv = (new Blank)
             ->setHeader(['name', 'age', 'weight'])
             ->append(['Colby', '23', '230']);
         
@@ -289,7 +314,7 @@ class CsvTest extends TestCase
     /** @test */
     public function can_use_first_function_when_in_sip_mode()
     {
-        $this->assertNotFalse(csv_sip(SAMPLE_CSV)->first());
+        $this->assertNotFalse((new Slurp)->setSourceFile(SAMPLE_CSV)->read()->first());
     }
     
     /** @test */
@@ -298,17 +323,17 @@ class CsvTest extends TestCase
         touch($emptyFile = '/tmp/empty-file.csv');
         
         $m = thrown_message(function () use ($emptyFile) {
-            csv_sip($emptyFile);
+            (new Sip)->setSourceFile($emptyFile)->read();
         });
-     
+        
         $this->assertEquals('Error setting CSV header. Could the file be empty?', $m);
     }
     
     /** @test */
     public function can_add_coder_after_calling_csv_sip()
     {
-        $csv = csv_sip(SAMPLE_CSV)->addCoder('other_info', Serialize::class);
-     
+        $csv = (new Sip)->setSourceFile(SAMPLE_CSV)->read()->addCoder('other_info', Serialize::class);
+        
         $this->assertTrue(is_array($csv->first()->other_info));
     }
 }

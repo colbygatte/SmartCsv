@@ -2,25 +2,31 @@
 
 namespace Tests\UnitTests;
 
+use ColbyGatte\SmartCsv\Csv\Alter;
+use ColbyGatte\SmartCsv\Csv\Blank;
+use ColbyGatte\SmartCsv\Csv\Slurp;
+use ColbyGatte\SmartCsv\Search;
 use PHPUnit\Framework\TestCase;
+use ColbyGatte\SmartCsv\Exception;
 
 class SearchTest extends TestCase
 {
     /** @test */
     public function search_test_slurp()
     {
-        $csv = csv()
+        $csv = (new Blank)
             ->setHeader(['name', 'age'])
             ->append(['Frankenstein', '26'], ['Sarah', '22'], ['Ben', '50']);
         
-        $resultCsv = csv_search($csv, [
-            function ($row) {
+        $search = (new Search)
+            ->addFilter(function ($row) {
                 return $row->age < 30;
-            },
-            function ($row) {
+            })
+            ->addFilter(function ($row) {
                 return strlen($row->name) < 6;
-            }
-        ]);
+            });
+        
+        $resultCsv = $csv->runSearch($search);
         
         $resultCsv->write('/tmp/results.csv');
         
@@ -33,13 +39,11 @@ class SearchTest extends TestCase
     /** @test */
     public function search_test_sip()
     {
-        $resultCsv = csv_search(SAMPLE_CSV, [
-            function ($row) {
-                return (int) $row->age > 70;
-            }
-        ]);
+        $search = (new Search)->addFilter(function ($row) {
+            return (int) $row->age > 70;
+        });
         
-        $resultCsv->write('/tmp/results.csv');
+        $resultCsv = (new Slurp)->setSourceFile(SAMPLE_CSV)->read()->runSearch($search);
         
         $this->assertEquals(4, $resultCsv->count());
         
@@ -51,14 +55,20 @@ class SearchTest extends TestCase
     {
         $this->assertNotEmpty(
             thrown_message(function () {
-                csv_search(csv_alter(SAMPLE_CSV, '/tmp/alter-file.csv'), [
-                    function ($row) {
+                $search = (new Search)
+                    ->addFilter(function ($row) {
                         return $row->age < 30;
-                    },
-                    function ($row) {
+                    })
+                    ->addFilter(function ($row) {
                         return strlen($row->name) < 6;
-                    }
-                ]);
+                    });
+                
+                $result = (new Alter)
+                    ->setSourceFile(SAMPLE_CSV)
+                    ->setAlterSourceFile('/tmp/alter-file.csv')
+                    ->runSearch($search);
+                
+                return $result;
             })
         );
     }
@@ -66,14 +76,14 @@ class SearchTest extends TestCase
     /** @test */
     public function match_up()
     {
-        $csv = csv()->setHeader(['awesome_human', 'awesome_email', 'value 2'])
+        $csv = (new Blank)->setHeader(['awesome_human', 'awesome_email', 'value 2'])
             ->setStrictMode(false)
             ->append(
                 ['Bernardo Turcotte', 'sloot@sllootsrus.com'],
                 ['Prof. Gregorio Schowalter Sr.', 'lrunte@hotmail.com', 'sushi']
             );
         
-        $resultCsv = csv(SAMPLE_CSV)->findMatches($csv, [
+        $resultCsv = (new Slurp)->setSourceFile(SAMPLE_CSV)->read()->findMatches($csv, [
             'name' => 'awesome_human',
             'contact 1' => 'awesome_email',
             'value 2' => 'value 2'

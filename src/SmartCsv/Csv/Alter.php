@@ -1,8 +1,9 @@
 <?php
 
-namespace ColbyGatte\SmartCsv\Csv\Slurp;
+namespace ColbyGatte\SmartCsv\Csv;
 
 use ColbyGatte\SmartCsv\Search;
+use ColbyGatte\SmartCsv\Exception;
 
 class Alter extends Sip
 {
@@ -29,6 +30,18 @@ class Alter extends Sip
         }
     }
     
+    /**
+     * @param $alterSourceFile
+     *
+     * @return \ColbyGatte\SmartCsv\Csv\Alter
+     */
+    public function setAlterSourceFile($alterSourceFile)
+    {
+        $this->alterSourceFile = $alterSourceFile;
+    
+        return $this;
+    }
+    
     public function next()
     {
         // If we are in alter mode, write the previous line (only if it hasn't been unset, which means the row was deleted)
@@ -51,9 +64,9 @@ class Alter extends Sip
     {
         parent::setUp();
         
-        $this->puts($this->getHeader(), $this->alter);
-        
         $this->alter = fopen($this->alterSourceFile, 'w');
+    
+        $this->puts($this->getHeader(), $this->alter);
         
         return $this;
     }

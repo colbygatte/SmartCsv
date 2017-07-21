@@ -1,6 +1,6 @@
 <?php
 
-namespace ColbyGatte\SmartCsv\Csv\Slurp;
+namespace ColbyGatte\SmartCsv\Csv;
 
 use ColbyGatte\SmartCsv\AbstractCsv;
 
@@ -10,8 +10,15 @@ class Sip extends AbstractCsv
     
     protected $currentRow;
     
+    /**
+     * @return $this
+     */
     public function setSourceFile($file) {
         $this->csvSourceFile = $file;
+    
+        $this->optionsParsed = true;
+        
+        return $this;
     }
     
     public function read($options = null)
@@ -20,8 +27,6 @@ class Sip extends AbstractCsv
         
         $this->currentRow = $this->gets();
         
-        $this->tearDown();
-        
         return $this;
     }
     
@@ -29,11 +34,15 @@ class Sip extends AbstractCsv
     {
         parent::addCoder($column, $coder);
         
+        $coder = $this->coders[$column]; // the coder is instantiated in the parent if it is a string
+        
         // In sip mode, reading is done first thing, so when adding a coder,
         // lets go ahead and decode it.
         if ($row = $this->currentRow) {
             $row->$column = $coder->decode($row->$column);
         }
+        
+        return $this;
     }
     
     public function current()
@@ -77,13 +86,5 @@ class Sip extends AbstractCsv
     public function valid()
     {
         return $this->currentRow !== null;
-    }
-    
-    /**
-     * @return string|false
-     */
-    public function getFile()
-    {
-        return $this->csvSourceFile ?: false;
     }
 }

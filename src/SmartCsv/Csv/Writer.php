@@ -1,29 +1,71 @@
 <?php
 
-namespace ColbyGatte\SmartCsv\Csv\Slurp;
+namespace ColbyGatte\SmartCsv\Csv;
 
 use ColbyGatte\SmartCsv\AbstractCsv;
 use ColbyGatte\SmartCsv\Row;
+use ColbyGatte\SmartCsv\Traits\CsvIo;
 
 class Writer
 {
+    use CsvIo;
+    
     /**
-     * Move forward to next element
-     *
-     * @return Row|null
+     * @var bool
      */
-    public function next()
+    protected $didSetHeader = false;
+    
+    /**
+     * @param $file
+     *
+     * @return $this
+     * @throws \Exception
+     */
+    public function setWriteFile($file)
     {
-        // TODO: Implement next() method.
+        if (is_resource($file)) {
+            $this->fileHandle = $file;
+            
+            return $this;
+        }
+        
+        if (! touch($file)) {
+            throw new \Exception("$file is not writable.");
+        }
+        
+        $this->fileHandle = fopen($file, 'w');
+        
+        return $this;
     }
     
     /**
-     * Return the key of the current element
+     * @param $header
      *
-     * @return int
+     * @return $this
+     * @throws \ColbyGatte\SmartCsv\Exception
      */
-    public function key()
+    public function setHeader($header)
     {
+        if ($this->didSetHeader) {
+            throw new Exception('Header has already been set.');
+        }
+        
+        $this->didSetHeader = true;
+        
+        $this->puts($header);
+        
+        return $this;
+    }
     
+    /**
+     * @param array ...$rows
+     *
+     * @return $this
+     */
+    public function append(...$rows)
+    {
+        array_map([$this, 'puts'], $rows);
+        
+        return $this;
     }
 }

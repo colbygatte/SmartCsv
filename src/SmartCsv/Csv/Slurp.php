@@ -1,6 +1,6 @@
 <?php
 
-namespace ColbyGatte\SmartCsv\Csv\Slurp;
+namespace ColbyGatte\SmartCsv\Csv;
 
 use ColbyGatte\SmartCsv\AbstractCsv;
 use ColbyGatte\SmartCsv\Csv\Blank;
@@ -10,7 +10,11 @@ class Slurp extends Blank
     protected $csvSourceFile;
     
     public function setSourceFile($file) {
+        $this->optionsParsed = true;
+        
         $this->csvSourceFile = $file;
+        
+        return $this;
     }
     
     function read($options = null)
@@ -25,13 +29,5 @@ class Slurp extends Blank
         $this->tearDown();
         
         return $this;
-    }
-    
-    /**
-     * @return string|false
-     */
-    public function getFile()
-    {
-        return $this->csvSourceFile ?: false;
     }
 }

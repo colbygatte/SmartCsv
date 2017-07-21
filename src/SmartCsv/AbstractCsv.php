@@ -3,6 +3,7 @@
 namespace ColbyGatte\SmartCsv;
 
 use ColbyGatte\SmartCsv\Coders\CoderInterface;
+use ColbyGatte\SmartCsv\Csv\Sip;
 use ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper;
 use ColbyGatte\SmartCsv\Traits\CsvIo;
 use ColbyGatte\SmartCsv\Traits\CsvIterator;
@@ -106,18 +107,14 @@ abstract class AbstractCsv implements Iterator
      * @return $this
      * @throws \ColbyGatte\SmartCsv\Exception
      */
-    public function read($options = null)
+    public function read()
     {
         if ($this->read) {
             throw new Exception('File already read!');
         }
         
-        if ($options == null && ! $this->optionsParsed) {
+        if (! $this->optionsParsed) {
             throw new Exception('No options have been set!');
-        }
-        
-        if ($options) {
-            $this->parseOptions($options);
         }
         
         $this->setUp();
@@ -185,7 +182,7 @@ abstract class AbstractCsv implements Iterator
     /**
      * @param array $header
      *
-     * @return \ColbyGatte\SmartCsv\AbstractCsv
+     * @return $this
      * @throws \ColbyGatte\SmartCsv\Exception
      */
     public function setHeader($header)
@@ -345,6 +342,14 @@ abstract class AbstractCsv implements Iterator
     }
     
     /**
+     * @return string|false
+     */
+    public function getFile()
+    {
+        return $this->csvSourceFile ?: false;
+    }
+    
+    /**
      * This must be called after the header has been parsed.
      * A new Csv instance will be returned, using sip mode.
      *
@@ -360,17 +365,11 @@ abstract class AbstractCsv implements Iterator
             $columnIndexes[$this->columnNamesAsKey[$column]] = $column;
         }
         
-        $options = [
-            'save' => false,
-            'file' => $this->getFile()
-        ];
-        
-        return (new static)->parseOptions($options)
+        return (new Sip)->setSourceFile($this->getFile())
             ->setHeader($columnIndexes)
             ->setStrictMode(false)
             ->read();
     }
-    
     
     /**
      * @param string $name
@@ -423,7 +422,6 @@ abstract class AbstractCsv implements Iterator
      * @return \ColbyGatte\SmartCsv\Row|null
      */
     abstract public function first();
-    
     
     /**
      * Get the index based on the CSV header
