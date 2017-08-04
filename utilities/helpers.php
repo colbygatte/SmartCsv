@@ -69,17 +69,16 @@ if (! function_exists('csv_sip')) {
 
 if (! function_exists('csv_writer')) {
     /**
-     * @param string $file
      * @param array $header
      *
-     * @return CsvWriter
+     * @return \ColbyGatte\SmartCsv\CsvWriter
      */
     function csv_writer($writeTo, $header = null)
     {
-        $writer = new Writer;
+        $writer = (new Writer)->setWriteFile($writeTo);
         
         if ($header) {
-            $writer->setHeader($writeTo);
+            $writer->setHeader($header);
         }
         
         return $writer;

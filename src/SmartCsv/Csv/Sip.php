@@ -21,9 +21,9 @@ class Sip extends AbstractCsv
         return $this;
     }
     
-    public function read($options = null)
+    public function read()
     {
-        parent::read($options);
+        parent::read();
         
         $this->currentRow = $this->gets();
         
