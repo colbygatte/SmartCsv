@@ -25,8 +25,10 @@ class Slurp extends Blank
         while ($row = $this->gets()) {
             array_push($this->rows, $row);
         }
-        
-        $this->tearDown();
+    
+        fclose($this->fileHandle);
+    
+        $this->read = true;
         
         return $this;
     }

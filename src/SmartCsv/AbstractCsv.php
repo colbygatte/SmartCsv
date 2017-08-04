@@ -527,18 +527,4 @@ abstract class AbstractCsv implements Iterator
         
         return $this;
     }
-    
-    /**
-     * Ran after writing to a CSV file.
-     *
-     * @return $this
-     */
-    protected function tearDown()
-    {
-        fclose($this->fileHandle);
-        
-        $this->read = true;
-        
-        return $this;
-    }
 }
