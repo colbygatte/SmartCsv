@@ -522,7 +522,7 @@ abstract class AbstractCsv implements Iterator
         try {
             $this->setHeader($this->gets(false));
         } catch (\Exception $e) {
-            throw new Exception("Error setting CSV header. Could the file be empty?");
+            throw new Exception("Error setting CSV header: {$e->getMessage()}");
         }
         
         return $this;
