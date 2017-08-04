@@ -16,7 +16,7 @@ if (! function_exists('csv')) {
      *
      * @param string|array $options
      *
-     * @return AbstractCsv
+     * @return Blank
      */
     function csv($header)
     {
@@ -34,7 +34,7 @@ if (! function_exists('csv_slurp')) {
     /**
      * @param string $file
      *
-     * @return \ColbyGatte\SmartCsv\AbstractCsv
+     * @return Slurp
      */
     function csv_slurp($file)
     {
@@ -59,7 +59,7 @@ if (! function_exists('csv_sip')) {
     /**
      * @param string $file
      *
-     * @return \ColbyGatte\SmartCsv\AbstractCsv
+     * @return Sip
      */
     function csv_sip($file)
     {
@@ -90,7 +90,7 @@ if (! function_exists('csv_search')) {
      * @param \ColbyGatte\SmartCsv\AbstractCsv $csv
      * @param callable[] $filters
      *
-     * @return AbstractCsv
+     * @return Blank
      */
     function csv_search($csv, $filters)
     {
