@@ -1,9 +1,5 @@
 # SmartCsv
 
-I wrote SmartCsv while working on a project that required handling multiple CSVs in several different formats.
-
-This tool has been a huge time saver for me, and has made my code much more readable.
-
 The Csv functions in 3 main modes: slurp and sip. Once a mode is set, it cannot be changed.
 
 * __Slurp__: read the entire CSV into memory. This mode is default.
