@@ -33,6 +33,14 @@ trait CsvIterator
     }
     
     /**
+     * Resets the rows array and returns the first row.
+     * Only works in slurp mode.
+     *
+     * @return \ColbyGatte\SmartCsv\Row|null
+     */
+    abstract public function first();
+    
+    /**
      * Move forward to next element
      *
      * @return Row|null
@@ -52,9 +60,6 @@ trait CsvIterator
      * @return bool
      */
     abstract public function valid();
-    //{
-    //    return $this->saveRows ? key($this->rows) !== null : $this->currentRow !== null;
-    //}
     
     /**
      * Rewind the Iterator to the first element

@@ -160,7 +160,7 @@ abstract class AbstractCsv implements Iterator
     }
     
     /**
-     * @param string $column
+     * @param string         $column
      * @param CoderInterface $coder
      *
      * @return $this
@@ -172,9 +172,7 @@ abstract class AbstractCsv implements Iterator
             throw new Exception("$coder does not implement CoderInterface.");
         }
         
-        $coder = is_string($coder) ? new $coder : $coder;
-        
-        $this->coders[$column] = $coder;
+        $this->coders[$column] = is_string($coder) ? new $coder : $coder;
         
         return $this;
     }
@@ -394,8 +392,8 @@ abstract class AbstractCsv implements Iterator
     }
     
     /**
-     * @param string $name
-     * @param string $mandatoryColumn
+     * @param string   $name
+     * @param string   $mandatoryColumn
      * @param string[] $additionalColumns
      *
      * @return $this
@@ -414,7 +412,7 @@ abstract class AbstractCsv implements Iterator
     
     /**
      * @param \ColbyGatte\SmartCsv\AbstractCsv $csvToSearch
-     * @param array $parameters
+     * @param array                            $parameters
      *
      * @return \ColbyGatte\SmartCsv\AbstractCsv
      */
@@ -436,14 +434,6 @@ abstract class AbstractCsv implements Iterator
         
         return $resultCsv;
     }
-    
-    /**
-     * Resets the rows array and returns the first row.
-     * Only works in slurp mode.
-     *
-     * @return \ColbyGatte\SmartCsv\Row|null
-     */
-    abstract public function first();
     
     /**
      * Get the index based on the CSV header
@@ -493,6 +483,57 @@ abstract class AbstractCsv implements Iterator
         $this->columnNamesAsValue = array_flip($this->columnNamesAsKey);
         
         return $this;
+    }
+    
+    /**
+     * @param $column
+     *
+     * @return array
+     * @throws \ColbyGatte\SmartCsv\Exception
+     */
+    public function pluck($column)
+    {
+        if (! isset($this->columnNamesAsKey[$column])) {
+            throw new Exception("Cannot pluck $column: column does not exist.");
+        }
+        
+        $values = [];
+        
+        foreach ($this as $row) {
+            $values[] = $row->$column;
+        }
+        
+        return $values;
+    }
+    
+    /**
+     * @param callable $callback
+     *
+     * @return array
+     */
+    public function map(callable $callback)
+    {
+        $new = [];
+        
+        foreach ($this as $row) {
+            $new[] = $callback($row);
+        }
+        
+        return $new;
+    }
+    
+    /**
+     * @return \ColbyGatte\SmartCsv\Row[]
+     */
+    public function all()
+    {
+        $rows = [];
+        
+        foreach ($this as $row) {
+            $rows[] = $row;
+        }
+        
+        return $rows;
     }
     
     /**

@@ -314,7 +314,9 @@ class CsvTest extends TestCase
     /** @test */
     public function can_use_first_function_when_in_sip_mode()
     {
-        $this->assertNotFalse((new Slurp)->setSourceFile(SAMPLE_CSV)->read()->first());
+        $this->assertNotFalse(
+            (new Slurp)->setSourceFile(SAMPLE_CSV)->read()->first()
+        );
     }
     
     /** @test */
@@ -322,11 +324,9 @@ class CsvTest extends TestCase
     {
         touch($emptyFile = '/tmp/empty-file.csv');
         
-        $m = thrown_message(function () use ($emptyFile) {
+        $this->assertEquals('Error setting CSV header: Header must be an array.', thrown_message(function () use ($emptyFile) {
             (new Sip)->setSourceFile($emptyFile)->read();
-        });
-        
-        $this->assertEquals('Error setting CSV header. Could the file be empty?', $m);
+        }));
     }
     
     /** @test */
