@@ -2,10 +2,6 @@
 
 namespace ColbyGatte\SmartCsv\Csv;
 
-use ColbyGatte\SmartCsv\AbstractCsv;
-use ColbyGatte\SmartCsv\Csv\Blank;
-use ColbyGatte\SmartCsv\Row;
-
 class Slurp extends Blank
 {
     protected $csvSourceFile;
@@ -15,7 +11,8 @@ class Slurp extends Blank
      *
      * @return $this
      */
-    public function setSourceFile($file) {
+    public function setSourceFile($file)
+    {
         $this->optionsParsed = true;
         
         $this->csvSourceFile = $file;
@@ -23,17 +20,21 @@ class Slurp extends Blank
         return $this;
     }
     
-    function read($options = null)
+    /**
+     * Read all rows
+     *
+     * @return $this
+     */
+    function read()
     {
-        parent::read($options);
+        parent::read();
         
-        // Read EVERYTHING!
         while ($row = $this->gets()) {
             array_push($this->rows, $row);
         }
-    
+        
         fclose($this->fileHandle);
-    
+        
         $this->read = true;
         
         return $this;

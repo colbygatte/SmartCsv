@@ -8,8 +8,18 @@ use ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper;
 use ColbyGatte\SmartCsv\Row;
 use ColbyGatte\SmartCsv\Search;
 
+/**
+ * Use for CSV creating
+ *
+ * @package ColbyGatte\SmartCsv\Csv
+ */
 class Blank extends AbstractCsv
 {
+    /**
+     * @var \ColbyGatte\SmartCsv\Row[]
+     */
+    protected $rows = [];
+    
     public function next()
     {
         next($this->rows);
@@ -88,7 +98,7 @@ class Blank extends AbstractCsv
     
     /**
      * @param \ColbyGatte\SmartCsv\Row|int $row
-     * @param bool $reindex
+     * @param bool                         $reindex
      *
      * @return bool
      * @throws \ColbyGatte\SmartCsv\Exception
@@ -124,7 +134,7 @@ class Blank extends AbstractCsv
     
     /**
      * @param string $title
-     * @param mixed $defaultValue Default value to assign to each new cell
+     * @param mixed  $defaultValue Default value to assign to each new cell
      *
      * @return $this
      * @throws \ColbyGatte\SmartCsv\Exception
@@ -166,5 +176,46 @@ class Blank extends AbstractCsv
         }
         
         return $this;
+    }
+    
+    /**
+     * This can be used in all modes because it is using the Iterator interface.
+     *
+     * @param \ColbyGatte\SmartCsv\Search $search
+     *
+     * @return \ColbyGatte\SmartCsv\Csv\Blank
+     * @throws \ColbyGatte\SmartCsv\Exception
+     */
+    public function runSearch(Search $search)
+    {
+        $results = (new Blank)->setHeader($this->getHeader());
+        
+        foreach ($this as $row) {
+            if ($search->runFilters($row)) {
+                $results->append($row);
+            }
+        }
+        
+        return $results;
+    }
+    
+    /**
+     * @return bool
+     */
+    public function isReading()
+    {
+        if (count($this->rows)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Rewind the Iterator to the first element
+     */
+    public function rewind()
+    {
+        reset($this->rows);
     }
 }

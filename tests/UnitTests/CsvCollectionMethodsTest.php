@@ -9,7 +9,7 @@ class CsvCollectionMethodsTest extends TestCase
     /** @test */
     public function can_pluck_column()
     {
-        $ages = csv_sip(SAMPLE_CSV)->pluck('age');
+        $ages = csv_sip(SAMPLE_CSV)->pluckFromRows('age');
         
         $this->assertEquals(
             ['31', '23', '62'],
@@ -21,7 +21,7 @@ class CsvCollectionMethodsTest extends TestCase
     /** @test */
     public function can_map_csv()
     {
-        $mapped = csv_sip(SAMPLE_CSV)->map(function ($row) {
+        $mapped = csv_sip(SAMPLE_CSV)->mapRows(function ($row) {
             return [$row->name, $row->age];
         });
         

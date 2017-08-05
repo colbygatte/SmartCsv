@@ -31,7 +31,7 @@ class Row implements Iterator, Countable
         $columnCount = $csv->columnCount();
         
         if ($dataCount != $columnCount) {
-            if ($csv->isStrictMode()) {
+            if ($csv->getStrictMode()) {
                 $message = $csv->getFile() ? " (File: {$csv->getFile()})" : ' (no file set)';
                 
                 throw new Exception("Expected $columnCount data entry(s), received $dataCount.$message");

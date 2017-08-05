@@ -33,14 +33,6 @@ trait CsvIterator
     }
     
     /**
-     * Resets the rows array and returns the first row.
-     * Only works in slurp mode.
-     *
-     * @return \ColbyGatte\SmartCsv\Row|null
-     */
-    abstract public function first();
-    
-    /**
      * Move forward to next element
      *
      * @return Row|null
@@ -64,14 +56,13 @@ trait CsvIterator
     /**
      * Rewind the Iterator to the first element
      */
-    public function rewind()
-    {
-        reset($this->rows);
-    }
+    abstract public function rewind();
     
     /**
      * Iterate over each element.
      * $callable is passed the Row instance..
+     *
+     * NOTE: array_map() is not used because it would not work in sip mode
      *
      * @param callable $callback
      *
@@ -79,7 +70,6 @@ trait CsvIterator
      */
     public function each(callable $callback)
     {
-        // array_map() is not used because it would not work in sip mode
         foreach ($this as $row) {
             $callback($row);
         }

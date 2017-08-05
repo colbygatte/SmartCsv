@@ -24,7 +24,7 @@ class HelperFunctionsTest extends TestCase
     {
         $this->assertEquals(
             'Prof. Adrian Schmeler IV',
-            csv_sip(SAMPLE_CSV)->first()->name
+            csv_sip(SAMPLE_CSV)->getRows()[0]->name
         );
     }
 }

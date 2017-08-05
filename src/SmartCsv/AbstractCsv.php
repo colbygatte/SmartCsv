@@ -9,6 +9,12 @@ use ColbyGatte\SmartCsv\Traits\CsvIo;
 use ColbyGatte\SmartCsv\Traits\CsvIterator;
 use Iterator;
 
+/**
+ * Base class for implementing CSV manipulation
+ * Sub classes must implement @see \Iterator methods
+ *
+ * @package ColbyGatte\SmartCsv
+ */
 abstract class AbstractCsv implements Iterator
 {
     use CsvIterator, CsvIo;
@@ -65,11 +71,6 @@ abstract class AbstractCsv implements Iterator
      * @var string
      */
     protected $csvSourceFile = null;
-    
-    /**
-     * @var \ColbyGatte\SmartCsv\Row[]
-     */
-    protected $rows = [];
     
     /**
      * @var bool
@@ -129,32 +130,11 @@ abstract class AbstractCsv implements Iterator
     }
     
     /**
-     * This can be used in all modes because it is using the Iterator interface.
-     *
-     * @param \ColbyGatte\SmartCsv\Search $search
-     *
-     * @return \ColbyGatte\SmartCsv\Csv\Blank
-     * @throws \ColbyGatte\SmartCsv\Exception
-     */
-    public function runSearch(Search $search)
-    {
-        $results = (new Blank)->setHeader($this->getHeader());
-        
-        foreach ($this as $row) {
-            if ($search->runFilters($row)) {
-                $results->append($row);
-            }
-        }
-        
-        return $results;
-    }
-    
-    /**
      * Used for only mode, where column header count won't be the same as the data count recieved.
      *
      * @return bool
      */
-    public function isStrictMode()
+    public function getStrictMode()
     {
         return $this->strictMode;
     }
@@ -201,8 +181,6 @@ abstract class AbstractCsv implements Iterator
         }
         
         $this->columnGroupingHelper->setColumnNames($header);
-        
-        //$this->setAliases();
         
         foreach ($this->columnGroups as $data) {
             $this->columnGroupingHelper->columnGroup(...$data);
@@ -314,15 +292,7 @@ abstract class AbstractCsv implements Iterator
     /**
      * @return bool
      */
-    public function isReading()
-    {
-        // FIXME: if reading started but there were no rows, this will still return false!
-        if ($this->currentRow !== false || count($this->rows)) {
-            return true;
-        }
-        
-        return false;
-    }
+    abstract public function isReading();
     
     /**
      * @return string|false
@@ -457,7 +427,7 @@ abstract class AbstractCsv implements Iterator
      * @return array
      * @throws \ColbyGatte\SmartCsv\Exception
      */
-    public function pluck($column)
+    public function pluckFromRows($column)
     {
         if (! isset($this->columnNamesAsKey[$column])) {
             throw new Exception("Cannot pluck $column: column does not exist.");
@@ -477,7 +447,7 @@ abstract class AbstractCsv implements Iterator
      *
      * @return array
      */
-    public function map(callable $callback)
+    public function mapRows(callable $callback)
     {
         $new = [];
         
@@ -491,7 +461,7 @@ abstract class AbstractCsv implements Iterator
     /**
      * @return \ColbyGatte\SmartCsv\Row[]
      */
-    public function all()
+    public function getRows()
     {
         $rows = [];
         
@@ -517,7 +487,7 @@ abstract class AbstractCsv implements Iterator
         // If strict mode is turned off (which it is for $this->only()
         // and the header is already set, throw it away
         if ($this->columnNamesAsKey != null) {
-            if ($this->isStrictMode()) {
+            if ($this->getStrictMode()) {
                 throw new Exception("Headers were already set before reading started!");
             } else {
                 $this->gets(false);
@@ -528,7 +498,7 @@ abstract class AbstractCsv implements Iterator
         
         try {
             $this->setHeader($this->gets(false));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new Exception("Error setting CSV header: {$e->getMessage()}");
         }
         

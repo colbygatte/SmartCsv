@@ -14,7 +14,7 @@ class OnlyAndExcludeTest extends TestCase
         
         $this->assertEquals(
             ['name', 'value 1'],
-            array_keys($csv->first()->toArray())
+            array_keys($csv->getRows()[0]->toArray())
         );
     }
 }
