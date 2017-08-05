@@ -2,7 +2,7 @@
 
 namespace ColbyGatte\SmartCsv\Traits;
 
-trait CsvCollection
+trait CsvOperations
 {
 
 }

@@ -45,48 +45,6 @@ class Row implements Iterator, Countable
         foreach (array_keys($csv->getHeader()) as $index) {
             $this->data[$index] = $data[$index];
         }
-        
-        $this->runDecoders();
-    }
-    
-    /**
-     * Should ONLY be called from constructor.
-     *
-     * @return void
-     */
-    protected function runDecoders()
-    {
-        /**
-         * @var string $column
-         * @var \ColbyGatte\SmartCsv\Coders\CoderInterface $coder
-         */
-        foreach ($this->csv->getCoders() as $column => $coder) {
-            $index = $this->csv->getIndex($column);
-            
-            if ($index === false) {
-                continue;
-            }
-            
-            $this->data[$index] = $coder->decode($this->data[$index]);
-        }
-    }
-    
-    /**
-     * Pull only the given column data. Pulled data is not returned with associative keys.
-     *
-     * @param array $columns
-     *
-     * @return array
-     */
-    public function pluck($columns)
-    {
-        $data = [];
-        
-        foreach ($columns as $column) {
-            $data[$column] = $this->get($column);
-        }
-        
-        return $data;
     }
     
     /**
@@ -100,6 +58,10 @@ class Row implements Iterator, Countable
     {
         if (is_int($indexString)) {
             return $this->getByIndex($indexString);
+        }
+        
+        if (is_array($indexString)) {
+            return array_combine($indexString, array_map([$this, 'get'], $indexString));
         }
         
         if (isset($this->csv->indexAliases[$indexString])) {
@@ -241,27 +203,11 @@ class Row implements Iterator, Countable
     }
     
     /**
-     * For coders, we use a new instance of Row.
-     *
      * @return array
      */
     public function toArray($associative = true)
     {
         $copy = $this->data;
-        
-        /**
-         * @var string $column
-         * @var \ColbyGatte\SmartCsv\Coders\CoderInterface $coder
-         */
-        foreach ($this->csv->getCoders() as $column => $coder) {
-            $index = $this->csv->getIndex($column);
-            
-            if ($index === false) {
-                continue;
-            }
-            
-            $copy[$index] = $coder->encode($this->data[$index]);
-        }
         
         if ($associative) {
             $copy = array_combine($this->csv->getHeader(), $copy);

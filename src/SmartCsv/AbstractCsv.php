@@ -2,7 +2,6 @@
 
 namespace ColbyGatte\SmartCsv;
 
-use ColbyGatte\SmartCsv\Coders\CoderInterface;
 use ColbyGatte\SmartCsv\Csv\Blank;
 use ColbyGatte\SmartCsv\Csv\Sip;
 use ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper;
@@ -71,15 +70,6 @@ abstract class AbstractCsv implements Iterator
      * @var \ColbyGatte\SmartCsv\Row[]
      */
     protected $rows = [];
-    
-    /**
-     * They key is the column to code.
-     * The values are the coder to run it through.
-     * Each column can only have one coder.
-     *
-     * @var array
-     */
-    protected $coders = [];
     
     /**
      * @var bool
@@ -160,24 +150,6 @@ abstract class AbstractCsv implements Iterator
     }
     
     /**
-     * @param string         $column
-     * @param CoderInterface $coder
-     *
-     * @return $this
-     * @throws \ColbyGatte\SmartCsv\Exception
-     */
-    public function addCoder($column, $coder)
-    {
-        if (! in_array(CoderInterface::class, class_implements($coder))) {
-            throw new Exception("$coder does not implement CoderInterface.");
-        }
-        
-        $this->coders[$column] = is_string($coder) ? new $coder : $coder;
-        
-        return $this;
-    }
-    
-    /**
      * Used for only mode, where column header count won't be the same as the data count recieved.
      *
      * @return bool
@@ -230,7 +202,7 @@ abstract class AbstractCsv implements Iterator
         
         $this->columnGroupingHelper->setColumnNames($header);
         
-        $this->setAliases();
+        //$this->setAliases();
         
         foreach ($this->columnGroups as $data) {
             $this->columnGroupingHelper->columnGroup(...$data);
@@ -283,16 +255,6 @@ abstract class AbstractCsv implements Iterator
     }
     
     /**
-     * Used by Row.
-     *
-     * @return array
-     */
-    public function getCoders()
-    {
-        return $this->coders;
-    }
-    
-    /**
      * @return string
      */
     public function getDelimiter()
@@ -324,6 +286,7 @@ abstract class AbstractCsv implements Iterator
         $this->puts($this->getHeader(), $fh);
         
         foreach ($this as $row) {
+            
             $this->puts($row, $fh);
         }
         
@@ -466,10 +429,13 @@ abstract class AbstractCsv implements Iterator
      *
      * @return $this
      */
-    public function setAliases($aliases = null)
+    public function setAliases($aliases)
     {
-        if (! is_null($aliases)) {
-            $this->indexAliases = $aliases;
+        $this->indexAliases = $aliases;
+        
+        // Check that no aliases are the same as current column names
+        if ($duplicates = array_intersect(array_keys($aliases), $this->columnNamesAsValue)) {
+            throw new Exception('Invalid alias name(s) (alias is an existing header name): '.implode(', ', $duplicates));
         }
         
         foreach ($this->indexAliases as $indexName => $indexSearchTerm) {

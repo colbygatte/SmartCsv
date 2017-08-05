@@ -30,26 +30,14 @@ class Sip extends AbstractCsv
         return $this;
     }
     
-    public function addCoder($column, $coder)
-    {
-        parent::addCoder($column, $coder);
-        
-        $coder = $this->coders[$column]; // the coder is instantiated in the parent if it is a string
-        
-        // In sip mode, reading is done first thing, so when adding a coder,
-        // lets go ahead and decode it.
-        if ($row = $this->currentRow) {
-            $row->$column = $coder->decode($row->$column);
-        }
-        
-        return $this;
-    }
-    
     public function current()
     {
         return $this->currentRow;
     }
     
+    /**
+     * @return \ColbyGatte\SmartCsv\Row
+     */
     public function first()
     {
         return $this->current();

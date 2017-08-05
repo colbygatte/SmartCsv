@@ -4,11 +4,17 @@ namespace ColbyGatte\SmartCsv\Csv;
 
 use ColbyGatte\SmartCsv\AbstractCsv;
 use ColbyGatte\SmartCsv\Csv\Blank;
+use ColbyGatte\SmartCsv\Row;
 
 class Slurp extends Blank
 {
     protected $csvSourceFile;
     
+    /**
+     * @param $file
+     *
+     * @return $this
+     */
     public function setSourceFile($file) {
         $this->optionsParsed = true;
         

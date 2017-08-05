@@ -30,4 +30,28 @@ class AliasesTest extends TestCase
         
         $this->assertEquals(['Length', 'Height', 'Weight'], $data);
     }
+    
+    /**
+     * Test this alias
+     *
+     *  [
+     *     'price' => 'reg_price',
+     *     'special_price' => 'price'
+     * ]
+     *
+     * @test
+     */
+    public function test_dup_aliases()
+    {
+        $this->assertEquals(
+            'Invalid alias name(s) (alias is an existing header name): age',
+            
+            thrown_message(function () {
+                csv_sip(SAMPLE_CSV)->setAliases([
+                    'age' => 'name',
+                    'special_age' => 'age'
+                ]);
+            })
+        );
+    }
 }

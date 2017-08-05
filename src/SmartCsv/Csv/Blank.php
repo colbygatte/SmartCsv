@@ -64,16 +64,18 @@ class Blank extends AbstractCsv
     }
     
     /**
+     * @param array[]|Row[] $rows
+     *
      * @return $this
      * @throws \ColbyGatte\SmartCsv\Exception
      */
-    public function append()
+    public function append(...$rows)
     {
         if (empty($this->columnNamesAsValue)) {
             throw new Exception('Header must be set before adding rows!');
         }
         
-        foreach (func_get_args() as $data) {
+        foreach ($rows as $data) {
             if ($data instanceof Row) { // TODO: clone row in case it's coming from another CSV, check for equal amount of columns
                 $this->rows[] = $data;
             } else {

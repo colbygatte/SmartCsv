@@ -2,7 +2,6 @@
 
 namespace Tests\UnitTests;
 
-use ColbyGatte\SmartCsv\Coders\Serialize;
 use ColbyGatte\SmartCsv\Csv\Alter;
 use ColbyGatte\SmartCsv\Csv\Blank;
 use ColbyGatte\SmartCsv\Csv\Sip;
@@ -299,14 +298,14 @@ class CsvTest extends TestCase
     }
     
     /** @test */
-    function can_pluck_data()
+    function can_get_certain_data()
     {
         $csv = (new Blank)
             ->setHeader(['name', 'age', 'weight'])
             ->append(['Colby', '23', '230']);
         
         $data = $csv->first()
-            ->pluck(['age', 'weight']);
+            ->get(['age', 'weight']);
         
         $this->assertEquals(['age' => '23', 'weight' => '230'], $data);
     }
@@ -327,13 +326,5 @@ class CsvTest extends TestCase
         $this->assertEquals('Error setting CSV header: Header must be an array.', thrown_message(function () use ($emptyFile) {
             (new Sip)->setSourceFile($emptyFile)->read();
         }));
-    }
-    
-    /** @test */
-    public function can_add_coder_after_calling_csv_sip()
-    {
-        $csv = (new Sip)->setSourceFile(SAMPLE_CSV)->read()->addCoder('other_info', Serialize::class);
-        
-        $this->assertTrue(is_array($csv->first()->other_info));
     }
 }
