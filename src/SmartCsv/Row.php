@@ -5,7 +5,7 @@ namespace ColbyGatte\SmartCsv;
 use Countable;
 use Iterator;
 
-class Row implements Iterator, Countable
+class Row implements Countable
 {
     /**
      * @var \ColbyGatte\SmartCsv\AbstractCsv
@@ -310,50 +310,6 @@ class Row implements Iterator, Countable
         fputcsv($fh, $this->toArray(false), $this->csv->getDelimiter());
         
         return ob_get_clean();
-    }
-    
-    /**
-     * Return the current element
-     *
-     * @return string|false
-     */
-    public function current()
-    {
-        return current($this->data);
-    }
-    
-    /**
-     * Move forward to next element
-     */
-    public function next()
-    {
-        next($this->data);
-    }
-    
-    /**
-     * Return the column title of the current element
-     *
-     * @return string
-     */
-    public function key()
-    {
-        return $this->csv->getIndexString(key($this->data));
-    }
-    
-    /**
-     * Checks if current position is valid
-     */
-    public function valid()
-    {
-        return key($this->data) !== null;
-    }
-    
-    /**
-     * Rewind the Iterator to the first element
-     */
-    public function rewind()
-    {
-        reset($this->data);
     }
     
     /**
