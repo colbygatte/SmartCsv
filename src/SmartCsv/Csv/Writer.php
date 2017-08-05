@@ -44,10 +44,10 @@ class Writer
      * @return $this
      * @throws \ColbyGatte\SmartCsv\Exception
      */
-    public function setHeader($header)
+    public function writeHeader($header)
     {
         if ($this->didSetHeader) {
-            throw new Exception('Header has already been set.');
+            throw new Exception('Header has already been set');
         }
         
         $this->didSetHeader = true;

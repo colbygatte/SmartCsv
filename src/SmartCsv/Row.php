@@ -120,7 +120,9 @@ class Row implements Countable
      */
     public function delete()
     {
-        $this->csv->delete($this);
+        if (method_exists($this->csv, 'delete')) {
+            $this->csv->delete($this);
+        }
     }
     
     /**

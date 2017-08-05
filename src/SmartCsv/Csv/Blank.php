@@ -103,7 +103,7 @@ class Blank extends AbstractCsv
      * @return bool
      * @throws \ColbyGatte\SmartCsv\Exception
      */
-    public function delete($row, $reindex = true)
+    public function delete(Row $row, $reindex = true)
     {
         if ($row instanceof Row) {
             if (($index = array_search($row, $this->rows)) !== false) {

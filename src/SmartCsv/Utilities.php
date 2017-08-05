@@ -5,7 +5,7 @@ namespace ColbyGatte\SmartCsv;
 class Utilities
 {
     /**
-     * @param array $elementsToCheck
+     * @param array  $elementsToCheck
      * @param string $message
      *
      * @throws \ColbyGatte\SmartCsv\Exception
@@ -14,6 +14,7 @@ class Utilities
     {
         $message = sprintf($message, implode(', ', array_flip(array_filter(
                 array_count_values($elementsToCheck),
+                
                 function ($value) {
                     return $value > 1;
                 })

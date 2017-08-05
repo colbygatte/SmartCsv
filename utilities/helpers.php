@@ -1,6 +1,5 @@
 <?php
 
-use ColbyGatte\SmartCsv\AbstractCsv;
 use ColbyGatte\SmartCsv\Csv\Alter;
 use ColbyGatte\SmartCsv\Csv\Blank;
 use ColbyGatte\SmartCsv\Csv\Sip;
@@ -20,13 +19,7 @@ if (! function_exists('csv')) {
      */
     function csv($header)
     {
-        $csv = (new Blank);
-        
-        if ($header) {
-            $csv->setHeader($header);
-        }
-        
-        return $csv;
+        return (new Blank)->setHeader($header);
     }
 }
 
@@ -71,14 +64,14 @@ if (! function_exists('csv_writer')) {
     /**
      * @param array $header
      *
-     * @return \ColbyGatte\SmartCsv\CsvWriter
+     * @return Writer
      */
     function csv_writer($writeTo, $header = null)
     {
         $writer = (new Writer)->setWriteFile($writeTo);
         
         if ($header) {
-            $writer->setHeader($header);
+            $writer->writeHeader($header);
         }
         
         return $writer;
@@ -88,7 +81,7 @@ if (! function_exists('csv_writer')) {
 if (! function_exists('csv_search')) {
     /**
      * @param \ColbyGatte\SmartCsv\AbstractCsv $csv
-     * @param callable[] $filters
+     * @param callable[]                       $filters
      *
      * @return Blank
      */

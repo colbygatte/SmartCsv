@@ -2,8 +2,9 @@
 
 namespace ColbyGatte\SmartCsv\Csv;
 
-use ColbyGatte\SmartCsv\Search;
 use ColbyGatte\SmartCsv\Exception;
+use ColbyGatte\SmartCsv\Row;
+use ColbyGatte\SmartCsv\Search;
 
 class Alter extends Sip
 {
@@ -19,15 +20,13 @@ class Alter extends Sip
         throw new Exception('Cannot search in alter mode.');
     }
     
-    public function delete($row, $reindex = true)
+    public function delete(Row $row, $reindex = true)
     {
-        if ($row instanceof Row) {
-            // In alter mode, deleting the row will mean not saving it to the new CSV file,
-            // so we just set the value of currentRow to false.
-            $this->currentRow = false;
-            
-            return true;
-        }
+        // In alter mode, deleting the row will mean not saving it to the new CSV file,
+        // so we just set the value of currentRow to false.
+        $this->currentRow = false;
+        
+        return true;
     }
     
     /**
@@ -38,7 +37,7 @@ class Alter extends Sip
     public function setAlterSourceFile($alterSourceFile)
     {
         $this->alterSourceFile = $alterSourceFile;
-    
+        
         return $this;
     }
     
@@ -65,7 +64,7 @@ class Alter extends Sip
         parent::setUp();
         
         $this->alter = fopen($this->alterSourceFile, 'w');
-    
+        
         $this->writeRow($this->getHeader(), $this->alter);
         
         return $this;

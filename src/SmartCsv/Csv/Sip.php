@@ -3,6 +3,8 @@
 namespace ColbyGatte\SmartCsv\Csv;
 
 use ColbyGatte\SmartCsv\AbstractCsv;
+use ColbyGatte\SmartCsv\Exception;
+use ColbyGatte\SmartCsv\Row;
 
 /**
  * Use Sip for reading a Csv, row by row (This is not necessarily line by line,
