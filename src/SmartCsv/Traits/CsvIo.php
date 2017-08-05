@@ -29,7 +29,7 @@ trait CsvIo
      * @param array|Row $data
      * @param resource $fh
      */
-    protected function puts($data, $fh = null)
+    protected function writeRow($data, $fh = null)
     {
         fputcsv(
             $fh ?: $this->fileHandle,
@@ -43,7 +43,7 @@ trait CsvIo
      *
      * @return array|\ColbyGatte\SmartCsv\Row
      */
-    protected function gets($makeRow = true)
+    protected function readRow($makeRow = true)
     {
         $data = fgetcsv($this->fileHandle, 0, $this->delimiter);
         

@@ -2,11 +2,9 @@
 
 namespace ColbyGatte\SmartCsv;
 
-use ColbyGatte\SmartCsv\Csv\Blank;
 use ColbyGatte\SmartCsv\Csv\Sip;
 use ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper;
 use ColbyGatte\SmartCsv\Traits\CsvIo;
-use ColbyGatte\SmartCsv\Traits\CsvIterator;
 use Iterator;
 
 /**
@@ -17,7 +15,7 @@ use Iterator;
  */
 abstract class AbstractCsv implements Iterator
 {
-    use CsvIterator, CsvIo;
+    use CsvIo;
     
     /**
      * @var array
@@ -261,11 +259,11 @@ abstract class AbstractCsv implements Iterator
         
         $fh = is_resource($toFile) ? $toFile : fopen($toFile, 'w');
         
-        $this->puts($this->getHeader(), $fh);
+        $this->writeRow($this->getHeader(), $fh);
         
         foreach ($this as $row) {
             
-            $this->puts($row, $fh);
+            $this->writeRow($row, $fh);
         }
         
         fclose($fh);
@@ -397,7 +395,10 @@ abstract class AbstractCsv implements Iterator
     /**
      * Add index aliases to Csv::$columnNamesAsKey
      *
+     * @param array $aliases
+     *
      * @return $this
+     * @throws \ColbyGatte\SmartCsv\Exception
      */
     public function setAliases($aliases)
     {
@@ -459,6 +460,25 @@ abstract class AbstractCsv implements Iterator
     }
     
     /**
+     * Iterate over each element.
+     * $callable is passed the Row instance..
+     *
+     * NOTE: array_map() is not used because it would not work in sip mode
+     *
+     * @param callable $callback
+     *
+     * @return $this
+     */
+    public function each(callable $callback)
+    {
+        foreach ($this as $row) {
+            $callback($row);
+        }
+        
+        return $this;
+    }
+    
+    /**
      * @return \ColbyGatte\SmartCsv\Row[]
      */
     public function getRows()
@@ -471,6 +491,39 @@ abstract class AbstractCsv implements Iterator
         
         return $rows;
     }
+    
+    /**
+     * Return the current element
+     *
+     * @return \ColbyGatte\SmartCsv\Row
+     */
+    abstract public function current();
+    
+    /**
+     * Move forward to next element
+     *
+     * @return Row|null
+     */
+    abstract public function next();
+    
+    /**
+     * Return the key of the current element
+     *
+     * @return int
+     */
+    abstract public function key();
+    
+    /**
+     * Checks if current position is valid
+     *
+     * @return bool
+     */
+    abstract public function valid();
+    
+    /**
+     * Rewind the Iterator to the first element
+     */
+    abstract public function rewind();
     
     /**
      * Ran before writing to a CSV file.
@@ -490,14 +543,14 @@ abstract class AbstractCsv implements Iterator
             if ($this->getStrictMode()) {
                 throw new Exception("Headers were already set before reading started!");
             } else {
-                $this->gets(false);
+                $this->readRow(false);
                 
                 return $this;
             }
         }
         
         try {
-            $this->setHeader($this->gets(false));
+            $this->setHeader($this->readRow(false));
         } catch (Exception $e) {
             throw new Exception("Error setting CSV header: {$e->getMessage()}");
         }

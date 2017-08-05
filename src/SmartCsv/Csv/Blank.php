@@ -218,4 +218,14 @@ class Blank extends AbstractCsv
     {
         reset($this->rows);
     }
+    
+    /**
+     * Return the current element
+     *
+     * @return \ColbyGatte\SmartCsv\Row
+     */
+    public function current()
+    {
+        return current($this->rows);
+    }
 }

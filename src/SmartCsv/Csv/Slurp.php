@@ -29,7 +29,7 @@ class Slurp extends Blank
     {
         parent::read();
         
-        while ($row = $this->gets()) {
+        while ($row = $this->readRow()) {
             array_push($this->rows, $row);
         }
         

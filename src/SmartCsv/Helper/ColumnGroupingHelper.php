@@ -35,7 +35,7 @@ class ColumnGroupingHelper
      * ColumnGroupingHelper constructor.
      *
      * @param \ColbyGatte\SmartCsv\AbstractCsv $csv
-     * @param array $columnNamesAsValue
+     * @param array                            $columnNamesAsValue
      */
     public function __construct(AbstractCsv $csv, $columnNamesAsValue = [])
     {
@@ -109,7 +109,7 @@ class ColumnGroupingHelper
     }
     
     /**
-     * @param string $mandatoryColumn
+     * @param string   $mandatoryColumn
      * @param string[] $additionalColumns
      * @param          $cache
      * @param          $info

@@ -46,10 +46,10 @@ class Alter extends Sip
     {
         // If we are in alter mode, write the previous line (only if it hasn't been unset, which means the row was deleted)
         if (is_resource($this->alter) && $this->currentRow) {
-            $this->puts($this->currentRow, $this->alter);
+            $this->writeRow($this->currentRow, $this->alter);
         }
         
-        if (! ($row = $this->gets())) {
+        if (! ($row = $this->readRow())) {
             $this->currentRow = null;
             
             return;
@@ -66,7 +66,7 @@ class Alter extends Sip
         
         $this->alter = fopen($this->alterSourceFile, 'w');
     
-        $this->puts($this->getHeader(), $this->alter);
+        $this->writeRow($this->getHeader(), $this->alter);
         
         return $this;
     }

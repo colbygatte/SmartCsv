@@ -63,7 +63,7 @@ class Sip extends AbstractCsv
     
     public function next()
     {
-        if (! ($row = $this->gets())) {
+        if (! ($row = $this->readRow())) {
             $this->currentRow = null;
             
             return;

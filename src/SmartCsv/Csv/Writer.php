@@ -52,7 +52,7 @@ class Writer
         
         $this->didSetHeader = true;
         
-        $this->puts($header);
+        $this->writeRow($header);
         
         return $this;
     }
@@ -64,7 +64,7 @@ class Writer
      */
     public function append(...$rows)
     {
-        array_map([$this, 'puts'], $rows);
+        array_map([$this, 'writeRow'], $rows);
         
         return $this;
     }
