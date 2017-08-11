@@ -81,11 +81,6 @@ abstract class AbstractCsv implements Iterator
     protected $columnGroups = [];
     
     /**
-     * @var \ColbyGatte\SmartCsv\RowDataCoders
-     */
-    protected $coders;
-    
-    /**
      * The CSV file handle.
      * $this->gets() and $this->puts() read from here if
      * no file handle is given.
@@ -98,6 +93,11 @@ abstract class AbstractCsv implements Iterator
      * @var string
      */
     protected $delimiter = ',';
+    
+    /**
+     * @var \ColbyGatte\SmartCsv\RowDataCoders
+     */
+    protected $coders;
     
     /**
      * Csv constructor.
@@ -526,6 +526,18 @@ abstract class AbstractCsv implements Iterator
      * Rewind the Iterator to the first element
      */
     abstract public function rewind();
+    
+    public function setCoders(RowDataCoders $coders)
+    {
+        $this->coders = $coders;
+        
+        return $this;
+    }
+    
+    public function getCoders()
+    {
+        return $this->coders;
+    }
     
     /**
      * @param array|Row $data

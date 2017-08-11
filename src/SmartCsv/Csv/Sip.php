@@ -4,6 +4,7 @@ namespace ColbyGatte\SmartCsv\Csv;
 
 use ColbyGatte\SmartCsv\AbstractCsv;
 use ColbyGatte\SmartCsv\Exception;
+use ColbyGatte\SmartCsv\RowDataCoders;
 
 /**
  * Use Sip for reading a Csv, row by row (This is not necessarily line by line,
@@ -107,17 +108,5 @@ class Sip extends AbstractCsv
         rewind($this->fileHandle);
         
         fgetcsv($this->fileHandle); // Re-reads the header
-    }
-    
-    public function setCoders($coders)
-    {
-        $this->coders = $coders;
-        
-        return $this;
-    }
-    
-    public function getCoders()
-    {
-        return $this->coders;
     }
 }
