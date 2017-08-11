@@ -32,6 +32,11 @@ class RowDataCoders
         return $this;
     }
     
+    public function setCoder($column, callable $encoder, callable $decoder)
+    {
+        $this->setEncoder($column, $encoder)->setDecoder($column, $decoder);
+    }
+    
     /**
      * @param string $column
      *
@@ -53,7 +58,7 @@ class RowDataCoders
             if (! isset($rowData[$column])) {
                 continue;
             }
-        
+            
             $rowData[$column] = $encoder($rowData[$column]);
         }
         
