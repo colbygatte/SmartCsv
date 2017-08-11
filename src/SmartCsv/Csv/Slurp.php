@@ -17,7 +17,10 @@ class Slurp extends Blank
         
         $this->csvSourceFile = $file;
         
-        return $this;
+        $this->fileHandle = fopen($file, 'r');
+    
+        return $this->setHeader($this->readRow(false))
+            ->read();
     }
     
     /**
@@ -25,17 +28,13 @@ class Slurp extends Blank
      *
      * @return $this
      */
-    function read()
+    protected function read()
     {
-        parent::read();
-        
         while ($row = $this->readRow()) {
             array_push($this->rows, $row);
         }
         
         fclose($this->fileHandle);
-        
-        $this->read = true;
         
         return $this;
     }

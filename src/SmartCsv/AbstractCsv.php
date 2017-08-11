@@ -4,7 +4,6 @@ namespace ColbyGatte\SmartCsv;
 
 use ColbyGatte\SmartCsv\Csv\Sip;
 use ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper;
-use ColbyGatte\SmartCsv\Traits\CsvIo;
 use Iterator;
 
 /**
@@ -15,8 +14,6 @@ use Iterator;
  */
 abstract class AbstractCsv implements Iterator
 {
-    use CsvIo;
-    
     /**
      * @var array
      */
@@ -84,6 +81,25 @@ abstract class AbstractCsv implements Iterator
     protected $columnGroups = [];
     
     /**
+     * @var \ColbyGatte\SmartCsv\RowDataCoders
+     */
+    protected $coders;
+    
+    /**
+     * The CSV file handle.
+     * $this->gets() and $this->puts() read from here if
+     * no file handle is given.
+     *
+     * @var resource|bool
+     */
+    protected $fileHandle;
+    
+    /**
+     * @var string
+     */
+    protected $delimiter = ',';
+    
+    /**
      * Csv constructor.
      */
     public function __construct()
@@ -92,34 +108,15 @@ abstract class AbstractCsv implements Iterator
     }
     
     /**
-     * @param null $options
+     * @param string $delimiter
      *
      * @return $this
      * @throws \ColbyGatte\SmartCsv\Exception
      */
-    public function read()
-    {
-        if ($this->read) {
-            throw new Exception('File already read!');
-        }
-        
-        if (! $this->optionsParsed) {
-            throw new Exception('No options have been set!');
-        }
-        
-        $this->setUp();
-    }
-    
-    /**
-     * @param string $delimiter
-     *
-     * @return $this
-     * @throws \Exception
-     */
     public function setDelimiter($delimiter)
     {
         if ($this->read) {
-            throw new \Exception('Delimiter cannot be changed after reading/writing');
+            throw new Exception('Delimiter cannot be changed after reading/writing');
         }
         
         $this->delimiter = $delimiter;
@@ -155,13 +152,18 @@ abstract class AbstractCsv implements Iterator
      * @return $this
      * @throws \ColbyGatte\SmartCsv\Exception
      */
-    public function setHeader($header)
+    public function setHeader($header, $overwrite = false)
     {
+        // If passed an instance of row, get integer-indexed array
+        if ($header instanceof Row) {
+            $header = $header->toArray(false);
+        }
+        
         if (! is_array($header)) {
             throw new Exception('Header must be an array.');
         }
         
-        if ($this->columnNamesAsValue != null) {
+        if ($this->columnNamesAsValue != null && ! $overwrite) {
             throw new Exception('Header can only be set once!');
         }
         
@@ -188,6 +190,8 @@ abstract class AbstractCsv implements Iterator
     }
     
     /**
+     * @param null $useAliases
+     *
      * @return string[]
      */
     public function getHeader($useAliases = null)
@@ -262,7 +266,6 @@ abstract class AbstractCsv implements Iterator
         $this->writeRow($this->getHeader(), $fh);
         
         foreach ($this as $row) {
-            
             $this->writeRow($row, $fh);
         }
         
@@ -317,9 +320,8 @@ abstract class AbstractCsv implements Iterator
         }
         
         return (new Sip)->setSourceFile($this->getFile())
-            ->setHeader($columnIndexes)
-            ->setStrictMode(false)
-            ->read();
+            ->setHeader($columnIndexes, true)
+            ->setStrictMode(false);
     }
     
     /**
@@ -526,35 +528,45 @@ abstract class AbstractCsv implements Iterator
     abstract public function rewind();
     
     /**
-     * Ran before writing to a CSV file.
-     *
-     * @return $this
-     * @throws \ColbyGatte\SmartCsv\Exception
+     * @param array|Row $data
+     * @param resource  $fh
      */
-    protected function setUp()
+    protected function writeRow($data, $fh = null)
     {
-        if (($this->fileHandle = fopen($this->csvSourceFile, 'r')) === false) {
-            throw new Exception("Could not open {$this->csvSourceFile}.");
-        }
-        
-        // If strict mode is turned off (which it is for $this->only()
-        // and the header is already set, throw it away
-        if ($this->columnNamesAsKey != null) {
-            if ($this->getStrictMode()) {
-                throw new Exception("Headers were already set before reading started!");
+        if ($data instanceof Row) {
+            if ($this->coders) {
+                $data = $this->coders->encodeData($data->toArray(true));
             } else {
-                $this->readRow(false);
-                
-                return $this;
+                $data = $data->toArray(true);
             }
         }
         
-        try {
-            $this->setHeader($this->readRow(false));
-        } catch (Exception $e) {
-            throw new Exception("Error setting CSV header: {$e->getMessage()}");
+        fputcsv(
+            $fh ?: $this->fileHandle,
+            array_values($data),
+            $this->delimiter
+        );
+    }
+    
+    /**
+     * @param bool $makeRow
+     *
+     * @return array|\ColbyGatte\SmartCsv\Row
+     */
+    protected function readRow($makeRow = true)
+    {
+        $data = fgetcsv($this->fileHandle, 0, $this->delimiter);
+        
+        if ($makeRow && $data !== false) {
+            $row = new Row($this, $data);
+            
+            if ($this->coders) {
+                $this->coders->applyDecoders($row);
+            }
+            
+            return $row;
         }
         
-        return $this;
+        return $data;
     }
 }

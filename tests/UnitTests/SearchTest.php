@@ -43,34 +43,11 @@ class SearchTest extends TestCase
             return (int) $row->age > 70;
         });
         
-        $resultCsv = (new Slurp)->setSourceFile(SAMPLE_CSV)->read()->runSearch($search);
+        $resultCsv = (new Slurp)->setSourceFile(SAMPLE_CSV)->runSearch($search);
         
         $this->assertEquals(4, $resultCsv->count());
         
         $this->assertEquals('Bernardo Turcotte', $resultCsv->first()->name);
-    }
-    
-    /** @test */
-    public function search_in_alter_mode_throws()
-    {
-        $this->assertNotEmpty(
-            thrown_message(function () {
-                $search = (new Search)
-                    ->addFilter(function ($row) {
-                        return $row->age < 30;
-                    })
-                    ->addFilter(function ($row) {
-                        return strlen($row->name) < 6;
-                    });
-                
-                $result = (new Alter)
-                    ->setSourceFile(SAMPLE_CSV)
-                    ->setAlterSourceFile('/tmp/alter-file.csv')
-                    ->runSearch($search);
-                
-                return $result;
-            })
-        );
     }
     
     /** @test */
@@ -83,7 +60,7 @@ class SearchTest extends TestCase
                 ['Prof. Gregorio Schowalter Sr.', 'lrunte@hotmail.com', 'sushi']
             );
         
-        $resultCsv = (new Slurp)->setSourceFile(SAMPLE_CSV)->read()->findMatches($csv, [
+        $resultCsv = (new Slurp)->setSourceFile(SAMPLE_CSV)->findMatches($csv, [
             'name' => 'awesome_human',
             'contact 1' => 'awesome_email',
             'value 2' => 'value 2'

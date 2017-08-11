@@ -56,7 +56,7 @@ if (! function_exists('csv_sip')) {
      */
     function csv_sip($file)
     {
-        return (new Sip)->setSourceFile($file)->read();
+        return (new Sip)->setSourceFile($file);
     }
 }
 

@@ -10,7 +10,7 @@ class OnlyAndExcludeTest extends TestCase
     /** @test */
     public function can_use_load_only_column_feature()
     {
-        $csv = (new Sip)->setSourceFile(SAMPLE_CSV)->read()->only(['name', 'value 1']);
+        $csv = (new Sip)->setSourceFile(SAMPLE_CSV)->only(['name', 'value 1']);
         
         $this->assertEquals(
             ['name', 'value 1'],

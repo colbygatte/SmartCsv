@@ -4,7 +4,6 @@ namespace ColbyGatte\SmartCsv\Csv;
 
 use ColbyGatte\SmartCsv\AbstractCsv;
 use ColbyGatte\SmartCsv\Exception;
-use ColbyGatte\SmartCsv\Row;
 
 /**
  * Use Sip for reading a Csv, row by row (This is not necessarily line by line,
@@ -25,27 +24,24 @@ class Sip extends AbstractCsv
     protected $currentRow;
     
     /**
+     * Sets source file & reads first row
+     *
+     * @param string $file
+     *
      * @return $this
+     * @throws \ColbyGatte\SmartCsv\Exception
      */
     public function setSourceFile($file)
     {
+        if ($this->csvSourceFile) {
+            throw new Exception('Source file already set.');
+        }
+        
         $this->csvSourceFile = $file;
         
-        $this->optionsParsed = true;
+        $this->fileHandle = fopen($file, 'r');
         
-        return $this;
-    }
-    
-    /**
-     * Read the first row
-     *
-     * @return $this
-     */
-    public function read()
-    {
-        parent::read();
-        
-        //$this->currentRow = $this->gets();
+        $this->setHeader($this->readRow(false));
         
         return $this;
     }
@@ -88,7 +84,7 @@ class Sip extends AbstractCsv
      */
     public function valid()
     {
-        return !feof($this->fileHandle);
+        return ! feof($this->fileHandle);
     }
     
     /**
@@ -111,5 +107,17 @@ class Sip extends AbstractCsv
         rewind($this->fileHandle);
         
         fgetcsv($this->fileHandle); // Re-reads the header
+    }
+    
+    public function setCoders($coders)
+    {
+        $this->coders = $coders;
+        
+        return $this;
+    }
+    
+    public function getCoders()
+    {
+        return $this->coders;
     }
 }

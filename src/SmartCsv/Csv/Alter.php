@@ -15,11 +15,6 @@ class Alter extends Sip
     
     protected $alterSourceFile; // TODO: SET THIS!
     
-    public function runSearch(Search $search)
-    {
-        throw new Exception('Cannot search in alter mode.');
-    }
-    
     public function delete(Row $row, $reindex = true)
     {
         // In alter mode, deleting the row will mean not saving it to the new CSV file,
@@ -37,7 +32,11 @@ class Alter extends Sip
     public function setAlterSourceFile($alterSourceFile)
     {
         $this->alterSourceFile = $alterSourceFile;
-        
+    
+        $this->alter = fopen($this->alterSourceFile, 'w');
+    
+        $this->writeRow($this->getHeader(), $this->alter);
+    
         return $this;
     }
     
@@ -57,16 +56,5 @@ class Alter extends Sip
         $this->currentRow = $row;
         
         return $row;
-    }
-    
-    protected function setUp()
-    {
-        parent::setUp();
-        
-        $this->alter = fopen($this->alterSourceFile, 'w');
-        
-        $this->writeRow($this->getHeader(), $this->alter);
-        
-        return $this;
     }
 }

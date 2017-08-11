@@ -3,7 +3,6 @@
 namespace ColbyGatte\SmartCsv;
 
 use Countable;
-use Iterator;
 
 class Row implements Countable
 {
@@ -21,7 +20,7 @@ class Row implements Countable
      * Row constructor.
      *
      * @param \ColbyGatte\SmartCsv\AbstractCsv $csv
-     * @param array $data
+     * @param array                            $data
      *
      * @throws \ColbyGatte\SmartCsv\Exception
      */
@@ -146,57 +145,6 @@ class Row implements Countable
     }
     
     /**
-     * @param $cached
-     *
-     * @return array
-     */
-    protected function groupSingleColumnsFromCache($cached)
-    {
-        $results = [];
-        
-        foreach ($cached as $index) {
-            $value = $this->data[$index];
-            
-            if (empty($value)) {
-                continue;
-            }
-            
-            $results[] = $value;
-        }
-        
-        return $results;
-    }
-    
-    /**
-     * @param $cached
-     * @param $trimEnding
-     *
-     * @return array
-     */
-    protected function groupMultipleColumnsFromCache($cached, $trimEnding)
-    {
-        $results = [];
-        
-        foreach ($cached['groups'] as $group) {
-            $ending = $group['ending'];
-            
-            $result = [];
-            
-            foreach ($cached['search'] as $key => $search) {
-                $index = $group['indexes'][$key];
-                
-                $value = $this->data[$index];
-                
-                $result[$trimEnding ? $search : $search.$ending] = $value;
-            }
-            
-            $results[] = $result;
-        }
-        
-        return $results;
-    }
-    
-    /**
      * @return string
      */
     public function toJson($options = 0, $depth = 512)
@@ -205,6 +153,10 @@ class Row implements Countable
     }
     
     /**
+     * Returns data as-is (does not use encoder)
+     *
+     * @param bool $associative
+     *
      * @return array
      */
     public function toArray($associative = true)
@@ -218,6 +170,7 @@ class Row implements Countable
         return $copy;
     }
     
+   
     /**
      * @return \ColbyGatte\SmartCsv\Helper\RowGroupGetter
      */
@@ -267,7 +220,7 @@ class Row implements Countable
     
     /**
      * @param string $name
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function __set($name, $value)
     {
@@ -332,5 +285,56 @@ class Row implements Countable
     public function addColumn($value = '')
     {
         array_push($this->data, $value);
+    }
+    
+    /**
+     * @param $cached
+     *
+     * @return array
+     */
+    protected function groupSingleColumnsFromCache($cached)
+    {
+        $results = [];
+        
+        foreach ($cached as $index) {
+            $value = $this->data[$index];
+            
+            if (empty($value)) {
+                continue;
+            }
+            
+            $results[] = $value;
+        }
+        
+        return $results;
+    }
+    
+    /**
+     * @param $cached
+     * @param $trimEnding
+     *
+     * @return array
+     */
+    protected function groupMultipleColumnsFromCache($cached, $trimEnding)
+    {
+        $results = [];
+        
+        foreach ($cached['groups'] as $group) {
+            $ending = $group['ending'];
+            
+            $result = [];
+            
+            foreach ($cached['search'] as $key => $search) {
+                $index = $group['indexes'][$key];
+                
+                $value = $this->data[$index];
+                
+                $result[$trimEnding ? $search : $search.$ending] = $value;
+            }
+            
+            $results[] = $result;
+        }
+        
+        return $results;
     }
 }

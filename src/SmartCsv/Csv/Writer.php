@@ -2,18 +2,28 @@
 
 namespace ColbyGatte\SmartCsv\Csv;
 
-use ColbyGatte\SmartCsv\AbstractCsv;
 use ColbyGatte\SmartCsv\Row;
-use ColbyGatte\SmartCsv\Traits\CsvIo;
 
 class Writer
 {
-    use CsvIo;
-    
     /**
      * @var bool
      */
     protected $didSetHeader = false;
+    
+    /**
+     * The CSV file handle.
+     * $this->gets() and $this->puts() read from here if
+     * no file handle is given.
+     *
+     * @var resource|bool
+     */
+    protected $fileHandle;
+    
+    /**
+     * @var string
+     */
+    protected $delimiter = ',';
     
     /**
      * @param $file
@@ -67,5 +77,36 @@ class Writer
         array_map([$this, 'writeRow'], $rows);
         
         return $this;
+    }
+    
+    /**
+     * @param array|Row $data
+     * @param resource  $fh
+     */
+    protected function writeRow($data, $fh = null)
+    {
+        fputcsv(
+            $fh ?: $this->fileHandle,
+            $data instanceof Row ? $data->toEncodedArray() : $data,
+            $this->delimiter
+        );
+    }
+    
+    /**
+     * @param bool $makeRow
+     *
+     * @return array|\ColbyGatte\SmartCsv\Row
+     */
+    protected function readRow($makeRow = true)
+    {
+        $data = fgetcsv($this->fileHandle, 0, $this->delimiter);
+        
+        if ($makeRow && $data !== false) {
+            $row = new Row($this, $data);
+            
+            return $row;
+        }
+        
+        return $data;
     }
 }

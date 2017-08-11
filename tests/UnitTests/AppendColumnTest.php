@@ -12,8 +12,6 @@ class AppendColumnTest extends TestCase
     {
         $csv = new CsvSlurp;
         $csv->setSourceFile(SAMPLE_CSV);
-        $csv->read();
-        
         $columnCount = $csv->columnCount();
         
         $csv->addColumn('Favorite coffee');
