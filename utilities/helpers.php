@@ -31,7 +31,7 @@ if (! function_exists('csv_slurp')) {
      */
     function csv_slurp($file)
     {
-        return (new Slurp)->setSourceFile($file)->read();
+        return (new Slurp)->setSourceFile($file);
     }
 }
 
@@ -44,7 +44,7 @@ if (! function_exists('csv_alter')) {
      */
     function csv_alter($sourceFile, $alterSourceFile)
     {
-        return (new Alter)->setSourceFile($sourceFile)->setAlterSourceFile($alterSourceFile)->read();
+        return (new Alter)->setSourceFile($sourceFile)->setAlterSourceFile($alterSourceFile);
     }
 }
 
