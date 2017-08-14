@@ -332,7 +332,7 @@ class Row implements Countable
                 
                 $value = $this->data[$index];
                 
-                $result[$trimEnding ? $search : ($search.$ending] = $value);
+                $result[$trimEnding ? $search : $search.$ending] = $value;
             }
             
             $results[] = $result;
