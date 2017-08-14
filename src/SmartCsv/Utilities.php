@@ -12,13 +12,15 @@ class Utilities
      */
     static public function throwElementNotUniqueException($elementsToCheck, $message)
     {
-        $message = sprintf($message, implode(', ', array_flip(array_filter(
+        $notUnique = array_flip(array_filter(
                 array_count_values($elementsToCheck),
                 
-                function ($value) {
-                    return $value > 1;
+                function ($count) {
+                    return $count > 1;
                 })
-        )));
+        );
+        
+        $message = sprintf($message, implode(', ', $notUnique));
         
         throw new Exception($message);
     }

@@ -145,6 +145,9 @@ class Row implements Countable
     }
     
     /**
+     * @param int $options
+     * @param int $depth
+     *
      * @return string
      */
     public function toJson($options = 0, $depth = 512)
@@ -329,7 +332,7 @@ class Row implements Countable
                 
                 $value = $this->data[$index];
                 
-                $result[$trimEnding ? $search : $search.$ending] = $value;
+                $result[$trimEnding ? $search : ($search.$ending] = $value);
             }
             
             $results[] = $result;

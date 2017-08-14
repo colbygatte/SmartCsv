@@ -3,6 +3,7 @@
 namespace Tests\UnitTests;
 
 use ColbyGatte\SmartCsv\Csv\Blank as BlankCsv;
+use ColbyGatte\SmartCsv\Csv\Sip;
 use PHPUnit\Framework\TestCase;
 
 class AliasesTest extends TestCase
@@ -53,5 +54,15 @@ class AliasesTest extends TestCase
                 ]);
             })
         );
+    }
+    
+    /** @test */
+    public function can_use_aliases()
+    {
+        $csv = (new Sip)->setSourceFile(SAMPLE_CSV)->setAliases([
+            'ALIVE_THIS_MANY_YEARS' => 'age'
+        ]);
+        
+        $this->assertNotEmpty($csv->current()->ALIVE_THIS_MANY_YEARS);
     }
 }
