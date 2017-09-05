@@ -9,12 +9,12 @@ class CsvCollectionMethodsTest extends TestCase
     /** @test */
     public function can_pluck_column()
     {
-        $ages = csv_sip(SAMPLE_CSV)->pluckFromRows('age');
+        $values = csv_sip(SAMPLE_CSV)->pluckFromRows('age');
         
         $this->assertEquals(
             ['31', '23', '62'],
             
-            array_slice($ages, 0, 3)
+            array_slice($values['age'], 0, 3)
         );
     }
     

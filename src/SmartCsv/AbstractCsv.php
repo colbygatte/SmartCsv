@@ -425,21 +425,31 @@ abstract class AbstractCsv implements Iterator
     }
     
     /**
-     * @param $column
+     * @param $columns
      *
-     * @return array
+     * @return array|string
      * @throws \ColbyGatte\SmartCsv\Exception
      */
-    public function pluckFromRows($column)
+    public function pluckFromRows($columns)
     {
-        if (! isset($this->columnNamesAsKey[$column])) {
-            throw new Exception("Cannot pluck $column: column does not exist.");
+        $columns = is_array($columns) ? $columns : [$columns];
+        
+        foreach ($columns as $column) {
+            if (! isset($this->columnNamesAsKey[$column])) {
+                throw new Exception("Cannot pluck $column: column does not exist.");
+            }
         }
         
         $values = [];
         
-        foreach ($this as $row) {
-            $values[] = $row->$column;
+        foreach ($columns as $column) {
+            $valuesForColumn = [];
+    
+            foreach ($this as $row) {
+                $valuesForColumn[] = $row->$column;
+            }
+            
+            $values[$column] = $valuesForColumn;
         }
         
         return $values;
