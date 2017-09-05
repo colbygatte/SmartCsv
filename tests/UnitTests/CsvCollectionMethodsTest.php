@@ -14,7 +14,7 @@ class CsvCollectionMethodsTest extends TestCase
         $this->assertEquals(
             ['31', '23', '62'],
             
-            array_slice($values['age'], 0, 3)
+            array_slice($values, 0, 3)
         );
     }
     
