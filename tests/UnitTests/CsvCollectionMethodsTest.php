@@ -12,7 +12,7 @@ class CsvCollectionMethodsTest extends TestCase
         $values = csv_sip(SAMPLE_CSV)->pluckFromRows('age');
         
         $this->assertEquals(
-            ['31', '23', '62'],
+            [['age' => '31'], ['age' => '23'], ['age' => '62']],
             
             array_slice($values, 0, 3)
         );

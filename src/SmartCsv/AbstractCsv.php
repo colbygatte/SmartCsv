@@ -432,13 +432,7 @@ abstract class AbstractCsv implements Iterator
      */
     public function pluckFromRows($columns)
     {
-        $returnSingleColumn = false;
-        
-        if (! is_array($columns)) {
-            $returnSingleColumn = $columns;
-    
-            $columns = [$columns];
-        }
+        $columns = is_array($columns) ? $columns : [$columns];
         
         foreach ($columns as $column) {
             if (! isset($this->columnNamesAsKey[$column])) {
@@ -448,18 +442,15 @@ abstract class AbstractCsv implements Iterator
         
         $values = [];
         
-        foreach ($columns as $column) {
-            $valuesForColumn = [];
-    
-            foreach ($this as $row) {
-                $valuesForColumn[] = $row->$column;
+        foreach ($this as $row) {
+            $valuesForRow = [];
+            
+            foreach ($columns as $column) {
+                
+                $valuesForRow[$column] = $row->$column;
             }
             
-            $values[$column] = $valuesForColumn;
-        }
-        
-        if ($returnSingleColumn !== false) {
-            return $values[$returnSingleColumn];
+            $values[] = $valuesForRow;
         }
         
         return $values;
