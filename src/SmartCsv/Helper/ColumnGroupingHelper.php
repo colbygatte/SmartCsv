@@ -68,80 +68,9 @@ class ColumnGroupingHelper
     {
         $searchKeyLength = strlen($mandatoryColumn);
 
-        $cacheData = [];
-
-        // Here, we iterate over all the cells.
-        foreach ($this->columnNamesAsValue as $columnName) {
-            if (substr($columnName, 0, $searchKeyLength) != $mandatoryColumn) {
-                continue;
-            }
-
-            if (empty($additionalColumns)) {
-                $cacheData[] = $this->csv->getIndex($columnName);
-
-                continue;
-            }
-
-            // We need the ending to find other matching search values with the same ending
-            $ending = substr($columnName, $searchKeyLength);
-
-            $cacheIndexes = [$this->csv->getIndex($columnName)];
-
-            foreach ($additionalColumns as $searchValue) {
-                $fullSearchValue = $searchValue.$ending;
-
-                if ($index = $this->csv->getIndex($fullSearchValue)) {
-                    $cacheIndexes[] = $this->csv->getIndex($fullSearchValue);
-                }
-            }
-
-            $cacheData[] = [
-                'ending' => $ending,
-                'indexes' => $cacheIndexes
-            ];
-        }
-
-        $info = [
-            'name' => $name
-        ];
-
-        $this->cacheGroupColumnsSearch($mandatoryColumn, $additionalColumns, $cacheData, $info);
-    }
-
-    /**
-     * @param string   $mandatoryColumn
-     * @param string[] $additionalColumns
-     * @param          $cache
-     * @param          $info
-     *
-     * @return void
-     */
-    public function cacheGroupColumnsSearch($mandatoryColumn, $additionalColumns, $cache, $info)
-    {
-        if (empty($additionalColumns)) {
-            $this->cachedIndexGroups['single'][$mandatoryColumn] = $cache;
-
-            $info['type'] = 'single';
-            $info['id'] = $mandatoryColumn;
-
-            $this->cachedIndexGroups['info'][$info['name']] = $info;
-
-            return;
-        }
-
-        $id = $this->cacheId($mandatoryColumn, $additionalColumns);
-
-        $info['type'] = 'multiple';
-        $info['id'] = $id;
-
-        array_unshift($additionalColumns, $mandatoryColumn);
-
-        $this->cachedIndexGroups['multiple'][$id] = [
-            'search' => $additionalColumns,
-            'groups' => $cache
-        ];
-
-        $this->cachedIndexGroups['info'][$info['name']] = $info;
+        empty($additionalColumns)
+            ? $this->parseOnlyMandatoryColumn($name, $mandatoryColumn, $searchKeyLength)
+            : $this->parseMandatoryAndAdditionalColumns($name, $mandatoryColumn, $additionalColumns, $searchKeyLength);
     }
 
     /**
@@ -220,5 +149,70 @@ class ColumnGroupingHelper
         $this->currentRow = $row;
 
         return $this;
+    }
+
+    protected function parseOnlyMandatoryColumn($name, $mandatoryColumn, $searchKeyLength)
+    {
+        $cacheData = [];
+
+        foreach ($this->columnNamesAsValue as $columnName) {
+            if (substr($columnName, 0, $searchKeyLength) != $mandatoryColumn) {
+                continue;
+            }
+
+            $cacheData[] = $this->csv->getIndex($columnName);
+        }
+
+        $this->cachedIndexGroups['single'][$mandatoryColumn] = $cacheData;
+
+        $this->cachedIndexGroups['info'][$name] = [
+            'name' => $name,
+            'type' => 'single',
+            'id' => $mandatoryColumn
+        ];
+    }
+
+    protected function parseMandatoryAndAdditionalColumns($name, $mandatoryColumn, $additionalColumns, $searchKeyLength)
+    {
+        $cacheData = [];
+
+        foreach ($this->columnNamesAsValue as $columnName) {
+            if (substr($columnName, 0, $searchKeyLength) != $mandatoryColumn) {
+                continue;
+            }
+
+            // We need the ending to find other matching search values with the same ending
+            $ending = substr($columnName, $searchKeyLength);
+
+            $cacheIndexes = [$this->csv->getIndex($columnName)];
+
+            foreach ($additionalColumns as $searchValue) {
+                $fullSearchValue = $searchValue.$ending;
+
+                if ($index = $this->csv->getIndex($fullSearchValue)) {
+                    $cacheIndexes[] = $this->csv->getIndex($fullSearchValue);
+                }
+            }
+
+            $cacheData[] = [
+                'ending' => $ending,
+                'indexes' => $cacheIndexes
+            ];
+        }
+
+        $id = $this->cacheId($mandatoryColumn, $additionalColumns);
+
+        array_unshift($additionalColumns, $mandatoryColumn);
+
+        $this->cachedIndexGroups['multiple'][$id] = [
+            'search' => $additionalColumns,
+            'groups' => $cacheData
+        ];
+
+        $this->cachedIndexGroups['info'][$name] = [
+            'type' => 'multiple',
+            'name' => $name,
+            'id' => $id
+        ];
     }
 }

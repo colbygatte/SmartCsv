@@ -22,7 +22,7 @@ class OnlyAndExcludeTest extends TestCase
     public function only_feature_will_throw_if_columns_not_set()
     {
         $message = thrown_message(function () {
-            $csv = (new Sip)->only(['name']);
+            (new Sip)->only(['name']);
         });
 
         $this->assertEquals('Columns have not been set', $message);

@@ -331,6 +331,8 @@ abstract class AbstractCsv implements Iterator
     }
 
     /**
+     *
+     *
      * @param string   $name
      * @param string   $mandatoryColumn
      * @param string[] $additionalColumns
