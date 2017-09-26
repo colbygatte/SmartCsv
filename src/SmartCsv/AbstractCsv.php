@@ -2,6 +2,7 @@
 
 namespace ColbyGatte\SmartCsv;
 
+use ColbyGatte\SmartCsv\Csv\Blank;
 use ColbyGatte\SmartCsv\Csv\Sip;
 use ColbyGatte\SmartCsv\Helper\ColumnGroupingHelper;
 use Iterator;
@@ -356,7 +357,7 @@ abstract class AbstractCsv implements Iterator
      */
     public function findMatches(AbstractCsv $csvToSearch, array $parameters)
     {
-        $resultCsv = (new static)->setHeader($csvToSearch->getHeader());
+        $resultCsv = (new Blank)->setHeader($csvToSearch->getHeader());
 
         foreach ($this as $row) {
             foreach ($csvToSearch as $rowToSearch) {
