@@ -31,7 +31,6 @@ class RowGroupGetter
      */
     public function __get($name)
     {
-        return $this->row
-            ->group($name);
+        return $this->row->group($name);
     }
 }

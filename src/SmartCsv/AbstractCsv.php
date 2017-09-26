@@ -155,12 +155,11 @@ abstract class AbstractCsv implements Iterator
         $this->columnNamesAsValue = $header;
 
         // If $this->columnNamesAsKey & $this->columnNamesAsValue are different,
-        // all the column titles were not unique. Lets tell throw an exception
+        // all the column titles were not unique. Throw an exception
         // showing which column titles were duplicates.
         if (count($this->columnNamesAsValue) != count($this->columnNamesAsKey)) {
             Utilities::throwElementNotUniqueException(
-                $this->columnNamesAsValue,
-                'Duplicate headers: %s'
+                $this->columnNamesAsValue, 'Duplicate headers: %s'
             );
         }
 
@@ -180,7 +179,7 @@ abstract class AbstractCsv implements Iterator
      */
     public function getHeader($useAliases = null)
     {
-        $useAliases = ($useAliases !== null) ? $useAliases : $this->useAliases();
+        $useAliases = ($useAliases !== null) ? $useAliases : $this->useAliases;
 
         return $useAliases ? $this->convertAliases() : $this->columnNamesAsValue;
     }
