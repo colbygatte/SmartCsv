@@ -57,6 +57,17 @@ class AliasesTest extends TestCase
     }
     
     /** @test */
+    public function making_a_group_with_no_matches_returns_empty_array()
+    {
+        $csv = csv(['testing']);
+        $csv->append(['woop woop']);
+        
+        $csv->makeGroup('selling_props', 'selling-prop-');
+        
+        $this->assertEquals([], $csv->first()->groups()->selling_props);
+    }
+    
+    /** @test */
     public function can_use_aliases()
     {
         $csv = (new Sip)->setSourceFile(SAMPLE_CSV)->setAliases([

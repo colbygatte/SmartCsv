@@ -13,12 +13,12 @@ class RowDataCoders
      * @var callable[]
      */
     protected $encoders;
-    
+
     /**
      * @var callable[]
      */
     protected $decoders;
-    
+
     /**
      * @param string   $column
      * @param callable $coder
@@ -28,15 +28,15 @@ class RowDataCoders
     public function setEncoder($column, callable $coder)
     {
         $this->encoders[$column] = $coder;
-        
+
         return $this;
     }
-    
+
     public function setCoder($column, callable $encoder, callable $decoder)
     {
         $this->setEncoder($column, $encoder)->setDecoder($column, $decoder);
     }
-    
+
     /**
      * @param string $column
      *
@@ -46,7 +46,7 @@ class RowDataCoders
     {
         return isset($this->encoders[$column]) ? $this->encoders[$column] : false;
     }
-    
+
     /**
      * @param array $rowData
      *
@@ -58,13 +58,13 @@ class RowDataCoders
             if (! isset($rowData[$column])) {
                 continue;
             }
-            
+
             $rowData[$column] = $encoder($rowData[$column]);
         }
-        
+
         return $rowData;
     }
-    
+
     /**
      * @param          $column
      * @param callable $coder
@@ -74,10 +74,10 @@ class RowDataCoders
     public function setDecoder($column, callable $coder)
     {
         $this->decoders[$column] = $coder;
-        
+
         return $this;
     }
-    
+
     /**
      * @param $column
      *
@@ -87,7 +87,7 @@ class RowDataCoders
     {
         return isset($this->decoders[$column]) ? $this->decoders[$column] : false;
     }
-    
+
     /**
      * @param Row $row
      */

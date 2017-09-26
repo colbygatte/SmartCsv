@@ -19,19 +19,19 @@ class Blank extends AbstractCsv
      * @var \ColbyGatte\SmartCsv\Row[]
      */
     protected $rows = [];
-    
+
     public function next()
     {
         next($this->rows);
-        
+
         return;
     }
-    
+
     public function key()
     {
         return key($this->rows);
     }
-    
+
     /**
      * Checks if current position is valid
      *
@@ -41,7 +41,7 @@ class Blank extends AbstractCsv
     {
         return key($this->rows) !== null;
     }
-    
+
     /**
      * @param $rowIndex
      *
@@ -53,7 +53,7 @@ class Blank extends AbstractCsv
             ? $this->rows[$rowIndex]
             : false;
     }
-    
+
     /**
      * Resets the rows array and returns the first row.
      * Only works in slurp mode.
@@ -64,7 +64,7 @@ class Blank extends AbstractCsv
     {
         return reset($this->rows);
     }
-    
+
     /**
      * @return int
      */
@@ -72,7 +72,7 @@ class Blank extends AbstractCsv
     {
         return count($this->rows);
     }
-    
+
     /**
      * @param array[]|Row[] $rows
      *
@@ -84,7 +84,7 @@ class Blank extends AbstractCsv
         if (empty($this->columnNamesAsValue)) {
             throw new Exception('Header must be set before adding rows!');
         }
-        
+
         foreach ($rows as $data) {
             if ($data instanceof Row) { // TODO: clone row in case it's coming from another CSV, check for equal amount of columns
                 $this->rows[] = $data;
@@ -92,10 +92,10 @@ class Blank extends AbstractCsv
                 $this->rows[] = new Row($this, $data);
             }
         }
-        
+
         return $this;
     }
-    
+
     /**
      * @param \ColbyGatte\SmartCsv\Row|int $row
      * @param bool                         $reindex
@@ -108,30 +108,30 @@ class Blank extends AbstractCsv
         if ($row instanceof Row) {
             if (($index = array_search($row, $this->rows)) !== false) {
                 unset($this->rows[$index]);
-                
+
                 return true;
             }
-            
+
             return false;
         }
-        
+
         if (! is_int($row)) {
             throw new Exception("Invalid row index $row.");
         }
-        
+
         if (isset($this->rows[$row])) {
             unset($this->rows[$row]);
-            
+
             if ($reindex) {
                 $this->rows = array_values($this->rows);
             }
-            
+
             return true;
         }
-        
+
         return false;
     }
-    
+
     /**
      * @param string $title
      * @param mixed  $defaultValue Default value to assign to each new cell
@@ -144,24 +144,24 @@ class Blank extends AbstractCsv
         if (! is_string($title)) {
             throw new Exception("Title must be a string.");
         }
-        
+
         $header = $this->getHeader(false);
         array_push($header, $title);
-        
+
         $this->columnNamesAsValue = null;
         $this->columnNamesAsKey = null;
-        
+
         $this->setHeader($header);
-        
+
         foreach ($this as $row) {
             $row->addColumn($defaultValue);
         }
-        
+
         $this->columnGroupingHelper = new ColumnGroupingHelper($this);
-        
+
         return $this;
     }
-    
+
     /**
      * Append row only if there the same instance isn't already present.
      *
@@ -174,10 +174,10 @@ class Blank extends AbstractCsv
         if (! in_array($row, $this->rows)) {
             $this->rows[] = $row;
         }
-        
+
         return $this;
     }
-    
+
     /**
      * This can be used in all modes because it is using the Iterator interface.
      *
@@ -189,16 +189,16 @@ class Blank extends AbstractCsv
     public function runSearch(Search $search)
     {
         $results = (new Blank)->setHeader($this->getHeader());
-        
+
         foreach ($this as $row) {
             if ($search->runFilters($row)) {
                 $results->append($row);
             }
         }
-        
+
         return $results;
     }
-    
+
     /**
      * @return bool
      */
@@ -207,10 +207,10 @@ class Blank extends AbstractCsv
         if (count($this->rows)) {
             return true;
         }
-        
+
         return false;
     }
-    
+
     /**
      * Rewind the Iterator to the first element
      */
@@ -218,7 +218,7 @@ class Blank extends AbstractCsv
     {
         reset($this->rows);
     }
-    
+
     /**
      * Return the current element
      *

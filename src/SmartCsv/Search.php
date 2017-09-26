@@ -8,7 +8,7 @@ class Search
      * @var callable[]
      */
     protected $searchFilters = [];
-    
+
     /**
      * @param callable $filter
      *
@@ -17,10 +17,10 @@ class Search
     public function addFilter($filter)
     {
         $this->searchFilters[] = $filter;
-        
+
         return $this;
     }
-    
+
     /**
      * @param callable[] $filters
      *
@@ -29,10 +29,10 @@ class Search
     public function addFilters($filters)
     {
         array_map([$this, 'addFilter'], $filters);
-        
+
         return $this;
     }
-    
+
     /**
      * @param \ColbyGatte\SmartCsv\Row $row
      *
@@ -45,7 +45,7 @@ class Search
                 return false;
             }
         }
-        
+
         return true;
     }
 }

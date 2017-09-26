@@ -11,8 +11,9 @@ class CoderTest extends TestCase
     /** @test */
     public function can_use_decoder()
     {
-        $coders = new RowDataCoders;
-        $coders->setDecoder('name', function () { return 'NAME'; });
+        $coders = (new RowDataCoders)->setDecoder('name', function () {
+            return 'NAME';
+        });
         
         $csv = (new Sip)->setCoders($coders)->setSourceFile(SAMPLE_CSV);
         

@@ -10,8 +10,8 @@ class AppendColumnTest extends TestCase
     /** @test */
     public function can_append_column()
     {
-        $csv = new CsvSlurp;
-        $csv->setSourceFile(SAMPLE_CSV);
+        $csv = (new CsvSlurp)->setSourceFile(SAMPLE_CSV);
+        
         $columnCount = $csv->columnCount();
         
         $csv->addColumn('Favorite coffee');

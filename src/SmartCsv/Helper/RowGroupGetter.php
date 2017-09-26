@@ -13,7 +13,7 @@ class RowGroupGetter
      * @var \ColbyGatte\SmartCsv\Row
      */
     protected $row;
-    
+
     /**
      * RowGroups constructor.
      *
@@ -23,7 +23,7 @@ class RowGroupGetter
     {
         $this->row = $row;
     }
-    
+
     /**
      * @param $name
      *

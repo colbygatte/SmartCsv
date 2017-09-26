@@ -4,18 +4,23 @@ namespace ColbyGatte\SmartCsv;
 
 use Countable;
 
+/**
+ * Class Row
+ *
+ * @package ColbyGatte\SmartCsv
+ */
 class Row implements Countable
 {
     /**
      * @var \ColbyGatte\SmartCsv\AbstractCsv
      */
     protected $csv;
-    
+
     /**
      * @var array
      */
     protected $data = [];
-    
+
     /**
      * Row constructor.
      *
@@ -28,28 +33,28 @@ class Row implements Countable
     {
         $dataCount = count($data);
         $columnCount = $csv->columnCount();
-        
+
         if ($dataCount != $columnCount) {
             if ($csv->getStrictMode()) {
                 $message = $csv->getFile() ? " (File: {$csv->getFile()})" : ' (no file set)';
-                
+
                 throw new Exception("Expected $columnCount data entry(s), received $dataCount.$message");
             }
-            
+
             $data = array_pad($data, $csv->columnCount(), '');
         }
-        
+
         $this->csv = $csv;
-        
+
         foreach (array_keys($csv->getHeader()) as $index) {
             $this->data[$index] = $data[$index];
         }
     }
-    
+
     /**
      * Use a string to get by header, integer to get by column ID.
      *
-     * @param $indexString
+     * @param int|string|array $indexString
      *
      * @return false|mixed
      */
@@ -58,22 +63,22 @@ class Row implements Countable
         if (is_int($indexString)) {
             return $this->getByIndex($indexString);
         }
-        
+
         if (is_array($indexString)) {
             return array_combine($indexString, array_map([$this, 'get'], $indexString));
         }
-        
+
         if (isset($this->csv->indexAliases[$indexString])) {
             $indexString = $this->csv->indexAliases[$indexString];
         }
-        
+
         if (($index = $this->csv->getIndex($indexString)) === false) {
             return false;
         }
-        
+
         return $this->data[$index];
     }
-    
+
     /**
      * @param $index
      *
@@ -83,7 +88,7 @@ class Row implements Countable
     {
         return $this->data[$index];
     }
-    
+
     /**
      * @param array $columns
      *
@@ -93,7 +98,7 @@ class Row implements Countable
     {
         return $this->csv->missingColumns($columns);
     }
-    
+
     /**
      * Check if columns are empty
      *
@@ -104,16 +109,16 @@ class Row implements Countable
     public function isEmpty($columns = null)
     {
         $columns = $columns ?: $this->csv->getHeader();
-        
+
         foreach ($columns as $column) {
             if (! $this->$column) {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * @return void
      */
@@ -123,27 +128,28 @@ class Row implements Countable
             $this->csv->delete($this);
         }
     }
-    
+
     /**
-     * @param $name
+     * @param      $name
+     * @param bool $trimEndings Whether or not to trim the ending that matches the group.
      *
      * @return array|false
      */
     public function group($name, $trimEndings = true)
     {
         $data = $this->csv->columnGroupingHelper->getColumnGroup($name);
-        
+
         if (! $data) {
             return false;
         }
-        
+
         if ($data['type'] == 'single') {
             return $this->groupSingleColumnsFromCache($data['cache']);
         }
-        
+
         return $this->groupMultipleColumnsFromCache($data['cache'], $trimEndings);
     }
-    
+
     /**
      * @param int $options
      * @param int $depth
@@ -154,7 +160,7 @@ class Row implements Countable
     {
         return json_encode($this->toArray(), $options, $depth);
     }
-    
+
     /**
      * Returns data as-is (does not use encoder)
      *
@@ -165,15 +171,14 @@ class Row implements Countable
     public function toArray($associative = true)
     {
         $copy = $this->data;
-        
+
         if ($associative) {
             $copy = array_combine($this->csv->getHeader(), $copy);
         }
-        
+
         return $copy;
     }
-    
-   
+
     /**
      * @return \ColbyGatte\SmartCsv\Helper\RowGroupGetter
      */
@@ -182,7 +187,7 @@ class Row implements Countable
         return $this->csv->columnGroupingHelper->setCurrentRow($this)
             ->getRowGroupGetter();
     }
-    
+
     /**
      * Set the value of a column using the column's header string.
      *
@@ -197,20 +202,20 @@ class Row implements Countable
         if (is_int($indexString)) {
             return $this->setByIndex($indexString, $value);
         }
-        
+
         if (isset($this->csv->indexAliases[$indexString])) {
             $indexString = $this->csv->indexAliases[$indexString];
         }
-        
+
         if (($index = $this->csv->getIndex($indexString)) !== false) {
             $this->data[$index] = $value;
-            
+
             return $this;
         }
-        
+
         throw new Exception("Column $indexString not found.");
     }
-    
+
     /**
      * @param $name
      *
@@ -220,7 +225,7 @@ class Row implements Countable
     {
         return $this->get($name);
     }
-    
+
     /**
      * @param string $name
      * @param mixed  $value
@@ -229,7 +234,7 @@ class Row implements Countable
     {
         $this->set($name, $value);
     }
-    
+
     /**
      * Set the value of a column using that columns zero-based index.
      *
@@ -244,10 +249,10 @@ class Row implements Countable
         if (! isset($this->data[$index])) {
             throw new Exception("Column $index is out of range.");
         }
-        
+
         $this->data[$index] = $value;
     }
-    
+
     /**
      * @return string
      */
@@ -255,21 +260,19 @@ class Row implements Countable
     {
         return $this->toCsv();
     }
-    
+
     /**
      * @return string
      */
     public function toCsv()
     {
-        $fh = fopen('php://output', 'w');
-        
         ob_start();
-        
-        fputcsv($fh, $this->toArray(false), $this->csv->getDelimiter());
-        
+
+        fputcsv(fopen('php://output', 'w'), $this->toArray(false), $this->csv->getDelimiter());
+
         return ob_get_clean();
     }
-    
+
     /**
      * Number of columns in the row.
      *
@@ -279,7 +282,7 @@ class Row implements Countable
     {
         return count($this->data);
     }
-    
+
     /**
      * Append an empty column onto the row. Should only be called from Csv::addColumn().
      *
@@ -289,7 +292,7 @@ class Row implements Countable
     {
         array_push($this->data, $value);
     }
-    
+
     /**
      * @param $cached
      *
@@ -298,20 +301,20 @@ class Row implements Countable
     protected function groupSingleColumnsFromCache($cached)
     {
         $results = [];
-        
+
         foreach ($cached as $index) {
             $value = $this->data[$index];
-            
+
             if (empty($value)) {
                 continue;
             }
-            
+
             $results[] = $value;
         }
-        
+
         return $results;
     }
-    
+
     /**
      * @param $cached
      * @param $trimEnding
@@ -321,23 +324,23 @@ class Row implements Countable
     protected function groupMultipleColumnsFromCache($cached, $trimEnding)
     {
         $results = [];
-        
+
         foreach ($cached['groups'] as $group) {
             $ending = $group['ending'];
-            
+
             $result = [];
-            
+
             foreach ($cached['search'] as $key => $search) {
                 $index = $group['indexes'][$key];
-                
+
                 $value = $this->data[$index];
-                
+
                 $result[$trimEnding ? $search : $search.$ending] = $value;
             }
-            
+
             $results[] = $result;
         }
-        
+
         return $results;
     }
 }
